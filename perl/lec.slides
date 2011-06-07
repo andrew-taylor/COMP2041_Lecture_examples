@@ -1,0 +1,2084 @@
+<title>Perl Programming
+<slide>
+<heading>Perl
+Perl = <b>P</b>ractical <b>E</b>xtraction and <b>R</b>eport <b>L</b>anguage
+<p>
+Developed by Larry Wall (late 80's) as a replacement for <@>awk</@>.
+<p>
+Has grown to become a replacement for <@>awk</@>, <@>sed</@>,
+<@>grep</@>, other filters, shell scripts, C programs, ...
+(i.e. "kitchen sink").
+<p>
+An extremely useful tool to know because it:
+<itemize>
+<item> runs on Unix, Linux, Mac, Amiga, OS/2, VMS, DOS, Windows, ...
+<item> de facto standard for complex scripting tasks 
+	<small>(once were shell scripts)</small>
+<item> has standard libraries for many applications (Web/CGI, DB, ...)
+</itemize>
+Perl has been influential: PHP, Python, Ruby, ... even Java <small>(interpreted)</small>
+</slide>
+
+<slide>
+<continued>
+Some of the language design principles for Perl:
+<itemize>
+<item> make it easy/concise to express common idioms 
+<item> provide many different ways to express the same thing
+<item> use sensible defaults to minimise declarations
+<item> don't be afraid to use context as a syntactic tool
+<item> create a large language that users will learn subsets of
+</itemize>
+<small>Many of these conflict with design principles of languages for teaching.</small>
+</slide>
+
+<slide>
+<continued>
+So what is the end product like?
+<itemize>
+<item> a language which makes it easy to build useful systems
+<item> readability can sometimes be a problem
+	<~> <small>(language is too rich?)</small>
+<item> interpreted <~> <$><Rightarrow></$> <~> efficient?
+	<~> <small>(although still remarkably efficient)</small>
+</itemize>
+Summary: it's easy to write concise, powerful, obscure programs in Perl
+</slide>
+
+<slide>
+<heading>Reference Material
+Getting started ...
+<itemize>
+<item> <em>A Little Book on Perl</em> <br>
+	by Robert W. Sebesta <br>
+	Prentice Hall, 2000, ISBN:0139279555
+</itemize>
+Getting serious ...
+<itemize>
+<item> <em>Perl Cookbook</em> <br>
+	by Tom Christiansen, Nathan Torkington, Larry Wall <br>
+	O'Reilly &amp; Associates, 1998, ISBN:1565922433
+<item> <em>Mastering Algorithms With Perl</em> <br>
+	by Jon Orwant, Jarkko Hietaniemi, John MacDonald, John Orwant <br>
+	O'Reilly &amp; Associates, 1999, ISBN: 1565923987
+<item> <em>www.perl.com</em> <br>
+	by various authors, on-line repository of Perl information
+</itemize>
+</slide>
+
+<slide>
+<heading>Using Perl
+Perl programs can be invoked in several ways ...
+<itemize>
+<item> giving the filename of the Perl program as a command line argument
+<program>
+perl <$>PerlCodeFile</$>.pl
+</program>
+<item> giving the Perl program itself as a command line argument
+<program>
+perl <blue>-e</blue> 'print "Hello, world\n";'
+</program>
+<item> using the <@>#!</@> notation and making the program file executable
+<program>
+chmod 755 <$>PerlCodeFile</$>
+./<$>PerlCodeFile</$>
+</program>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Advisable to <i>always</i> use <@@>-w</@@> option.
+<p>
+Causes Perl to print warnings about common errors.
+<program>
+perl -w <$>PerlCodeFile</$>.pl
+
+perl -w -e '<$>PerlCode</$>'
+</program>
+Can use options with <@>#!</@>
+<program>
+#!/usr/local/bin/perl -w
+
+<$>PerlCode</$>
+</program>
+</slide>
+
+<slide>
+<heading>Syntax Conventions
+Perl uses non-alphabetic characters to introduce various kinds of
+program entities
+<small>(i.e. set a context in which to interpret identifiers)</small>.
+<p>
+<center>
+<table 4>
+<row>
+  <col1><b>Char</b></col1>
+  <col2><b>Kind</b></col2>
+  <col3><b>Example</b></col3>
+  <col4><b>Description</b></col4>
+</row>
+<row>
+  <col1><b><@>#</@></b></col1>
+  <col2>Comment</col2>
+  <col3><nobr><@># comment</@></nobr></col3>
+  <col4>rest of line is a comment</col4>
+</row>
+<row>
+  <col1><b><@>$</@></b></col1>
+  <col2>Scalar</col2>
+  <col3><@>$count</@></col3>
+  <col4>variable containing simple value</col4>
+</row>
+<row>
+  <col1><b><@>@</@></b></col1>
+  <col2>Array</col2>
+  <col3><@>@counts</@></col3>
+  <col4>list of values, indexed by integers</col4>
+</row>
+<row>
+  <col1><b><@>%</@></b></col1>
+  <col2>Hash</col2>
+  <col3><@>%marks</@></col3>
+  <col4>set of values, indexed by <$>strings<$></col4>
+</row>
+<row>
+  <col1><b><@>&amp;</@></b></col1>
+  <col2>Subroutine</col2>
+  <col3><@>&amp;doIt</@></col3>
+  <col4>a callable piece of Perl code (the &amp; is optional)</col4>
+</row>
+</table>
+</center>
+<vspace 1>
+</slide>
+
+<slide>
+<continued>
+Any unadorned identifiers are either
+<itemize>
+<item> names of built in (or other) functions <~> (e.g. <@>chomp</@>, <@>split</@>, ...)
+<item> control-structures <~> (e.g. <@>if</@>, <@>for</@>, <@>foreach</@>, ...)
+<item> literal strings (like the shell!)
+</itemize>
+The latter can be confusing to C/Java/PHP programmers e.g.
+<program>
+$x = abc;   <$>is the same as</$>   $x = "abc";
+</program>
+</slide>
+<slide>
+<heading>Variables
+Perl supports three kinds of variable:
+<itemize>
+<item> <em>scalars</em> ... a single atomic value (number or string)
+<item> <em>arrays</em> ... a list of values, indexed by number
+<item> <em>hashes</em> ... a group of values, indexed by string
+</itemize>
+Variables do not need to be declared or initialised.
+<p>
+If used when not initialised, the value is 0 <small>or</small> empty string <small>or</small> empty list.
+<p>
+<em>Beware:</em> spelling mistakes in variable names, <~> e.g.
+<p>
+<center>
+<@>print "abc=$acb\n";</@>  <~~~> rather than <~~~> <@>print "abc=$abc\n";</@>
+</center>
+<p>
+prints no value, leaving you wondering what happened to <@>$abc</@>'s value.
+</slide>
+
+<slide>
+<continued>
+Many scalar operations have the notion of a "default source/target".
+<p>
+If you don't specify an argument, they assume one called <@>$_</@>.
+<p>
+This makes it
+<itemize>
+<item> often very convenient to write brief programs
+	<~> <small>(minimal syntax)</small>
+<item> sometimes confusing to new users
+	<~> <small>("Where's the argument??")</small>
+</itemize>
+<small>
+<@>$_</@> performs a similar role to "it" in English text.
+<p>
+E.g. <q>The dog ran away. It ate a bone. It had lots of fun.</q>
+</small>
+</slide>
+
+<slide>
+<heading>Scalars
+One scalar data type: string.
+<p>
+In expressions/assignments, values of scalar variables 
+are automatically converted to a type appropriate for the context
+where the context is determined by the operators used
+<p>
+<itemize>
+<item> Arithmetic operators <$><rightarrow></$> numeric context
+<item> String operators (concatenation etc) <$><rightarrow></$> string context
+</itemize>
+This requires two sets of relational (comparison) operators:
+<itemize>
+<item> Numeric: <@>==  !=  <<  <<=  >>  >>=  <<=>></@>
+<item> String: <@>eq  ne  lt  le  gt  ge  cmp</@>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+$x = '123';    <comment># $x assigned string "123"</comment>
+$y = "123 ";   <comment># $y assigned string "123 "</comment>
+$z = 123;      <comment># $z assigned integer 123</comment>
+$i = $x + 1;   <comment># $x value converted to integer</comment>
+$j = $y + $z;  <comment># $y value converted to integer</comment>
+$a = $x == $y; <comment># compare numeric versions of $x,$y  (true)</comment>
+$b = $x eq $y; <comment># compare string versions of $x,$y   (false)</comment>
+$c = $x.$y;    <comment># concat string versions of $x,$y (explicit)</comment>
+$c = "$x$y";   <comment># concat string versions of $x,$y (interpolation)</comment>
+</program>
+Note: <@>$c = $x $y</@> is invalid
+<small>(Perl has no empty infix operator)</small>
+<p>
+<small>(unlike predecessor languages such as awk, where <@>$x $y</@> meant string concatenation)</small>
+</slide>
+
+<slide>
+<continued>
+Scalars are converted to printable form when interpolated into strings.
+<p>
+A couple of subtleties to note:
+<itemize>
+<item> for booleans ... true <$><rightarrow></$> <@>1</@>, <~> false <$><rightarrow></$> <@>""</@>.
+<item> for numbers ... Perl uses the default format <@>%.15g</@>
+</itemize>
+Numeric formatting produces the most compact representation
+it can with up to 15 significant digits, e.g.
+<program>
+$x = 3/2; print "$x";  # displays 1.5
+$x = 4/2; print "$x";  # displays 2
+$x = 1/3; print "$x";  # displays 0.333333333333333
+</program>
+To get numbers formatted exactly how you want ... use <@>printf</@>.
+</slide>
+
+<slide>
+<continued>
+A very common pattern for modifying scalars is:
+<program>
+$<$>var</$> = $<$>var</$> <$>op</$> <$>expression</$>
+</program>
+<em>Compound assignments</em> for the most common operators allow you to write
+<program>
+$<$>var</$> <$>op</$>= <$>expression</$>
+</program>
+Examples:
+<program>
+$x += 1;     # increment the value of $x
+$y *= 2;     # double the value of $y
+$a .= "abc"  # append "abc" to $a
+</program>
+</slide>
+
+<slide>
+<heading>Logical Operators
+Perl has two sets of logical operators, one like C, the other like "English".
+<p>
+The second set has very low precedence, so can be used between statements.
+<p>
+<center>
+<table 5>
+<tr>
+  <td><b>Operation</b></td>
+  <td><~></td>
+  <td><b>Example</b></td>
+  <td><~></td>
+  <td><b>Meaning</b></td>
+</tr>
+<tr>
+  <td>And</td>
+  <td><~></td>
+  <td><@>x &amp;&amp; y</@></td>
+  <td><~></td>
+  <td>false if <@>x</@> is false, otherwise <@>y</@></td>
+</tr>
+<tr>
+  <td>Or</td>
+  <td><~></td>
+  <td><@>x || y</@></td>
+  <td><~></td>
+  <td>true if <@>x</@> is true, otherwise <@>y</@></td>
+</tr>
+<tr>
+  <td>Not</td>
+  <td><~></td>
+  <td><@>! x</@></td>
+  <td><~></td>
+  <td>true if <@>x</@> is not true, false otherwise</td>
+</tr>
+<tr>
+  <td>And</td>
+  <td><~></td>
+  <td><@>x and y</@></td>
+  <td><~></td>
+  <td>false if <@>x</@> is false, otherwise <@>y</@></td>
+</tr>
+<tr>
+  <td>Or</td>
+  <td><~></td>
+  <td><@>x or y</@></td>
+  <td><~></td>
+  <td>true if <@>x</@> is true, otherwise <@>y</@></td>
+</tr>
+<tr>
+  <td>Not</td>
+  <td><~></td>
+  <td><@>not</@> x</td>
+  <td><~></td>
+  <td>true if <@>x</@> is not true, false otherwise</td>
+</tr>
+</table>
+</center>
+</slide>
+
+<slide>
+<continued>
+Example of using statement-level logical operations:
+<program>
+if (!open(FILE,"myFile")) {
+    die "Can't open myFile";
+}
+# or
+
+if (!open(FILE,"myFile"))
+    { die "Can't open myFile"; }
+
+
+# can be replaced by Perl idiom
+
+open(FILE,"myFile")  or  die "Can't open myFile";
+</program>
+</slide>
+
+<slide>
+<heading>Arrays (Lists)
+An <em>array</em> is a sequence of scalars, indexed by position <small>(0,1,2,...)</small>
+<p>
+The whole array is denoted by <~> <@>@array</@>
+<p>
+Individual array elements are denoted by <~>
+<@>$</@>array<@>[</@>index<@>]</@>
+<p>
+<@>$#</@>array gives the <i>index of the last element</i>.
+<p>
+Example:
+<program>
+$a[0] = "first string";
+$a[1] = "2nd string";
+$a[2] = 123;
+<$>or, equivalently,</$>
+@a = ("first string", "2nd string", 123);
+
+print "Index of last element is $#a\n";
+print "Number of elements is ", $#a+1, "\n";
+</program>
+</slide>
+
+<slide>
+<continued>
+Alternative interpretations for <~><@>@a</@> ...
+<program>
+@a = ("abc", 123, 'x');
+
+<comment># numeric context ... gives list length</comment>
+
+$n = @a;         #  $n == 3
+
+<comment># string context ... gives space-separated elems</comment>
+
+$s = "@a";       #  $s eq "abc 123 x"
+
+<comment># scalar context ... gives list length</comment>
+
+$t = @a."";      #  $t eq "3"
+
+<comment># print context ... gives joined elems</comment>
+
+print @a;        #  displays "abc123x"
+</program>
+In Perl, interpretation is context-dependent.
+</slide>
+
+<slide>
+<continued>
+Arrays do not need to be declared, and they grow and shrink as needed.
+<p>
+"Missing" elements are interpolated, e.g.
+<program>
+$abc[0] = "abc";  $abc[2] = "xyz";
+# reference to $abc[1] returns ""
+</program>
+Can assign <em>to</em> a whole array; can assign <em>from</em> a whole array, e.g.
+<program>
+@numbers = (4, 12, 5, 7, 2, 9);
+($a, $b, $c, $d) = @numbers;
+</program>
+Since assignment of list elements happens in parallel ...
+<program>
+($x, $y) = ($y, $x);   <small># swaps values of $x, $y</small>
+</program>
+</slide>
+
+<slide>
+<continued>
+Array <em>slices</em>, e.g.
+<program>
+@list = (1, 3, 5, 7, 9);
+print "@list[0,2]\n";   # displays "1 5"
+print "@list[0..2]\n";  # displays "1 3 5"
+print "@list[4,2,3]\n"; # displays "9 5 7"
+print "@list[0..9]\n";  # displays "1 3 5 7 9"
+</program>
+Array values interpolated into array literals:
+<program>
+@a = (3, 5, 7);
+@b = @a;           # @b = (3,5,7);
+@c = (1, @a, 9);   # @c = (1,3,5,7,9);
+@a == (@a) == ((@a)) ...
+</program>
+</slide>
+
+<slide>
+<continued>
+Arrays can be accessed element-at-a-time using the <@>for</@> loop:
+<program>
+@nums = (23, 95, 33, 42, 17, 87);
+$sum = 0;
+for ($i = 0; $i < @nums; $i++) {   <comment># @nums gives length</comment>
+    $sum += $nums[$i];
+}
+$sum = 0;
+foreach $num (@nums) { sum += $num; }
+</program>
+<@>push</@> and <@>pop</@> act on the "right-hand" end of an array:
+<program>
+                   # Value of @a
+@a = (1,3,5);      # (1,3,5)
+push @a, 7;        # (1,3,5,7)
+$x = pop @a;       # (1,3,5,7), $x == 7
+$y = pop @a;       # (1,3,5), $y == 5
+</program>
+</slide>
+
+<slide>
+<continued>
+Other useful operations on arrays:
+<p>
+<center>
+<table 3>
+<tr>
+  <td><@>@b = sort(@a)</@></td>
+  <td><~></td>
+  <td>returns sorted version of <@>@a</@></td>
+</tr>
+<tr>
+  <td><@>@b = reverse(@a)</@></td>
+  <td><~></td>
+  <td>returns reversed version of <@>@a</@></td>
+</tr>
+<tr>
+  <td><@>shift(@a)</@></td>
+  <td><~></td>
+  <td>like <@>pop(@a)</@>, but from left-hand end</td>
+</tr>
+<tr>
+  <td><@>unshift(@a,x)</@></td>
+  <td><~></td>
+  <td>like <@>push(@a,x)</@>, but at left-hand end</td>
+</tr>
+</table>
+</center>
+</slide>
+
+<slide>
+<heading>Exercise: reverse
+Assume that Perl doesn't have <@>reverse</@>.
+<p>
+Write code to reverse an array <@>@a</@>.
+<p>
+Store the result in an array <@>@b</@>
+</slide>
+
+<slide>
+<heading>Control Structures
+<em>All</em> single Perl statements must be terminated by a semicolon, e.g.
+<program>
+$x = 1;
+print "Hello";
+</program>
+<em>All</em> statements with control structures must be enclosed in braces, e.g.
+<program>
+if ($x > 9999) {
+    print "x is big\n";
+}
+</program>
+You don't need a semicolon after a statement group in <@>{...}</@>.
+<p>
+Statement blocks can also be used like anonymous functions.
+</slide>
+
+<slide>
+<heading>Exercise: sorting
+By default, <@>sort()</@> uses lexical (string) comparison.
+<p>
+Produce calls to <@>sort</@> that achieve
+<itemize>
+<item> sorting in ascending numeric order
+<item> sorting in descending numeric order
+<item> sorting in descending lexical order
+</itemize>
+</slide>
+
+<slide>
+<heading>Function Calls
+All Perl function calls ...
+<itemize>
+<item> are call by value <~> <small>(like C)</small>
+<item> are expressions <~> <small>(although often ignore return value)</small>
+</itemize>
+<p>
+Notation(s) for Perl function calls:
+<session>
+&<$>func</$>(<$>arg<sub>1</sub></$>, <$>arg<sub>2</sub></$>, ... <$>arg<sub>n</sub></$>)
+<$>func</$>(<$>arg<sub>1</sub></$>, <$>arg<sub>2</sub></$>, ... <$>arg<sub>n</sub></$>)
+<$>func</$> <$>arg<sub>1</sub></$>, <$>arg<sub>2</sub></$>, ... <$>arg<sub>n</sub></$>
+</session>
+</slide>
+
+<slide>
+<heading>Control Structures
+Selection is handled by <~> <@>if</@> ... <@>elsif</@> ... <@>else</@>
+<session>
+<b>if</b> ( <$>boolExpr<sub>1</sub></$> ) { <$>statements<sub>1</sub></$> }
+<b>elsif</b> ( <$>boolExpr<sub>2</sub></$> ) { <$>statements<sub>2</sub></$> }
+...
+<b>else</b> { <$>statements<sub>n</sub></$> }
+
+<$>statement</$> if ( <$>expression</$> );
+</session>
+</slide>
+
+<slide>
+<continued>
+Iteration is handled by <~> <@>while</@>, <@>until</@>, <@>for</@>, <@>foreach</@>
+<program>
+while ( <$>boolExpr</$> ) {
+    <$>statements</$>
+}
+
+until ( <$>boolExpr</$> ) {
+    <$>statements</$>
+}
+
+for ( <$>init</$> ; <$>boolExpr</$> ; <$>step</$> ) {
+    <$>statements</$>
+}                    
+
+foreach <$>var</$> (<$>list</$>) {
+    <$>statements</$>
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+Example (compute <$>pow = k<sup>n</sup></$>):
+<program>
+# Method 1 ... while
+$pow = $i = 1;
+while ($i <= $n) {
+    $pow = $pow * $k;
+    $i++;
+}
+# Method 2 ... for
+$pow = 1;
+for ($i = 1; $i <= $n; $i++) {
+    $pow *= $k;
+}
+# Method 3 ... foreach
+$pow = 1;
+foreach $i (1..$n) { $pow *= $k; }
+
+# Method 4 ... foreach $_
+$pow = 1;
+foreach (1..$n) { $pow *= $k; }
+
+# Method 5 ... builtin operator
+$pow = $k ** $n;
+</program>
+</slide>
+
+<slide>
+<continued>
+Example of fine-grained loop control:
+<program>
+OUTER:
+while (i < 1000)
+{
+    INNER:
+    for ($i = 0; $i < 99; $i++)
+    {
+        last OUTER if $i > 90;   # terminates both loops
+        $i += 3;
+        next if $i > 80;         # next iteration of INNER
+        if ($i > 70) { next; }   # next iteration of INNER
+        $i += 4;
+        redo if $i < 70;         # next iteration of INNER
+        next OUTER if $i == 42;  # next iteration of OUTER
+     }
+}
+</program>
+</slide>
+
+<slide>
+<heading>Terminating
+Normal termination: call <@>exit 0</@> at the end of the script.
+<p>The <@@>die</@@> function is used for abnormal termination:
+<itemize>
+<item> accepts a list of arguments
+<item> concatenates them all into a single string
+<item> appends file name and line number
+<item> prints this string
+<item> and then terminates the Perl interpreter
+</itemize>
+Example:
+<program>
+if (! -r "myFile") {
+    die "Can't read myFile\n";
+}
+# or
+die "Can't read myFile\n" if (! -r "myFile");
+</program>
+<small>
+Convention: omit parentheses on <@>die</@> argument list if just one argument
+</small>
+</slide>
+
+<slide>
+<heading>Defining Functions
+Perl functions (or subroutines) are defined via <@>sub</@>, e.g.
+<program>
+sub sayHello {
+    print "Hello!\n";
+}
+</program>
+<p>
+And used by calling, with or without <@>&</@>, e.g.
+<program>
+&sayHello;    # arg list optional with &
+sayHello();   # more common, show empty arg list explicitly
+</program>
+</slide>
+
+<slide>
+<continued>
+Function arguments are passed via a list variable <@>@_</@>, e.g.
+<program>
+sub mySub {
+    @args = @_;
+    print "I got ",@#args+1," args\n";
+    print "They are (@args)\n";
+}
+</program>
+<p>
+Note that <@>@args</@> is a global variable.
+<p>
+To make it local, precede by <@>my</@>, e.g.
+<program>
+    my @args = @_;
+</program>
+</slide>
+
+<slide>
+<continued>
+Can achieve similar effect to the C function
+<program>
+int f(int x, int y, int z) {
+    int  res;
+    ...
+    return res;
+}
+</program>
+<p>
+by using array assignment in Perl
+<program>
+sub f {
+    my ($x, $y, $z) = @_;
+    my $res;
+    ...
+    return $res;
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+For functions with array or hash parameters
+<program>
+sub ff {
+    my ($x, @y, %z) = @_;
+    ...
+}
+</program>
+<p>
+<em>Prototypes</em> indicate expected parameter structure.
+Use one <@>$</@> for each scalar
+and <@>@</@> for a list.
+<p>
+Examples:
+<program>
+sub f($$$);
+sub ff($@%);
+<comment>or even</comment>
+sub xyz(\[$@%]);
+</program>
+<p>
+Perl check against the prototype provided it occurs before
+the first call on the function.
+<p>
+<red>Put prototypes at the top of the file</red>.
+</slide>
+
+<slide>
+<heading>Exercise: function definitions
+Consider the function definitions in the file <@>functions.pl</@>.
+<p>
+What does each one do? Describe how it works.
+</slide>
+
+<slide>
+<heading>Input/Output
+Files are accessed via <em>handles</em> <~> <small>(cf. Unix file descriptors)</small>.
+<p>
+<@><<</@><$>Handle</$><@>>></@> for an input file means "read the next line from that file".
+<p>
+E.g. <~~> <@> $line = <<STDIN>>; </@>
+<p>
+... stores the next line from standard input in the variable <@>$line</@>.
+<p>
+Output file handles are used as the first argument to the <@>print</@> command.
+<p>
+E.g. <~~> <@> print REPORT "Report for $today\n";</@>
+<p>
+... writes a line to the file attached to the <@>REPORT</@> handle.
+<p>
+<small>Note: no comma after the handle ID</small>
+</slide>
+
+<slide>
+<continued>
+Example (a simple <@>cat</@>):
+<program>
+#!/usr/bin/perl
+# Copy stdin to stdout
+
+while ($line = <<STDIN>>) {
+    print $line;
+}
+</program>
+However, this can be simplified to:
+<program>
+while (<<STDIN>>) { print; }
+
+# or even
+
+print <<STDIN>>;
+</program>
+Defaults:
+<itemize>
+<item> the default destination variable for input is <@>$_</@>
+<item> the default argument for <@>print</@> is also <@>$_</@>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Handles can be explicitly attached to files via the <@>open</@> command:
+<program>
+  open(DATA, "<< data");     # read from a file called "data"
+  open(RES,  ">> results");  # write to a file called "results"
+  open(XTRA, ">>> stuff");   # append to a file called "stuff"
+</program>
+Handles can even be attched to pipelines to read/write to Unix commands:
+<program>
+  open(DATE, "/bin/date |"); # read from output of date command
+  open(FEED, "| more");      # send output through the more command
+</program>
+Opening a handle may fail:
+<program>
+   open(DATA, "<< data")  or  die "Can't open data file";
+</program>
+Handles are closed using <~><@>close(</@><$>HandleName</$><@>)</@><~>
+	<small>(or automatically closed on exit)</small>.
+</slide>
+
+<slide>
+<continued>
+The special file handle <@><<>></@> 
+<itemize>
+<item> treats all command-line arguments as file names
+<item> opens and reads from each of them in turn
+</itemize>
+If there are no command line arguments, then <~> <@><<>> == <<STDIN>></@>
+<p>
+Example:
+<program>
+perl -e 'print <<>>;' a b c
+</program>
+Displays the contents of the files <@>a</@>, <@>b</@>, <@>c</@> on stdout.
+</slide>
+
+<slide>
+<heading>Exercise: uniq in Perl
+Implement a Perl version of Unix's <@>uniq</@>
+<itemize>
+<item> prints only one instance of consecutive identical lines
+<item> processes multiple files as a single stream or reads stdin
+<item> optional <@>-c</@> parameter prepends each line by count
+</itemize>
+</slide>
+<small>
+<slide>
+<heading>Exercise: track enrolments
+Consider a collection of compressed files of format
+<program>
+<$>Course</$>|<$>StuId</$>|<$>Name</$>|...
+</program>
+Each file has name like <@>2007s1_COMP.gz</@>, i.e.
+<program>
+<$>Year</$><$>Session</$>_<$>Prefix</$>.gz
+</program>
+Write a Perl script <@>track.pl</@> that gives enrolment counts
+<itemize>
+<item> example of usage <@>perl track.pl COMP3311 s1</@>
+<item> session code is optional (can be either <@>s1</@> or <@>s2</@>)
+<item> uses all files matching <$>Prefix</$> (e.g. COMP)
+<item> does sensible error checking/reporting
+</itemize>
+Develop this by transforming the <@>track</@> shell script.
+</slide>
+
+<slide>
+<heading>Exercise: auto-indexing text
+Write a script to produce an index of words in text
+<itemize>
+<item> everything mapped to lower case
+<item> words are defined as <@>/[a-zA-Z']+/</@>
+<item> possessives are dropped (e.g. John's <$><rightarrow></$> John)
+<item> all '-suffixes are dropped (e.g. they're <$><rightarrow></$> they)
+<item> "stop words" are removed <small>(see file <tt>stop.words</tt>)</small>
+<item> remove single-letter "words" <small>("a" and "i" are stop words)</small>
+<item> output shows <$>word</$> <$>line<sub>1</sub>,line<sub>2</sub>,...</$> for all words
+</itemize>
+Implement as a shell and Perl script.
+</slide>
+<slide>
+<heading>Perl and External Commands
+Perl is shell-like in the ease of invoking other commands/programs.
+<p>
+Several ways of interacting with external commands/programs:
+<deftable 5>
+<row>
+<col1> <@><red>`</red></@><$>cmd</$><@><red>`</red>;</@> </col1>
+<col2> capture entire output of <$>cmd</$> as single string </col2>
+</row>
+<row>
+<col1> <@>system("</@><$>cmd</$><@>")</@> </col1>
+<col2> execute <$>cmd</$> and capture its exit status only </col2>
+</row>
+<row>
+<col1> <@>open(F,"</@><$>cmd</$><@>|")</@> </col1>
+<col2> collect <$>cmd</$> output by reading from a stream </col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+External command Examples:
+<program>
+$files = `ls $d`;           # string output from command
+
+$status = system("ls $d");  # numeric status of command (output goes to stdout)
+
+open(FILES, "ls $d |");     # display dir contents, one per line
+while (<~FILES~>) {
+    chomp;
+    @fields = split;    # split words in $_ to @_
+    print "Next file is $fields[$#fields]\n";
+}
+</program>
+</slide>
+
+<slide>
+<heading>File Test Operators
+Perl provides an extensive set of operators to query file information:
+<deftable>
+<row>
+  <col1><@>-r, -w, -x</@></col1>
+  <col2>file is readable, writeable, executable</col2>
+</row>
+<row>
+  <col1><@>-e, -z, -s</@></col1>
+  <col2>file exists, has zero size, has non-zero size</col2>
+</row>
+<row>
+  <col1><@>-f, -d, -l</@></col1>
+  <col2>file is a plain file, directory, sym link</col2>
+</row>
+</deftable>
+Cf. the Unix <@>test</@> command.
+<p>
+Used in checking I/O operations, e.g.
+<program>
+-r "dataFile" && open DATA,"<dataFile";
+</program>
+</slide>
+
+<slide>
+<heading>Special Variables
+Perl defines numerous special variables to hold information about its
+execution environment.
+<p>
+These variables typically have names consisting of a single punctuation
+character e.g. <~> <@>$!  $@  $#  $$  $%</@> <~> ...
+	<~><small>(English names are also available)</small>
+<p>
+The <@>$_</@> variable is particularly important:
+<itemize>
+<item> acts as the default location to assign result values (e.g. <@><<STDIN>></@>)
+<item> acts as the default argument to many operations (e.g. <@>print</@>)
+</itemize>
+Careful use of <@>$_</@> can make programs concise, uncluttered. <br>
+Careless use of <@>$_</@> can make programs cryptic.
+</slide>
+
+<slide>
+<continued>
+<deftable>
+<row>
+   <col1><@>$_</@></col1>
+   <col2>default input and pattern match</col2>
+</row>
+<row>
+   <col1><@>$</@><$>i</$></col1>
+   <col2>matching string for <$>i<sup>th</sup></$> regexp in pattern</col2>
+</row>
+<row>
+   <col1><@>$0</@></col1>
+   <col2>name of file containing executing Perl script (cf. shell)</col2>
+</row>
+<row>
+   <col1><@>$$</@></col1>
+   <col2>process number of executing Perl script (cf. shell)</col2>
+</row>
+<row>
+   <col1><@>@ARGV</@></col1>
+   <col2>list (array) of command line arguments</col2>
+</row>
+<row>
+   <col1><@>%ENV</@></col1>
+   <col2>lookup table of environment variables</col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+Example (<@>echo</@> in Perl):
+<program>
+for ($i = 0; $i < @ARGV; $i++) {
+    print "$ARGV[$i] ";
+}
+print "\n";
+</program>
+or
+<program>
+foreach $arg (@ARGV) {
+    print "$arg ";
+}
+print "\n";
+</program>
+or
+<program>
+print "@ARGV\n";
+</program>
+</slide>
+
+<slide>
+<heading>Perl Regular Expressions
+Because Perl makes heavy use of strings, regular expressions
+are a very important component of the language.
+<p>
+They can be used:
+<itemize>
+<item> in conditional expressions to test whether a string matches a pattern
+<p>
+e.g. <~> checking the contents of a string
+<program>
+if ($name =~ /[0-9]/) { print "name contains digit\n"; }
+</program>
+<item> in assignments to modify the value of a string
+<p>
+e.g. <~> convert McDonald to MacDonald
+<program>
+$name =~ s/Mc/Mac/;
+</program>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Perl extends <small>POSIX</small> regular expressions with some shorthand:
+<deftable>
+<row>
+  <col1><@>\d</@></col1>
+  <col2>matches any digit, i.e. <@>[0-9]</@></col2>
+</row>
+<row>
+  <col1><@>\D</@></col1>
+  <col2>matches any non-digit, i.e. <@>[^0-9]</@></col2>
+</row>
+<row>
+  <col1><@>\w</@></col1>
+  <col2>matches any "word" char, i.e. <@>[a-zA-Z_0-9]</@></col2>
+</row>
+<row>
+  <col1><@>\W</@></col1>
+  <col2>matches any non "word" char, i.e. <@>[^a-zA-Z_0-9]</@></col2>
+</row>
+<row>
+  <col1><@>\s</@></col1>
+  <col2>matches any whitespace, i.e. <@>[ \t\n\r\f]</@></col2>
+</row>
+<row>
+  <col1><@>\S</@></col1>
+  <col2>matches any non-whitespace, i.e. <@>[^ \t\n\r\f]</@></col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+Perl also adds some new anchors to regexps:
+<deftable>
+<row>
+  <col1><@>\b</@></col1>
+  <col2>matches at a word boundary</col2>
+</row>
+<row>
+  <col1><@>\B</@></col1>
+  <col2>matches except at a word boundary</col2>
+</row>
+</deftable>
+And generalises the repetition operators:
+<deftable>
+<row>
+  <col1><$>patt</$><@>*</@></col1>
+  <col2>matches 0 or more occurences of <$>patt</$></col2>
+</row>
+<row>
+  <col1><$>patt</$><@>+</@></col1>
+  <col2>matches 1 or more occurences of <$>patt</$></col2>
+</row>
+<row>
+  <col1><$>patt</$><@>?</@></col1>
+  <col2>matches 0 or 1 occurence of <$>patt</$></col2>
+</row>
+<row>
+  <col1><$>patt</$><@>{</@><$>n</$><@>,</@><$>m</$><@>}</@></col1>
+  <col2>matches between <$>n</$> and <$>m</$> occurences of <$>patt</$></col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+The default semantics for pattern matching is "first, then largest".
+<p>
+E.g. <@>/ab+/</@> matches <~> <@><green>abbb</green>abbbb</@> <~>
+	not <~> <@><green>ab</green>bbabbbb</@> <~> or
+	<~> <@>abbb<green>abbbb</green></@>
+<p>
+A pattern can also be qualified so that it looks for the shortest match.
+<p>
+If the repetition operator is followed by <@>?</@> the "first, then shortest"
+string that matches the pattern is chosen.
+<p>
+E.g. <@>/ab+?/</@> would match <~> <@><green>ab</green>bbabbbb</@>
+</slide>
+
+<slide>
+<continued>
+Regular expressions can be formed by interpolating strings in between <@>/.../</@>.
+<p>
+Example:
+<program>
+   $pattern = "ab+";
+   $replace = "Yod";
+   $text = "abba";
+
+   $text =~ s/$pattern/$replace/;
+
+   # converts "abba" to "Yoda"
+</program>
+<small>
+Note: Perl doesn't confuse the use of <@>$</@> in <@>$var</@> and <@>abc$</@>,
+because the anchor occurs at the end.
+</small>
+</slide>
+
+<slide>
+<heading>Pattern Matcher
+A Perl script to accept a pattern and a string and show the match (if any):
+<program>
+#!/usr/bin/perl
+
+$pattern = $ARGV[0];     print "pattern=/$pattern/\n";
+
+$string = $ARGV[1];      print "string =\"$string\"\n";
+
+$string =~ /$pattern/;   print "match  =\"$&\"\n";
+</program>
+<small>You might find this a useful tool to test out your understanding of regular expressions.</small>
+</slide>
+
+<slide>
+<heading>Lists as Strings
+Recall the marks example from earlier on; we used <@>"54,67,88"</@> to
+effectively hold a list of marks.
+<p>
+Could we turn this into a real list if e.g. we wanted to compute an average?
+<p>
+The <em>split</em> operation allows us to do this:
+<p>
+Syntax: <~> <@>split(/</@><$>pattern</$><@>/,</@><$>string</$><@>)</@> <~> returns a list
+<p>
+The <em>join</em> operation allows us to convert from list to string:
+<p>
+Syntax: <~> <@>join('</@><$>char</$><@>',</@><$>list</$><@>)</@> <~> returns a string
+<br><small>(Don't confuse this with the <@>join</@> filter in the shell.
+Perl's <@>join</@> acts more like <@>paste</@>.)</small>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+$marks = "99,67,85,48,77,84";
+
+@listOfMarks = split(/,/, $marks);
+    # assigns (99,67,85,48,77,84) to @listOfMarks
+
+$sum = 0;
+foreach $m (@listOfMarks) {
+    $sum += $m;
+}
+
+$newMarks = join(':',@listOfMarks);
+    # assigns "99:67:85:48:77:84" to $newMarks
+</program>
+<p>
+<small>Note: argument parentheses are optional:
+I use them for more than
+one argument or where it looks ambiguous
+(though not for <@>printf</@>).</small>
+</slide>
+
+<slide>
+<continued>
+Complex splits can be achieved by using a full regular expression
+rather than a single delimiter character.
+<br>
+If part of the regexp is parenthesised,
+the corresponding part of each delimiter
+is retained in the resulting list.
+<program>
+split(/[#@]+/, 'ab##@#c#d@@e'); # gives (ab, c, d, e)
+split(/([#@]+)/, 'ab##@#c#d@@e'); # gives (ab, ##@#, c, #, d, @@, e)
+split(/([#@])+/, 'ab##@#c#d@@e'); # gives (ab, #, c, #, d, @, e)
+</program>
+<p>
+And as a specially useful case, the empty regexp
+is treated as if it matched between every character,
+splitting the string into a list of single characters:
+
+<program>
+split(//, 'hello'); # gives (h, e, l, l, o)
+</program>
+
+</slide>
+
+<slide>
+<heading>Associative Arrays (Hashes)
+As well as arrays indexed by numbers, Perl supports arrays indexed by
+strings: <em>hashes</em>.
+<p>
+Conceptually, as hash is a set <small>(not list)</small> of <$>(key,value)</$> pairs.
+<p>
+We can deal with an entire hash at a time via <@>%</@><$>hashName</$>, e.g.
+<program>
+         #  Key      Value
+
+ %days = ( "Sun" => "Sunday",
+           "Mon" => "Monday",
+           "Tue" => "Tuesday",
+           "Wed" => "Wednesday",
+           "Thu" => "Thursday",
+           "Fri" => "Friday",
+           "Sat" => "Saturday" );
+</program>
+</slide>
+
+<slide>
+<continued>
+Individual components of a hash are accessed via <@>$</@><$>hashName</$><@>{</@><$>keyString</$><@>}</@>
+<p>
+Examples:
+<program>
+$days{"Sun"}   # returns "Sunday"
+$days{"Fri"}   # returns "Friday"
+$days{"dog"}   # is undefined (interpreted as "")
+$days{0}       # is undefined (interpreted as "")
+
+     # inserts a new (key,value)
+$days{dog} = "Dog Day Afternoon";   # bareword OK as key
+
+     # replaces value for key "Sun"
+$days{"Sun"} = Soonday;             # bareword OK as value
+</program>
+</slide>
+
+<slide>
+<continued>
+Consider the following two assignments:
+<program>
+ @f = ("John", "blue", "Anne", "red", "Tim", "green");
+ %g = ("John" => "blue", "Anne" => "red", "Tim" => "green");
+</program>
+<p>
+The first produces an array of strings that can be accessed via position,
+such as <@>$f[0]</@>
+<p>
+The second produces a lookup table of names and colours, e.g. <@>$g{"Tim"}</@>.
+<br>(In fact the symbols <@>=></@> and comma have identical meaning in a list,
+so either right-hand side could have been used.
+However, always use the arrow form exclusively for hashes.)
+</slide>
+
+<slide>
+<continued>
+Consider iterating over each of these data structures:
+<p>
+<center>
+<deftable 4>
+<row>
+<col1>
+<program>
+foreach $x (@f) {
+    print "$x\n";
+}
+
+John
+blue
+Anne
+red
+Tim
+green
+</program>
+</col1>
+<col2>
+<program>
+foreach $x (keys %g) {
+   print "$x => $g{$x}\n";
+}
+
+Anne => red
+Tim => green
+John => blue
+</program>
+</col2>
+</row>
+</deftable>
+</center>
+<p>
+The data comes out of the hash in a fixed but arbitrary order
+(due to the hash function).
+</slide>
+
+<slide>
+<continued>
+There are several ways to examine the <$>(key,value)</$> pairs
+in a hash:
+<program>
+foreach $key (keys %myHash) {
+    print "($key, $myHash{$key})\n";
+}
+</program>
+<p>
+or, if you just want the values without the keys
+<program>
+foreach $val (values %myHash) {
+    print "(?, $val)\n";
+}
+</program>
+<p>
+or, if you want them both together
+<program>
+while (($key,$val) = each %myHash) {
+    print "($key, $val)\n";
+}
+</program>
+<p>
+Note that each method produces the keys/values in the same order.
+It's illegal to change the hash within these loops.
+</slide>
+
+<slide>
+<continued>
+Example (collecting marks for each student):
+<itemize>
+<item> a data file of <$>(name,mark)</$> pairs, space-separated, one per line
+<item> out should be <$>(name,marksList)</$>, with comma-separated marks
+</itemize>
+<program>
+while (<>) {
+    chomp;    # remove newline
+    ($name, $mark) = split;    # separate data fields
+    $marks{$name} .= ",$mark"; # accumulate marks
+}
+foreach $name (keys %marks) {
+    $marks{$name} =~ s/,//;    # remove comma prefix
+    print "$name $marks{$name}\n";
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+The <@>delete</@> function removes an entry (or entries) from an associative array.
+<p>
+To remove a single pair:
+<program>
+delete $days{"Mon"};  # "I don't like Mondays"
+</program>
+<p>
+To remove multiple pairs:
+<program>
+delete @days{ ("Sat","Sun") };  # Omigosh! No weekend!
+</program>
+<p>
+To clean out the entire hash:
+<program>
+foreach $d (keys %days) { delete $days{$d}; }
+# or, more simply
+%days = ();
+</program>
+</slide>
+
+
+<slide>
+<heading>Perl Library Functions
+Perl has literally hundreds of functions for all kinds of purposes:
+<itemize>
+<item> file manipulation, database access, network programming, etc. etc.
+</itemize>
+It has an especially rich collection of functions for strings.
+<p>
+E.g. <@>tr/abc/ABC/</@> converts <@>a</@> to <@>A</@>, <@>b</@> to <@>B</@>, <@>c</@> to <@>C</@> throughout a string
+<p>
+Consult on-line Perl manuals, reference books, example programs for further information.
+</slide>
+
+<slide>
+<heading>Defining Functions
+Perl functions (or subroutines) are defined via <@>sub</@>, e.g.
+<program>
+sub sayHello {
+    print "Hello!\n";
+}
+</program>
+<p>
+And used by calling, with or without <@>&</@>, e.g.
+<program>
+&sayHello;    # arg list optional with &
+sayHello();   # more common, show empty arg list explicitly
+</program>
+</slide>
+
+<slide>
+<continued>
+Function arguments are passed via a list variable <@>@_</@>, e.g.
+<program>
+sub mySub {
+    @args = @_;
+    print "I got ",@#args+1," args\n";
+    print "They are (@args)\n";
+}
+</program>
+<p>
+Note that <@>@args</@> is a global variable.
+<p>
+To make it local, precede by <@>my</@>, e.g.
+<program>
+    my @args = @_;
+</program>
+</slide>
+
+<slide>
+<continued>
+Can achieve similar effect to the C function
+<program>
+int f(int x, int y, int z) {
+    int  res;
+    ...
+    return res;
+}
+</program>
+<p>
+by using array assignment in Perl
+<program>
+sub f {
+    my ($x, $y, $z) = @_;
+    my $res;
+    ...
+    return $res;
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+Lists and arrays are concatentated with any scalar arguments
+to produce a single composite argument list.
+<p>
+There's a useful convention, <em>prototypes</em>,
+to indicate the expected parameter structure.
+Use one <@>$</@> for each scalar
+and @ for a list.
+<p>
+The previous example is thus more clearly specified as
+<program>
+sub f($$$) {
+    my ($x, $y, $z) = @_;
+    ...
+    return $res;
+}
+</program>
+<p>
+
+Perl will check the prototype provided it occurs before
+the first call on the function.
+<p>
+<red>There should be a copy of all prototypes at the top of the file</red>
+so the perl interpreter can validate each call.
+</slide>
+
+<slide>
+<continued>
+Example: Perl factorial
+<program>
+sub fac($) {
+    my ($n) = @_;
+
+    return 1 if $n < 1;
+
+    return $n * fac($n-1);
+}
+</program>
+which behaves as
+<sprogram>
+print fac(3);   # displays 6
+print fac(4);   # displays 24
+print fac(10);  # displays 3628800
+print fac(20);  # displays 2.43290200817664e+18
+</sprogram>
+</slide>
+
+<slide>
+<heading>Parameter Passing
+All parameters in Perl are passed by value.
+<p>
+To pass complex structure intact, so that the original
+object (e.g. arrays, hashes),
+must pass a <em>reference</em> to the structure:
+<program>
+%h = (jas=>100,arun=>95,eric=>50);
+@x = (1..10)
+
+mySub(3, \%h, \@x);
+mysub(2, \%h, [1,2,3,4,5]);
+mysub(5, {a=>1,b=>2}, [1,2,3]);
+</program>
+<p>
+Notation:
+<itemize>
+<item> <@>[1,2,3]</@> gives a reference to <@>(1,2,3)</@>
+<item> <@>{a=>1,b=>2}</@> gives a reference to <@>(a=>1,b=>2)</@>
+</itemize>
+</slide>
+
+<slide>
+<heading>References
+References
+<itemize>
+<item> are like C pointers <small>(refer to some other objects)</small>
+<item> can be assigned to scalar variables
+<item> are dereferenced by evaluating the variable
+</itemize>
+Example:
+<program>
+$aref = [1,2,3,4];
+print @$aref;    # displays whole array
+... $$aref[0];   # access the first element
+... ${$aref}[1]; # access the second element
+... $aref->[2];  # access the third element
+</program>
+
+</slide>
+
+<slide>
+<heading>Perl Programming Style
+
+<itemize>
+<item>
+Perl has different ways of expressing solutions to the same problem.
+<item>
+The more concise versions make full use of built-in operations,
+but may also be more difficult to follow.
+<item>
+Good coding standards help to mitigate against this risk.
+<item>
+Poor discipline leads to very obscure programs
+that are difficult to debug and maintain.
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Recommended stylistic and structural rules:
+<itemize>
+<item>
+Use consistent indenting, preferably 4-space unit, no tabs
+<small>(a good editor will convert tabs to spaces as you type).</small>
+<item>
+Except for short filters,
+use functions for all but the top-level processing.
+<item>
+Make sparing use of global variables,
+generally limiting them to major structures such as hashes or
+constants. Use UPPER_CASE for visibility.
+<item>
+Hence use local variables (<@>my</@> variables) extensively.
+<item>
+Emphasise clarity over efficiency
+(you can generally encapsulate an improved algorithm in a function
+without losing readability).
+<item>
+Consistently document each function's purpose and interface (arg list).
+</itemize>
+</slide>
+
+<slide>
+<heading>Perl Programming Techniques
+
+Note: these problem types and solution
+techniques are not limited to Perl,
+although the language supports them well.
+<p>
+Some solution structures (necessarily incomplete):
+<itemize>
+<item>
+<b>Stateless filtering</b> - many examples already, program can treat each
+data element (line or character) independently.
+<item>
+<b>Control-break </b>- data consists of a sequence of "runs" or subsequences
+that share a common property.
+<item>
+<b>Data validation</b> - applying simple rules to data formats.
+<item>
+<b>Data transformation</b> - format changes, often a more sophisticated kind of
+filter, data may be in sections with specific, predetermined structure.
+<item>
+<b>Data integration</b> - merging and correlating multiple data sources.
+<item>
+<b>Data analysis/mining</b> - combination of some of the above.
+</itemize>
+</slide>
+
+<slide>
+<heading>Control-break Programming</heading>
+
+Originally coined in the 1960s, control-break programming describes
+how to process a sequence of subsequences.
+<p>
+Each subsequence or "run" shares some property (often common key value)
+<p>
+The end of a run is signalled by the start of the next
+<p>
+Run-processing caches results, unloads at end of run
+<p>
+Easy to get logic wrong if careless (or overconfident, lazy, half asleep etc)
+<p>
+<@@>uniq</@@> is a classic control-break processor (see over)
+</slide>
+
+<slide>
+<continued>
+Let's try writing <@>uniq</@> (without options) in Perl.
+<p>
+The basic algorithm looks like
+<program>
+for <$>every line $L</$> {
+    if (<$>$L is different from previous</$>) {
+        <$>show previous</$>
+        <$>save $L as previous</$>
+    }
+}
+</program>
+<p>
+This isn't quite right as we'll see,
+but let's assume we think it's correct.
+</slide>
+
+<slide>
+<continued>
+First version:
+<program>
+#!/usr/bin/perl -w
+
+# uniq.pl - emulate uniq without options
+# Written by geoffw@cse,unsw.edu.au as a COMP2041 example
+# V1: naive version (buggy)
+
+sub show($);    # prototype
+
+$prev = "";
+while (<>) {    # for each line of all input files
+    chomp;              # discard \n
+    if ($_ ne $prev) {  # start of new run
+        show($prev);
+        $prev = $_;     # update current value
+    }
+}
+
+# Display $1
+sub show($) {
+    my ($line) = @_;
+    print "$line\n";
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+<b>Problems</b> (as established through testing):
+<itemize>
+<item>
+spurious line at the beginning of the output
+<item>
+last value is missing
+</itemize>
+
+<p>
+<b>Design defect</b>:
+algorithm only recognises end of run at start of next,
+but
+<itemize>
+<item>
+there is no run following the last; and
+<item>
+there is no run to terminate preceding the first.
+</itemize>
+
+<p>
+<b>More subtle design defect</b>:
+<itemize>
+<item>
+gives wrong answer if first line is empty
+(initial value of <@>$prev</@>
+is a valid data value and hence can't be a sentinel).
+</itemize>
+<p>
+<b>Solution</b>:
+(see examples).
+</slide>
+
+<slide>
+<heading>Data Validation
+<p>
+Perl is good at extracting relevant info,
+transforming it for convenient processing, and applying
+an algorithm of arbitrary complexity to the data.
+<p>
+Example: APC Validation
+<itemize>
+<item>
+APC (Australian Product Codes) are the numeric values
+encoded by bar codes on retail products.
+<item>
+They are compatible with the international EAN
+(European Article Number)
+<item>
+Structure: 13 digits comprising
+<itemize>
+<item> Country code (2 digits)
+<item> Manufacturer (5 digits)
+<item> Article assigned by manufacturer (5 digits)
+<item> Check digit
+</itemize>
+</itemize>
+Example: 9300652010916 is made up of 93 (AUS), 00652 (Sanitarium),
+and 01091 (Weet-Bix 1kg). The 6 is chosen so that
+certain errors are detected...
+</slide>
+
+<slide> <continued>
+Check digit algorithm <i>f</i>(<i>d</i> <i>i</i>=1..13)
+guards against
+<itemize>
+<item>
+Single substitution errors  (169 instead of 139)
+<item>
+90% of adjacent transposition errors (193 instead of 139)
+<item>
+some multiple adjacent transposition errors (319 instead of 139)
+</itemize>
+<p>
+The algorithm is usually expressed procedurally:
+<itemize>
+<item>
+Counting from the right as position 1,
+add the digits in odd positions
+<item>
+Add the digits in even positions
+<item>
+Multiply the even sum by 3, add the odd sum
+<item>
+The total should be a multiple of 10.
+</itemize>
+The rule includes the check digit itself, which is in an odd position.
+</slide>
+
+<slide>
+<continued>
+Underlining even positions in the example on the previous slide: 
+<blockquote><b>9<u>3</u>0<u>0</u>6<u>5</u>2<u>0</u>1<u>0</u>9<u>1</u>6</b></blockquote>
+<br>the APC is valid because
+<blockquote>9+0+6+2+1+9+6 + 3*(3+0+5+0+0+1) = 33 + 3*9 = 33 + 27 = 60</blockquote>
+<p>
+Try substituting any single digit and recalcuting
+the sum (or reasoning about the result),
+and swapping adjacent digits and retesting.
+Swapping one particular pair produces a different code that
+still passes the validation test.
+Which one (and, more importantly, why?)
+<p>
+Try other examples using anything handy that has a full APC.
+<p>
+Books have both an APC (beginning with 978)
+and an ISBN (which uses a different validation rule).
+Notice the connection between them?
+</slide>
+
+<slide>
+<continued>
+Implementation features (see <@>apc.pl</@> in examples).
+<itemize>
+<item>
+Constants are simulated by distinctively named variables
+set only once.
+<item>
+Prompts if used interactively (notice how this is done).
+<item>
+Top-level loop OK in "main".
+<item>
+Sub <@>validate</@> makes successive checks with concise guarded returns.
+<item>
+Local variables (note declaration format).
+<item>
+String -> array of char conversion.
+<item>
+Reverse indexing to sidestep 0-origin (Perl) vs 1-origin (human) issues.
+<item>
+Single pass simpler than two loops
+(even though it needs a parity test each time).
+Could have avoided the test but increases obscurity:
+<sprogram>
+$factor = $APC_ODDFACTOR;
+foreach (-$APC_LENGTH..-1) {
+    sum += $factor*$digits[$pos];
+    $factor = $APC_ODDFACTOR + $APC_EVENFACTOR - $factor;
+}
+</sprogram>
+</itemize>
+
+</slide>
+
+<slide>
+<heading>Data Transformation
+<p>
+The rich set of operations makes converting complex
+data into other forms relatively painless.
+<p>
+Line and field-based data is easiest to interpret.
+<p>
+Free-format is much more difficult (though not impossible).
+<p>
+Example:
+displaying a tab-separated text file
+(such as that exported from a spreadsheet application)
+in a browser.
+<itemize>
+<item>
+the script will create an HTML document containing a table
+<item>
+browsers are very good at showing tables,
+including column balancing
+<item>
+the problem becomes one of translating lines such as
+<session>
+field1 <b>TAB</b> field2 <b>TAB</b> field3
+</session>
+into
+<program>
+<~tr~> <~td~>field1<~/td> <~td~>field2<~/td> <~td~>field3<~/td> <~/tr~>
+</program>
+</itemize>
+</slide>
+
+<slide> <continued>
+Implementation features (see <@>tbl.pl</@> in examples).
+<itemize>
+<item>
+Three functions, main has overall logic.
+<item>
+Use of conditional operator <@>? :</@> for compactness.
+<item>
+Use of split and foreach to process each data item
+<small>(could have used split directly in the foreach,
+but the intermediate, named array makes the steps clearer).</small>
+</itemize>
+<p>
+Deficiencies:
+<itemize>
+<item>
+Data is interpreted by the browser: need a data cleansing
+function so any characters special in HTML (<@><< >> &</@>)
+are replaced by corresponding "entities" (escape sequences).
+<item>
+The delimiter shouldn't be hard-coded, but able to be
+set on the command line.
+<item>
+Missing fields display poorly when the table has borders.
+Consider how to append sufficient dummy fields
+(containing <@>&amp;nbsp;</@> a non-breaking space)
+to the data.
+</itemize>
+</slide>
+
+<slide>
+<heading>Data integration
+Merging data from multiple sources is managed by storing
+relevant content from each file (except the last)
+in hashes, using an appropriate key value to associate
+them.
+<p>
+Example: Lecture space utilisation.
+<p>
+Say we have three files:
+<itemize>
+<item>
+A list of teaching rooms (or "facilities") and their characteristics,
+including capacity;
+<item>
+A list of course IDs and names; and
+<item>
+A tally of enrolments in each class, with the component type
+(lecture, tutorial etc) and ID of the room used (if applicable).
+Times are ignored for this example.
+</itemize>
+We've been asked to calculate the utilisation of each lecture
+(how full it is) as part of a project to make more effective
+use of teaching space.
+
+</slide>
+
+<slide> <continued>
+
+Sample data rows (tab-separated fields, shown as <red><@>@</@></red>:
+<br><@>facilities.txt</@>:
+<session>
+K-E27-C<red>@</red>K-E27<red>@</red>THTR C<red>@</red>Biomedical Theatre C<red>@</red>Biomed C<red>@</red>LCTR<red>@</red>N<red>@</red>KENSINGTON<red>@</red>240<red>@</red>Y
+</session>
+
+<@>courses.txt</@>:
+<session>
+COMP2041<red>@</red>Software Construction<red>@</red>UGRD<red>@</red>KENS
+</session>
+
+<@>enrol_tally.txt</@>:
+<session>
+COMP2041<red>@</red>LEC<red>@</red>202<red>@</red>K-E27-C
+COMP2041<red>@</red>TLB<red>@</red>15<red>@</red>K-G17-221
+COMP2041<red>@</red>TLB<red>@</red>16<red>@</red>K-K17-B02
+</session>
+
+<p>
+The output should be of the form 
+<session>
+
+84.2<red>@</red>COMP2041<red>@</red>Software Construction<red>@</red>202<red>@</red>240<red>@</red>Biomedical Theatre C
+</session>
+
+
+</slide>
+
+<slide> <continued>
+
+If we process the files in this order,
+then we will have to remember enough about facilities
+and courses to be able to calculate the utilisation
+and display the details as soon as we come across
+a lecture.
+<p>
+We need
+<itemize>
+<item>
+the name of each facility
+<item>
+the capacity of each facility
+<item>
+the name of each course
+</itemize>
+
+Each of these is an obvious use for a <em>hash</em>.
+
+</slide>
+
+<slide> <continued>
+Implementation features (see <@>lectutil.pl</@> in examples).
+
+<itemize>
+<item>
+Input and output formats are documented up front.
+<item>
+Field positions (as array indexes, zero-origin) are named to avoid sprinkling
+numbers throughout the program.
+<item>
+The first two files are processed by saving the data required
+in the final merge in hashes, indexed by facility ID
+or course ID.
+<item>
+The split in the last function looks different because
+the data can have trailing empty fields.
+<br>
+Unfortunately the default semantics for split ignores these.
+<item>
+The merge occurs while the last file is being read.
+<br>
+Since the facility and course info is readily available
+the final coding is straightforward.
+</itemize>
+
+</slide>
+
+<slide>
+<heading>Pragmas and Modules
+
+Perl provides a way of controlling some aspects of the interpreter's behaviour
+(through <em>pragmas</em>) and is an extensible language through the
+use of compiled modules, of which there is a large number.
+Both are introduced by the <em>use</em> keyword.
+<p>
+<subhead>Pragmas
+<itemize>
+<item>
+<@>use English;</@> <dash> allow names for built-in vars, e.g.,
+<@>$NF</@> = <@>$.</@> and <@>$ARG</@> = <@>$_</@>.
+<item>
+<@>use integer;</@> <dash> truncate all arithmetic operations to integer,
+effective to the end of the enclosing block.
+<item>
+<@>use strict 'vars';</@> <dash> insist on all variables declared using <@@>my</@@>.
+</itemize>
+
+</slide>
+
+<slide>
+<continued>
+<subhead>Standard modules
+These are heaps of these, some grouped into packages.
+The package name is prefixed with <@@>::</@@>
+
+<p>
+Examples:
+<itemize>
+<item>
+<@>use DB_File;</@> <dash> functions for maintaining an external hash
+<item>
+<@>use Getopt::Std;</@> <dash> functions for processing command-line flags
+<item>
+<@>use File::Find;</@> <dash> find function like the shell's find
+<item>
+<@>use Math::BigInt;</@> <dash> unlimited-precision arithmetic
+<item>
+<@>use CGI;</@> <dash> see next week's lecture.
+</itemize>
+
+</slide>
+
+
+<slide>
+<heading>Summary
+
+<itemize>
+<item>
+Structure your scripts so they have documentation, constants,
+function prototypes, usage handling, main logic and function
+definitions, in that order.
+
+<item>
+Make sure you understand all the examples.
+
+<item>
+Consider that the built-in functions in the examples
+are the minimum that you need to know,
+and consult documentation for other string and scalar
+functions.
+
+<item>
+Perl is powered by regular expressions.
+Get used to using regexps and their operators. Quickly.
+
+<item>
+Initially you may want to stick to predictable ways of
+processing data, usually by splitting into field arrays
+and processing each element in turn.
+
+<item>
+With experience, try to exploit some of the more powerful
+attributes of the language, such as list assignment,
+slices etc. 
+
+<item>
+If you really want to, experiment with <@>map</@>,
+although the resulting, powerful scripts are a challenge
+to understanding, and will require extensive documentation.
+
+</itemize>
+
+</slide>

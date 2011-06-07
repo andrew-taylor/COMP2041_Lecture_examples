@@ -1,0 +1,975 @@
+<title>Perl/CGI Scripting
+<slide>
+<heading>TCP/IP Intro
+
+TCP/IP beyond scope of this course (see COMP[93]331).
+<p>
+But helps understand how CGI works if we can use TCP/IP from Perl
+<p>
+Easy to establish a TCP/IP connection.
+<p>
+Server running on host <@>$host</@> does this:
+<p>
+<sprogram>
+use IO::Socket;
+$server = IO::Socket::INET->new(LocalPort => $port, Listen => SOMAXCONN) or die;
+$c = $server->accept()
+</sprogram>
+<p>
+Client running anywhere on internet does this:
+<p>
+<sprogram>
+use IO::Socket;
+$c = IO::Socket::INET->new(PeerAddr => $host, PeerPort => $port) or die;
+</sprogram>
+<p>
+Then <@>$c</@> give you something  (see COMP[93]331)
+that can be used like a bidirectional file handle.
+</slide>
+<slide>
+<heading>Time Server / Client
+A simple TCP/IP server which supplies the current time as an ASCII string.
+
+<source examples/timeserver.pl>
+
+Simple client which gets the time from the server on host <@>$ARGV[0]</@>
+and prints it.
+
+<source examples/timeclient.pl>
+
+See NTP for a full-fledged way to distributed time across networks.
+</slide>
+<slide>
+<heading>Well-known TCP/IP ports
+To connect via TCP/IP you need to know the port.
+Particular services often listen to a standard TCP/IP port
+on the machine they are running. For example:
+<p>
+<itemize>
+<item> 21 ftp
+<item> 22 ssh (Secure shell)
+<item> 23 telnet
+<item> 25 SMTP (e-mail)
+<item> 80 HTTP (Hypertext Transfer Protocol)
+<item> 123 NTP (Network Time Protocol)
+<item> 443 HTTPS (Hypertext Transfer Protocol over SSL/TLS)
+</itemize>
+<p>
+So a web server normally listen to port 80 on the host is running.
+<p>
+</slide>
+<slide>
+<heading>Uniform Resource Locator (URL)
+<p>
+Familiar  syntax:
+<p>
+<sprogram>
+scheme://domain:port/path?query_string#fragment_id
+</sprogram>
+<p>
+For example:
+<p>
+<sprogram>
+http://en.wikipedia.org/wiki/URI_scheme#Generic_syntax
+http://www.google.com.au/search?q=COMP2041&hl=en&num=100
+</sprogram>
+<p>
+Given a http URL a web browser extracts the hostname from the URL
+and connects to port 80 (unless another port is specified).
+<p>
+In then sends the remainder of the URL to the server.
+<p>
+The HTTP syntax of such a request is simple:
+<p>
+<sprogram>
+GET <i>path</i> HTTP/<i>version</i>
+</sprogram>
+<p>
+We can do this easily in Perl
+</slide>
+<slide>
+<heading>Simple Web Client in Perl
+A very simple web client, doesn't render the HTML or
+provide a GUI or much at all.
+<p>
+<source examples/webget.pl>
+<p>
+In action it looks like this:
+<p>
+<sprogram>
+ % ./webget.pl http://www.cse.unsw.edu.au/~cs2041/index.html
+ HTTP/1.1 200 OK
+ Date: Tue, 08 Jun 2010 12:12:37 GMT
+ Server: Apache/1.3.34 (Debian) PHP/4.4.4-8+etch6
+ Last-Modified: Wed, 03 Feb 2010 23:58:31 GMT
+ Connection: close
+ Content-Type: text/html; charset=iso-8859-1
+ 
+ &lt;html>
+ &lt;head>
+ &lt;meta HTTP-EQUIV="Refresh"
+ content="0; URL=
+ http://www.cse.unsw.edu.au/~cs2041/11s1/index.html">
+ &lt;/head>
+ &lt;body>
+ &lt;/body>
+ &lt;/html>
+</sprogram>
+</slide>
+<p>
+Notice the web server returns some header lines and then data.
+<p>
+Again easy to do in perl.
+<p>
+See HTTP::Request::Common for a more general solution
+<slide>
+<heading>Web server in Perl - 404 every time
+<p>
+A very simple and very limited web server which just redeturn
+a header - the same header every time saying it can't find the URL.
+<source examples/webserver-404.pl>
+</slide>
+<slide>
+<heading>Web server in Perl - too simple
+A simple web server in Perl.
+<p>
+<source examples/webserver-too-simple.pl>
+<p>
+Does the basic job of serving web pages from /home/cs2041/public_html but
+has a pile of bugs, insecurities and limitations.
+<source examples/webserver-too-simple.pl>
+</slide>
+<slide>
+<heading>Web server in Perl - simple 
+Previous simple web server with various checks added.
+<source examples/webserver-simple.pl>
+</slide>
+<slide>
+<heading>Web server in Perl - mime-types
+Web server typically determine a file's type from its extension (suffix)
+and pass this back in a header line.
+<p>
+The file /etc/mime-types contains lines mapping extensions to
+mime-types, e.g.:
+<sprogram>
+application/pdf             pdf
+image/jpeg                  jpeg jpg jpe
+text/html                   html htm shtml
+</sprogram>
+<p>
+Previous simple web server with code added to
+determine appropiate mime type from /etc/mime-types
+<source examples/webserver-mime-types.pl>
+</slide>
+<slide>
+<heading>Web server in Perl - multi-processing
+Previous web server scripts  serve only one request at a time.
+<p>
+Can not handle a high volume of requests.
+<p>
+A slow client can prevent access to the web server, e.g:
+<source examples/webget-slow.pl>
+<p>
+Simple solution is to process each request in a separate process.
+<p>
+The Perl subroutine fork duplicates a running program:
+<p>
+<source examples/webserver-parallel.pl>
+</slide>
+<slide>
+<heading>Web server - Simple CGI
+A simple CGI implementation - POST requests are not handled.
+<source examples/webserver-simple-cgi.pl>
+</slide>
+<slide>
+<heading>Web server - CGI
+A fuller CGI implementation. Both GET and POST requests are  handled.
+<source examples/webserver-cgi.pl>
+</slide>
+<slide>
+<heading>Web Documents
+We're (hopefully) all familiar with <em>static</em> web documents.
+<itemize>
+<item> content marked up with <em>tags</em> to describe appearance
+<item> browser reads HTML and builds internal model <br>
+	<small>(DOM = Document Object Model = hierarchy of components)</small>
+<item> browser produces a visible rendering of DOM
+</itemize>
+Example:
+<diagram>Pic/staticpage.png
+</slide>
+
+<slide>
+<heading>Dynamic Web Pages
+HTML tags are <em>static</em>
+	<~> <small> (i.e. produce a fixed rendering).</small>
+<p>
+<q>Dynamic</q> web documents come in two flavours ...
+<itemize>
+<item> Web pages generated "on-the-fly" from non-HTML data sources:
+<itemize>
+<item> SSP <~> <small>(program running in web server generates HTML)</small>
+<item> CGI <~> <small>(program running outside web server generates HTML)</small>
+</itemize>
+<item> Web pages with interactive content:
+<itemize>
+<item> JavaScript <~> <small>(browser manipulates document object model)</small>
+<item> Java Applet <~> <small>(JVM in browser executes Java program)</small>
+</itemize>
+</itemize>
+<small>
+Cascading Style Sheets (CSS) gives user fine-grained control of appearance.
+</small>
+</slide>
+
+<slide>
+<continued>
+For CGI and SSP, the scripts <small>(HTML generators)</small> are invoked
+<itemize>
+<item> via a URL
+	<~> <small>(giving the name and type of application)</small>
+<item> passing some data values
+	<~> <small>(either in the URL or via stdin)</small>
+</itemize>
+The data values are typically
+<itemize>
+<item> collected in a fill-in form which invokes the script
+<item> passed from page to page (script to script) via GET/POST
+</itemize>
+<small>
+(other mechanisms for data transmission include cookies and server-state)
+</small>
+</slide>
+
+<slide>
+<heading>CGI <~><small>(Common Gateway Interface)</small>
+<p><br><p>
+<diagram>Pic/cgi.png
+<p>
+Data is passed as <@>name=value</@> pairs
+	<~> <small>(all values are strings)</small>.
+<p>
+Application outputs (normally) HTML, which server passes to client.
+<p>
+For HTML documents, header is <~> <@>Content-type: text/html</@>
+<p>
+<small>
+Header can be any MIME-type (e.g. <@>text/html</@>, <~> <@>image/gif</@>, ...)
+</small>
+</slide>
+
+<slide>
+<heading>Perl and CGI
+So how does Perl fit into this scenario?
+<p>
+CGI scripts typically:
+<itemize>
+<item> do lots of complex string manipulation
+<item> write many complex strings (HTML) to output
+</itemize>
+Perl is good at manipulating strings <$><Rightarrow></$> good for CGI.
+<p>
+Libraries for Perl make CGI processing even easier.
+<p>
+CGI.pm is one such library 
+	<~> <small>(see later for more details)</small>
+</slide>
+
+<slide>
+<heading>SSP <~><small>(Server-side Programming)</small>
+<p><br><p>
+<diagram>Pic/sscript.png
+<p>
+Data is available via library functions (e.g. <@>param</@>).
+<p>
+Script produces HTML output, which is sent to client (browser).
+<p>
+</slide>
+
+<slide>
+<heading>JavaScript <~><small>(Client-side DOM Scripting)</small>
+<p><br><p>
+<diagram>Pic/jscript.png
+Executing script can modify browser's internal representation of document (DOM)
+<$><Rightarrow></$> change appearance of document on screen.
+<p>
+This can happen at script load time or in response to <em>events</em>
+(such as <@>onClick</@>, <@>onMouseOver</@>, <@>onKeyPress</@>) after
+script has loaded.
+<p>
+Can also access data in form controls <small>(because they are also document elements)</small>.
+</slide>
+
+<slide>
+<heading>Ajax
+Ajax provides a variation on the above approach:
+<itemize>
+<item> <q>normal</q> browser-to-server interaction is HTTP request
+<item> this causes browser to read response as HTML <small>(new page)</small>
+<item> Ajax sends XMLHttpRequests from browser-to-server
+<item> browser does not refresh, but waits for a response
+<item> response data <small>(not HTML)</small> is read and added into DOM
+</itemize>
+Leads to interaction appearing more like traditional GUI.
+<p>
+Examples: Gmail, Google calendar, Flickr, ....
+</slide>
+
+<slide>
+<continued>
+Ajax-style browser/server interaction:
+<diagram>Pic/webdb-ajax.png
+</slide>
+
+<slide>
+<heading>HTML Forms
+An HTML <em>form</em> combines the notions of
+	 <~> <em>user input</em> <~>&amp;<~> <em>function call</em> :
+<itemize>
+<item> collects data via <em>form control</em> elements
+<item> invokes a URL to process the collected data when <@>submit</@>ted
+</itemize>
+Syntax:
+<program>
+<<form method=<$>RequestMethod</$> action=<$>URL</$> ...>>
+<$>any HTML except another form</$>
+   mixed with
+<$>data collection (form control) elements</$>
+<</form>>
+</program>
+An HTML document may contain any number of <@><<form>></@>'s.
+<p>
+Forms can be arbitrarily interleaved with HMTL layout elements
+	 <small>(e.g. <@><<table>></@>)</small>
+</slide>
+
+<slide>
+<heading><@>METHOD</@> Attribute
+The <i>RequestMethod</i> value indicates how data is passed to <@>action</@> URL.
+<p>
+Two <i>RequestMethod</i>s are available: <@>GET</@> and <@>POST</@>
+	<~> <small>(although <@>GET</@> is deprecated).</small>
+<itemize>
+<item>
+<@>GET</@>: data attached to URL
+	<~> (<@><i>URL</i><b>?</b><i>name<sub>1</sub></i>=<i>val<sub>1</sub></i><b>&</b><i>name<sub>2</sub></i>=<i>val<sub>2</sub></i><b>&</b>...</@>)
+<item>
+<@>POST</@>: data available to script via standard input
+</itemize>
+Within a server script all we see is a collection of variables:
+<itemize>
+<item> with the same names as those used in the form elements
+<item> initialised with the values collected in the form
+</itemize>
+</slide>
+
+<slide>
+<heading>URL-encoded Strings
+Data is passed from browser to server as a single string in the form:
+<session>
+<i>name</i><b>=</b><i>val</i><b>&amp;</b><i>name</i><b>=</b><i>val</i><b>&amp;</b><i>name</i><b>=</b><i>val</i><b>&amp;</b>...
+</session>
+with no spaces and where '<@><b>=</b></@>' and '<@><b>&amp;</b></@>'
+are treated as special characters.
+<p>
+To achieve this strings are "url-encoded" e.g.
+<center>
+<p>
+<reltable 2>
+<row>
+<col1> <@>andrewt</@> </col1>
+<col2> <@>andrewt</@> </col2>
+</row>
+<row>
+<col1> <@>John Shepherd</@> </col1>
+<col2> <@>John<blue>+</blue>Shepherd</@> </col2>
+</row>
+<row>
+<col1> <@>~andrewt = /home/andrewt</@> </col1>
+<col12> <@><red>%7E</red>andrewt<blue>+</blue><red>%3D</red><blue>+</blue><red>%2F</red>home<red>%2F</red>andrewt</@> </col2>
+</row>
+<row>
+<col1> <@>1 + 1 = 2</@> </col1>
+<col2> <@>1<blue>+</blue><red>%2B</red><blue>+</blue>1<blue>+</blue><red>%3D</red><blue>+</blue>2</@> </col2>
+</row>
+<row>
+<col1> <@>Jack &amp; Jill = Love!</@> </col1>
+<col2> <@>Jack<blue>+</blue><red>%26</red><blue>+</blue>Jill<blue>+</blue><red>%3D</red><blue>+</blue>Love<red>%21</red></a> </@></col2>  
+</row>
+</reltable>
+</center>
+<p>
+Data values are decoded before script uses them
+<small>(WYSIWYG)</small>.
+</slide>
+
+<slide>
+<heading><@>ACTION</@> Attribute
+<@><<form ... <brown><b>action</b></brown>='<i>URL</i>' ... >></@>
+<itemize>
+<item> specifies script <@><i>URL</i></@> to process form data
+</itemize>
+When the form is submitted ...
+<itemize>
+<item> invoke the URL specified in <@>action</@>
+<item> pass all form data to it
+</itemize>
+If no <@>action</@> attribute, re-invoke the current script.
+</slide>
+
+<slide>
+<heading>Other <@><<form>></@> Attributes
+<@><<form ... <brown><b>name</b></brown>='<i>FormName</i>' ... >></@>
+<itemize>
+<item> associates the name <@><i>FormName</i></@> with the entire form
+<item> useful for referring to form in JavaScript
+</itemize>
+<@><<form ... <brown><b>target</b></brown>='<i>WindowName</i>' ... >></@>
+<itemize>
+<item> causes output from executing script to be placed in specified window
+<item> useful when dealing with frames <~> <small>(see later)</small>
+</itemize>
+<@><<form ... <brown><b>onSubmit</b></brown>='<i>Script</i>' ... >></@>
+<itemize>
+<item> specifies actions to be carried out just before sending data to script
+</itemize>
+</slide>
+
+<slide>
+<heading>Form Controls
+<em>Form controls</em> are the individual data collection elements within a form.
+<p>
+Data can be collected in the following styles:
+<center>
+<p>
+<reltable 2>
+<row><col1> text </col1><col2> single line or region of text </col2></row>
+<row><col1> password </col1><col2> single line of text, value is hidden </col2></row>
+<row><col1> menu </col1><col2> choose 1 or many from a number of options </col2></row>
+<row><col1> checkbox </col1><col2> on/off toggle switch </col2></row>
+<row><col1> radio </col1><col2> choose only 1 from a number of options </col2></row>
+<row><col1> hidden </col1><col2> data item not displayed to user </col2></row>
+<row><col1> submit </col1><col2> button, sends collected data to script </col2></row>
+<row><col1> reset </col1><col2> button, resets all data elements in form </col2></row>
+<row><col1> button </col1><col2> button, effect needs to be scripted </col2></row>
+</reltable>
+<p>
+</center>
+</slide>
+
+<slide>
+<heading>CGI Scripts
+CGI scripts can be written in <em>most</em> languages.
+<p>
+The better CGI languages:
+<itemize>
+<item> are good at manipulating character strings
+<item> make it easy to produce HTML
+</itemize>
+Perl satisfies both of these criteria ok on its own.
+<p>
+Libraries like <@>CGI.pm</@> make Perl even better for CGI.
+</slide>
+
+<slide>
+<heading>CGI at CSE
+On CSE machines, users typically place CGI scripts in:
+<session>
+/home/<i>UserName</i>/public_html/cgi-bin
+</session>
+And access them via:
+<session>
+http://cgi.cse.unsw.edu.au/~<i>Username</i>/cgi-bin/<i>Script</i>
+</session>
+Nowadays, you can place CGI scripts
+<itemize>
+<item> anywhere under your <@>public_html</@> directory
+<item> provided that they have a <@>.cgi</@> or suffix
+</itemize>
+and access them via e.g.
+<session>
+http://www.cse.unsw.edu.au/~<i>UserName</i>/path/to/script.cgi
+</session>
+The CSE web server will automatically forward them to
+the CGI server for execution.
+</slide>
+
+<slide>
+<continued>
+A note on file/directory protections and security ...
+<itemize>
+<item> files under <@>public_html</@> need to be readable
+<item> directories under <@>public_html</@> need to be executable
+</itemize>
+so that at least the Web server can access them.
+<p>
+A special command:
+<program>
+priv webonly <$>FileOrDirecctory</$>
+</program>
+makes files/dirs readable only to you and the web server.
+</slide>
+
+<slide>
+<heading>CGI and Security
+Putting up a CGI scripts means that
+<itemize>
+<item> anyone, anywhere can execute your script
+<item> they can give it any data they like
+</itemize>
+If you are not careful how data is used ...
+<p>
+Always run Perl CGI scripts in <q>taint</q> mode
+<itemize>
+<item> generates an error if tainted data used unsafely
+</itemize>
+Tainted data = any CGI parameter
+<p>
+Unsafely = in system-type operations (e.g. <@>`...`</@>)
+</slide>
+
+<slide>
+<heading>CGI.pm
+<defn>CGI.pm</defn> is a Perl module to simplify CGI scripts.
+<p>
+It prrovides functions/methods that make it easy
+<itemize>
+<item> to access parameters and other data for CGI scripts
+<item> to produce HTML output from the script
+</itemize>
+CGI.pm supports two styles of programming:
+<small>
+<itemize>
+<item> object-oriented, with CGI objects and methods on those objects
+<item> function-oriented, with function calls and a single implicit CGI object
+</itemize>
+</small>
+</slide>
+
+<slide>
+<continued>
+CGI.pm has a range of methods/functions for:
+<itemize>
+<item> producing HTML <~> <small>(several flavours, including browser-specific)</small>,
+<item> building HTML forms <~> <small>(overall wrapping, plus all form elements)</small>
+<item> CGI handling <~> <small>(manipulating parameters, managing state)</small>
+</itemize>
+HTML and form building methods typically
+<itemize>
+<item> accept a collection of string arguments
+<item> return a string that contains a fragment of HTML
+</itemize>
+<p>
+A dynamic Web page is produced by
+<itemize>
+<item> printing a collection of such HTML fragments
+</itemize>
+</slide>
+
+<slide>
+<heading>Example CGI.pm
+Consider a data collection form (<@>SayHello.html</@>):
+<program>
+<<form name="Hello" action="HelloScript.cgi">>
+Your name: <<input name="UserName" type="text">>
+<<input type=submit value="Say Hello">>
+<</form>>
+</program>
+And consider that we type <@>John</@> into the input box.
+</slide>
+
+<slide>
+<continued>
+An OO-style script (<@>HelloScript.cgi</@>)
+<session>
+use CGI;
+$cgi = new CGI;
+$name = $cgi->param("UserName");
+print $cgi-><red>header()</red>, $cgi-><green>start_html()</green>,
+      $cgi-><navy>p("Hello there, $name")</navy>,
+      $cgi-><brown>end_html()</brown>;
+</session>
+Output of script (sent to browser):
+<session>
+<red>Content-type: text/html</red>
+
+<green><<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">>
+<<HTML>><<HEAD>><<TITLE>>Untitled Document<</TITLE>>
+<</HEAD>><<BODY>></green><navy><<P>>Hello there, John<</P>></navy><brown><</BODY>><</HTML>></brown>
+</session>
+</slide>
+
+<slide>
+<continued>
+A function-style script (<@>HelloScript.cgi</@>)
+<session>
+use CGI qw/:standard/;
+$name = param("UserName");
+print <red>header()</red>, <green>start_html()</green>,
+      <navy>p("Hello there, $name")</navy>,
+      <brown>end_html()</brown>;
+</session>
+Output of script (sent to browser):
+<session>
+<red>Content-type: text/html</red>
+
+<green><<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">>
+<<HTML>><<HEAD>><<TITLE>>Untitled Document<</TITLE>>
+<</HEAD>><<BODY>></green><navy><<P>>Hello there, John<</P>></navy><brown><</BODY>><</HTML>></brown>
+</session>
+</slide>
+
+<slide>
+<heading>Calling CGI.pm Methods
+CGI.pm methods often accept many (optional) parameters.
+<p>
+Special method-call syntax available throughout CGI.pm:
+<session>
+<i>MethodName</i>(-<i>ArgName<sub>1</sub></i>=><i>Value<sub>1</sub></i>,
+           -<i>ArgName<sub>2</sub></i>=><i>Value<sub>2</sub></i>,
+           -<i>ArgName<sub>3</sub></i>=><i>Value<sub>3</sub></i>,
+           ...
+           -<i>ArgName<sub>n</sub></i>=><i>Value<sub>n</sub></i>,
+           );
+</session>
+Example:
+<program>
+print header(-type=>'image/gif',-expires=>'+3d');
+</program>
+<small>
+Argument names are case-insensitive; args can be supplied in any order.
+</small>
+</slide>
+
+<slide>
+<continued>
+CGI.pm doesn't explicitly define methods for all HMTL tags.
+<p>
+Instead, constructs them on-the-fly using rules about arguments.
+<p>
+This allows you to include arbitrary attributes in HTML tags
+<session>
+<i>MethodName</i>({-<i>AttrName</i>=><i>Value</i>,...}, <i>OtherArgs</i>, ...);
+</session>
+If first argument is an associative array, it is converted into tag attributes.
+<p>
+Other unnamed string arguments are concatenated space-separated.
+<p>
+Methods that behave like this are called <defn>HTML shortcuts</defn>.
+</slide>
+
+<slide>
+<continued>
+Examples of HTML shortcuts:
+<deftable>
+<row>
+  <col1><@>h1()</@> <~> or <~> <@>h1</@></col1>
+  <col2><@><<H1>></@></col2>
+</row>
+<row>
+  <col1><@>h1('some','contents')</@></col1>
+  <col2><@><<H1>>some contents<</H1>></@></col2>
+</row>
+<row>
+  <col1><@>h1({-align=>left})</@></col1>
+  <col2><@><<H1 ALIGN="left">></@></col2>
+</row>
+<row>
+  <col1><@>h1({-align=>left},'Head')</@></col1>
+  <col2><@><<H1 ALIGN="left">><br>Head<</H1>></@></col2>
+</row>
+<row>
+  <col1><@>p()</@> <~> or <~> <@>p</@></col1>
+  <col2><@><<P>></@></col2>
+</row>
+<row>
+  <col1><@>p('how\'s',"this","now")</@></col1>
+  <col2><@><<P>>how's this now<</P>></@></col2>
+</row>
+<row>
+  <col1><@>p({-align=>center},'Now!')</@></col1>
+  <col2><@><<P ALIGN="center">><br>Now!<</P>></@></col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<heading>Accessing Data Items
+The <@><b><brown>param</brown></b></@> method provides access to CGI parameters.
+<itemize>
+<item> can get a list of names for all parameters
+<item> can get value for a single named parameter
+<item> can modify the values of individual parameters
+</itemize>
+Examples:
+<program>
+# get a list of names of all parameters
+@names = param();
+# get value of parameter "name"
+$name = param('name');
+# get values of parameter "choices"
+@list = param('choices');
+# set value of "colour" parameter to 'red"
+param('colour','red');
+param(-name=>'colour', -value='red');
+</program>
+</slide>
+
+<slide>
+<continued>
+Example (dump a table of CGI params):
+<program>
+#!/usr/bin/perl
+
+use CGI ':standard';
+
+@params = param();
+
+print header, "<<html>><<body>>";
+
+foreach $p (@params) {
+	$v = param($p);
+	$rows .= "<<tr>><<td>>$p<</td>><<td>>$v<</td>><</tr>>";
+}
+print "<<center>><<table border=1>>
+          <<tr>><<td>>Param<</td>><<td>>Value<</td>><</tr>>
+          $rows
+       <</table>><</center>>
+       <</body>><</html>>
+      ";
+</program>
+</slide>
+
+<slide>
+<continued>
+Example (dump CGI params, using shortcuts):
+<program>
+#!/usr/bin/perl
+
+use CGI ':standard';
+
+@params = param();
+
+print header, start_html;
+
+foreach $p (@params) {
+   $rows .= Tr(td([$p, param($p)]));
+}
+print center(
+         table({-border=>1},
+            Tr(th(['Param','Value'])),
+            $rows
+         )
+      ),
+      end_html;
+</program>
+</slide>
+
+<slide>
+<heading>Generating Forms
+CGI.pm has methods to assist in generating forms dynamically:
+<deftable>
+<row>
+  <col1><@>start_form</@></col1>
+  <col2>generates a <@><<form>></@> tag with <br>
+	optional params for <@>action</@>,...</col2>
+</row>
+<row>
+  <col1><@>end_form</@></col1>
+  <col2>generates a <@><</form>></@> tag</col2>
+</row>
+</deftable>
+Plus methods for each different kind of data collection element <br>
+<itemize>
+<item> <@>textfield</@>, <~> <@>textarea</@>, <~> <@>password_field</@>
+<item> <@>popup_menu</@>, <~> <@>scrolling_list</@>
+<item> <@>checkbox</@>, <~> <@>radio_group</@>, <~> <@>checkbox_group</@>
+<item> <@>submit</@>, <~> <@>reset</@>, <~> <@>button</@>, <~> <@>hidden</@>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Example (self-invoking form):
+<program>
+#!/usr/bin/perl
+# CGI script that creates a fill-out form
+# and echoes back its values.
+
+use CGI qw/:standard/;  # qw/X/ == 'X'
+print header,
+   start_html(-bgcolor=>'white','A Simple Example'),
+   h1(font({-color=>'blue'},'A Simple Example')),
+   start_form,
+   "What's your name? ",textfield('name'),p,
+   "What's the combination?", p,
+   checkbox_group(-name=>'words',
+                  -values=>['eenie','meenie','minie','moe'],
+                  -defaults=>['eenie','minie']), p,
+   "What's your favorite color? ",
+   popup_menu(-name=>'color',
+              -values=>['red','green','blue','yellow']),p,
+   submit,
+   end_form,
+   hr;
+
+if (param()) {
+   print "Your name is ",em(param('name')),p,
+      "The keywords are ",em(join(", ",param('words'))),p,
+      "Your favorite color is ",em(param('color')),
+      hr;
+}
+</program>
+</slide>
+
+<slide>
+<heading>CGI Script Structure
+CGI scripts <i>can</i> interleave computation and output.
+<p>
+Arbitrary interleaving is not generally effective <br>
+<small>(e.g. produce some output and then encounter an error in middle of table)</small>
+<p>
+Useful structure for (large) scripts:
+<itemize>
+<item> collect and check parameters; handle errors
+<item> use parameters to compute result data structures
+<item> convert results into HTML string
+<item> output entire well-formed HTML string
+</itemize>
+</slide>
+
+<slide>
+<heading>Multi-page (State-based) Scripts
+Often, a Web-based transaction goes through several stages.
+<p>
+Sometimes useful to implement all stages by a single script.
+<p>
+Such scripts are
+<itemize>
+<item> structured as a collection of cases, distinguished by a "state" variable
+<item> each state sets parameter to pass to next invocation of same script
+<item> new invocation produces a new state (different value of "state" variable)
+</itemize>
+Overall effect: a single script produces many different Web pages.
+</slide>
+
+<slide>
+<continued>
+Example (state-based script schema):
+<program>
+$state = param("state");
+if ($state eq "") {
+   do processing for initial state
+   set up form to invoke next state
+}
+elsif ($state == Value1) {
+   do processing for state 1
+   set up form to invoke next state
+}
+elsif ($state == Value2) {
+   do processing for state 2
+   set up form to invoke next state
+}
+elsif ($state == Value3) {
+   do processing for state 3
+   set up form to invoke next state
+}
+...
+</program>
+</slide>
+<slide>
+<heading>Cookies
+Web applications often need to maintain state (variables)
+between execution of their CGI script(s).
+<p>
+We've seen this done with parameters in hidden input fields.
+<p>
+This is only useful for the one "session".
+<p>
+Cookies provide more persistant storage.
+<p>
+Cookies are strings sent to web clients (browsers)  in the response headers.
+<p>
+Clients (browsers) store these strings in a file and send them back in the header
+when they subsequently access the site.
+<p>
+For example:
+<p>
+<sprogram>
+% ./webget.pl  http://www.amazon.com/
+HTTP/1.1 200 OK
+Date: Thu, 19 May 2011 00:54:27 GMT
+Server: Server
+Set-Cookie: skin=noskin; path=/; domain=.amazon.com; expires=Thu, 19-May-2011 00:54:27 GMT
+Set-cookie: session-id-time=208567201l; path=/; domain=.amazon.com; expires=Tue Jan 01 08:00:01 2036 GMT
+Set-cookie: session-id=191-0575084-2685655; path=/; domain=.amazon.com; expires=Tue Jan 01 08:00:01 2036 GMT
+....
+</sprogram>
+<p>
+A web client will sent the cookie strings back next time it access Amazon.
+</slide>
+<slide>
+<heading>Storing a Hash
+The Storable module provides an easy way to store a hash, e.g:
+<p>
+<source examples/persistent.pl>
+<p>
+<sprogram>
+% persistent.pl 
+This script has now been run 1 times
+% persistent.pl 
+This script has now been run 2 times
+% persistent.pl 
+This script has now been run 3 times
+% persistent.pl 
+This script has now been run 4 times
+</sprogram>
+</slide>
+<slide>
+<heading>A Web Client with Cookies
+<p>
+<source examples/webget-cookies.pl>
+<p>
+<sprogram>
+% webget-cookies.pl http://www.amazon.com/
+Received cookie .amazon.com / skin=noskin
+Received cookie .amazon.com / session-id-time=2092797201l
+Received cookie .amazon.com / session-id=192-8901109-6810988
+% webget-cookies.pl http://www.amazon.com/
+Sent cookie skin=noskin
+Sent cookie session-id-time=2092797201l
+Sent cookie session-id=192-8901109-6810988
+Received cookie .amazon.com / skin=noskin
+Received cookie .amazon.com / ubid-main=198-1199999-1186912
+Received cookie .amazon.com / session-id-time=2092797201l
+Received cookie .amazon.com / session-id=192-8901109-6810988
+</sprogram>
+</slide>
+<slide>
+<heading>CGI Script Setting Cookie Directly
+<p>
+This crude script puts a cookie in the header directly.
+<p>
+And it also crudely retrieves a cookie from the HTTP_COOKIE environment variable.
+<p>
+<source examples/simple_cookie.cgi>
+</slide>
+<slide>
+<heading>Using CGI.pm to Set a Cookie
+<p>
+CGI.pm provides more convenient access to cookies.
+<p>
+<source examples/simple_cookie.cgipm.cgi>
+</slide>
+<slide>
+<heading>Further Information ...
+Comprehensive documentation attached to course Web page:
+<program>
+http://www.cse.unsw.edu.au/~cs2041/doc/perl-5.8.8/CGI.html
+</program>
+Along with plenty of examples to look at in:
+<program>
+http://www.cse.unsw.edu.au/~cs2041/manuals/cgi/examples
+</program>
+Most Perl books have some material on CGI.pm.
+</slide>

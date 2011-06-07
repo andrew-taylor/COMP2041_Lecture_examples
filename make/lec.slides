@@ -1,0 +1,539 @@
+<title>Configuration/Building
+
+<slide>
+<heading>Building Software Systems
+Software systems need to be built / re-built
+<itemize>
+<item> during the development phase
+    <~> <small>(change,compile,test,repeat)</small>
+<item> if distributed in source code form
+    <~> <small>(assists portability)</small>
+</itemize>
+We focus on building systems implemented as C programs:
+<itemize>
+<item> multiple object files (<@>.o</@> files) and libraries (<@>libxyz.a</@>)
+<item> compiler that only recompiles what it's told to
+</itemize>
+</slide>
+
+<slide>
+<heading>Multi-module C Programs
+Large C programs are implemented as a collection of <@>.c</@> and <@>.h</@> files.
+<p>
+A pair of <@>a.c</@> and <@>a.h</@> generally defines a <em>module</em>:
+<itemize>
+<item> <@>a.c</@> contains operations related to one particular kind of data/object
+<item> <@>a.h</@> exports definitions for types/operations defined in <@>a.c</@>
+</itemize>
+Why partition a program into modules at all?
+<itemize>
+<item> as a principle of good design
+<item> to share development work in a large project
+<item> to create re-usable libraries
+</itemize>
+</slide>
+
+<slide>
+<heading>Example Multi-module C Program
+A large system like a game program has ...
+<itemize>
+<item> an internal model of the game world
+    <~> <small>(places, objects, actors)</small>
+<item> code to manage graphics
+    <~> <small>(mapping the world to the screen)</small>
+</itemize>
+The graphics code would ...
+<itemize>
+<item> typically be separated from the world code
+    <~> <small>(software eng)</small>
+<item> need to use the world operations
+    <~> <small>(to render current scene)</small>
+</itemize>
+Then there would be a main program to ...
+<itemize>
+<item> accept user commands, modify world, update display
+</itemize>
+</slide>
+
+<slide>
+<continued>
+<diagram>Pic/modules.png
+</slide>
+
+<slide>
+<heading>Building Large Programs
+Building the example program is relatively simple:
+<session>
+$ <b>gcc -c -g -Wall world.c</b>
+$ <b>gcc -c -g -Wall graphics.c</b>
+$ <b>gcc -c -g -Wall main.c</b>
+$ <b>gcc -Wall -o game main.o world.o graphics.o</b>
+</session>
+For larger systems, building is either
+<itemize>
+<item> inefficient <~> <small>(recompile everything after any change)</small>
+<item> error-prone <~> <small>(recompile just what's changed + dependents)</small>
+<itemize>
+<sitem> module relationships easy to overlook <br>
+<small>(e.g. <@>graphics.c</@> depends on a <@>typedef</@> in <@>world.h</@>)</small>
+<sitem> you may not know when a module changes <br>
+<small>(e.g. you work on <@>graphics.c</@>, others work on <@>world.c</@>)</small>
+</itemize>
+</itemize>
+</slide>
+
+<slide>
+<heading>The <large><code>make</code></large> Command
+The <@>make</@> command overcomes these problems by:
+<itemize>
+<item> documenting intra-module dependencies
+<item> automatically keeping track of changes
+</itemize>
+<@>make</@> works from a file called <@>Makefile</@>
+    <~> <small>(or <tt>makefile</tt>)</small>
+<p>
+A <@>Makefile</@> contains a sequence of rules like:
+<syntax>
+<i>target</i> : <i>source<$><sub>1</sub></$></i> <i>source<$><sub>2</sub></$></i> ...
+        <i>commands to create target from sources</i>
+</syntax>
+<p>
+<red><b>Beware:</b> each command is preceded by a single <em>tab</em> char.</red>
+<p>
+<$><Rightarrow></$> Don't use the clipboard to copy <@>Makefile</@>s
+</slide>
+
+<slide>
+<heading>Dependencies
+The <@>make</@> command is based on the notion of <em>dependencies</em>.
+<p>
+Each rule in a <@>Makefile</@> describes:
+<itemize>
+<item> dependencies between each target and its sources
+<item> commands to build the target from its sources
+</itemize>
+<@>Make</@> decides that a target needs to be rebuilt if
+<itemize>
+<item> it is older than any of its sources 
+    <~> <small>(based on file modification times)</small>
+</itemize>
+</slide>
+
+<slide>
+<heading>Example <large><code>Makefile</code></large> #1
+<diagram>Pic/modules.png
+</slide>
+
+<slide>
+<continued>
+A <@>Makefile</@> for the earlier example program:
+<program>
+game : main.o graphics.o world.o
+        gcc -Wall -o game main.o graphics.o world.o
+
+main.o : main.c graphics.h world.h
+        gcc -c main.c
+
+graphics.o : graphics.c world.h 
+        gcc -c -g -Wall graphics.c
+
+world.o : world.c
+        gcc -c -g -Wall world.c
+</program>
+
+Easily parsed in Perl:
+
+<sprogram>
+sub parse_makefile($) {
+    my ($file) = @_;
+    open MAKEFILE, $file or die;
+    while (&lt;MAKEFILE>) {
+        my ($target, $dependencies) = /(\S+)\s*:\s*(.*)/ or next;
+        $first_target = $target if !defined $first_target;
+        $dependencies{$target} = $dependencies;
+        while (&lt;MAKEFILE>) {
+            last if !/^\t/;
+            $build_command{$target} .= $_;
+        }
+    }
+}
+</sprogram>
+</slide>
+
+<slide>
+<heading>How <large><code>make</code></large> Works
+The <@>make</@> command behaves as:
+<program>
+make(target, sources, command):
+    <comment># Stage 1</comment>
+    FOR each S in sources DO
+        rebuild S if it needs rebuilding
+    END
+    <comment># Stage 2</comment>
+    IF (no sources OR
+        any source is newer than target) THEN
+       run command to rebuild target
+    END
+</program>
+</slide>
+
+<slide>
+<continued>
+Implementation in Perl:
+<program>
+sub build($) {
+    my ($target) = @_;
+    my $build_command = $build_command{$target};
+    die "*** No rule to make target $target\n" if !$build_command && !-e $target;
+    return if !$build_command;
+    my $target_build_needed = ! -e $target;
+    foreach $dependency (split /\s+/, $dependencies{$target}) {
+        build $dependency;
+        $target_build_needed ||= -M  $target > -M $dependency;
+    }
+    return if !$target_build_needed;
+    print $build_command;
+    system $build_command;
+}
+</program>
+</slide>
+
+<slide>
+<heading>More on <large><code>Makefiles</code></large>
+Some additional functionalities of <tt>Makefiles</tt>
+<program>
+<comment># string-valued variables/macros</comment>
+CC = gcc
+CFLAGS = -g
+LDFLAGS = -lm
+BINS = main.o graphics.o world.o
+
+<comment># implicit commands, determined by suffix</comment>
+main.o     : main.c graphics.h world.h
+graphics.o : graphics.c world.h
+world.o    : world.c
+
+<comment># pseduo-targets</comment>
+clean :
+        rm -f game main.o graphics.o world.o
+    <comment># or ... rm -f game $(BINS)</comment>
+
+<comment># multiple targets with same sources</comment>
+stats1 stats2 : data1 data2 data3
+        perl analyse1.pl data1 data2 data3 > stats1
+        perl analyse2.pl data1 data2 data3 > stats2
+
+<comment># creating subsystems via make</comment>
+parser:
+    cd parser && $(MAKE)
+<comment># assumes parser directory has own Makefile</comment>
+</program>
+
+Variables and comments easily handled parsed in Perl:
+
+<sprogram>
+sub parse_makefile($) {
+    my ($file) = @_;
+    open MAKEFILE, $file or die;
+    while (&lt;MAKEFILE>) {
+        s/#.*//;
+        s/\$\((\w+)\)/$variable{$1}||''/eg;
+        if (/^\s*(\w+)\s*=\s*(.*)$/) {
+            $variable{$1} = $2;
+            next;
+        }
+        my ($target, $dependencies) = /(\S+)\s*:\s*(.*)/ or next;
+        $first_target = $target if !defined $first_target;
+        $dependencies{$target} = $dependencies;
+        while (&lt;MAKEFILE>) {
+            s/\$\((\w+)\)/$variable{$1}||''/eg;
+            last if !/^\t/;
+            $build_command{$target} .= $_;
+        }
+    }
+}
+</sprogram>
+</slide>
+
+<slide>
+<heading> Command-line Arguments
+If <@>make</@> arguments are targets, build just those targets:
+<session>
+$ <b>make world.o</b>
+$ <b>make clean</b>
+</session>
+If no args, build first target in the <@>Makefile</@>.
+<p>
+The <@>-n</@> option instructs <@>make</@>
+<itemize>
+<item> to tell what it would do to create targets
+<item> but don't execute any of the commands
+</itemize>
+
+Implementation in Perl:
+<sprogram>
+$makefile_name = "Makefile";
+if (@ARGV >= 2 && $ARGV[0] eq "-f") {
+    shift @ARGV;
+    $makefile_name = shift @ARGV;
+}
+parse_makefile $makefile_name;
+push @ARGV, $first_target if !@ARGV;
+build $_ foreach @ARGV;
+</sprogram>
+</slide>
+
+<slide>
+<heading>Example <large><code>Makefile</code></large> #2
+Sample <@>Makefile</@> for a simple compiler:
+<program>
+CC     = gcc
+CFLAGS = -Wall -g
+OBJS   = main.o lex.o parse.o codegen.o
+
+mycc : $(OBJS)
+        $(CC) -o mycc $(OBJS)
+
+main.o : main.c mycc.h lex.h parse.h codegen.h
+        $(CC) $(CFLAGS) -c main.c
+
+lex.o : lex.c mycc.h lex.h
+        $(CC) $(CFLAGS) -c lex.c
+
+parse.o : parse.c mycc.h parse.h lex.h
+codegen.o : codegen.h mycc.h codegen.h parse.h
+
+clean :
+        rm -f mycc $(OBJS) core
+</program>
+</slide>
+
+<slide>
+<heading>Abbreviations
+To simplify writing rules, <@>make</@> provides default abbreviations:
+<deftable>
+<row>
+<col1><@>$<at></@></col1>
+<col2>full name of target</col2>
+</row>
+<row>
+<col1><@>$*</@></col1>
+<col2>name of target, without suffix</col2>
+</row>
+<row>
+<col1><@>$<<</@></col1>
+<col2>full name of first source</col2>
+</row>
+<row>
+<col1><@>$?</@></col1>
+<col2>full names of all newer sources</col2>
+</row>
+</deftable>
+Examples:
+<p>
+<program>
+<comment># one of above rules, re-written</comment>
+lex.o : lex.c mycc.h lex.h
+        $(CC) $(CFLAGS) -c $*.c -o $@
+    <comment># or ... $(CC) $(CFLAGS) -c $<< -o $@</comment>
+
+<comment># update a library archive</comment>
+lib.a: foo.o bar.o lose.o win.o
+    ar r lib.a $?
+</program>
+Implementation in Perl:
+<sprogram>
+my %builtin_variables;
+$builtin_variables{'@'} = $target;
+($builtin_variables{'*'} = $target) =~ s/\.[^\.]*$//;
+$builtin_variables{'^'} = $dependencies{$target};
+($builtin_variables{'&lt;'} = $dependencies{$target}) =~  s/\s.*//;
+$build_command =~ s/\$(.)/$builtin_variables{$1}||''/eg;
+</sprogram>
+</slide>
+
+<slide>
+<heading>Generic Rules
+Can define generic rules based on suffixes:
+<program>
+.SUFFIXES: .c .o .java .pl .sh
+
+.c.o:
+    $(CC) $(CFLAGS) -c -o $@ $<<
+</program>
+<p>
+i.e. to make a <@>.o</@> file from a </@>.c</@> file, use the command ...
+<p>
+Rules for several common languages are built in to <@>make</@>.
+<p>
+Pattern-based rules generalise what suffix rules do.
+<p>
+E.g. implementation of <@>.c.o</@>
+<program>
+\%.o : \%.c
+    $(CC) $(CFLAGS) -c -o $@ $<<
+</program>
+</slide>
+
+<slide>
+<heading>Make in Perl - Version #0
+Simple Make implementation in Perl.
+
+Parses makefile rules and storing them in 2 hashes.
+
+Building is done with a recursive function.
+
+<source examples/make0.pl>
+</slide>
+<slide>
+<heading>Make in Perl - Version #1
+Add a few lines of code and we can handle variables and comments.
+
+A good example of how easy some tasks are in Perl.
+
+<source examples/make1.pl>
+</slide>
+<slide>
+<heading>Make in Perl - Version #2
+Add a few lines of code and we can handle some
+builtin variables and an implicit rule.
+
+Another  good example of how easy some tasks are in Perl.
+
+<source examples/make2.pl>
+</slide>
+<slide>
+<heading>Testing our Make Implementations 
+<ssession>
+ % cd /home/cs2041/public_html/lec/make/examples
+ % ./make0.pl -f Makefile.simple world.o
+ % ./make0.pl -f Makefile.simple clean
+     rm -f game main.o graphics.o world.o
+ % ./make0.pl -f Makefile.simple world.o
+     gcc -c world.c
+ % ./make0.pl -f Makefile.simple
+     gcc -c main.c
+     gcc -c graphics.c
+     gcc -o game main.o graphics.o world.o
+ %  ./make0.pl -f Makefile.simple
+ % ./make0.pl -f Makefile.simple clean
+     rm -f game main.o graphics.o world.o
+ % ./make1.pl -f Makefile.variables world.o graphics.o
+     gcc-4.3 -O3 -Wall -c world.c
+     gcc-4.3 -O3 -Wall -c graphics.c
+ % ./make1.pl -f Makefile.variables 
+     gcc-4.3 -O3 -Wall -c main.c
+     gcc-4.3 -O3 -Wall -o game main.o graphics.o world.o
+ % ./make2.pl -f Makefile.builtin_variables clean
+     rm -f game main.o graphics.o world.o
+ % ./make2.pl -f Makefile.builtin_variables
+     gcc-4.3 -O3 -Wall -c main.c
+     gcc-4.3 -O3 -Wall -c graphics.c
+     gcc-4.3 -O3 -Wall -c world.c -o world.o
+     gcc-4.3 -O3 -Wall -o game main.o graphics.o world.o
+ % ./make2.pl -f Makefile.implicit  clean
+     rm -f game main.o graphics.o world.o
+ % ./make2.pl -f Makefile.implicit
+     gcc-4.3 -O3 -Wall -c main.c -o main.o
+     gcc-4.3 -O3 -Wall -c graphics.c -o graphics.o
+     gcc-4.3 -O3 -Wall -c world.c -o world.o
+     gcc-4.3 -O3 -Wall -o game main.o graphics.o world.o 
+</ssession>
+</slide>
+
+<slide>
+<heading>Configuration
+Systems need to be tailored to fit into specific computing environments.
+<p>
+If we're lucky, this is handled by the execution engine.
+<itemize>
+<item> although we'll may still need to change e.g. file/user names
+</itemize>
+<p>
+If we're not so lucky, we need to ...
+<itemize>
+<item> embded stuff in the code to cater for each environment
+<item> ensure the compiler uses the right set of switches
+</itemize>
+Best to do this automatically ...
+</slide>
+
+<slide>
+<heading>Configure/Autoconf
+A Unix tool for assisting with portability of open source systems.
+<p>
+Uses a generic <@>configure</@> command to
+<itemize>
+<item> interrogate the local system and determine configuration settings
+<item> read simple templates for <@>Makefile</@> and/or <@>config.h</@>
+<item> generate customised <@>Makefile</@> and/or <@>config.h</@> 
+</itemize>
+Once system is configured, simply run <@>make</@> to build it
+<p>
+<@>Configure</@> shell script is distributed with the source code.
+</slide>
+
+<slide>
+<continued>
+<diagram>Pic/configure.png
+</slide>
+
+<slide>
+<continued>
+<diagram>Pic/make.png
+</slide>
+
+<slide>
+<continued>
+If the <@>configure</@> script was completely general
+<itemize>
+<item> it would be huge
+<item> most of it would be irrelevant for a given system
+<item> developers would need to tailor it for new systems
+</itemize>
+The solution: generate the <@>configure</@> script automatically ...
+</slide>
+
+<slide>
+<continued>
+The <@>autoconf</@> command
+<itemize>
+<item> generates a <@>configure</@> script from a file called <@>configure.in</@>
+<item> <@>configure.in</@> contains information such as
+<itemize>
+<item> names of all source code files for this system
+<item> where should binaries and manuals be installed
+<item> which libraries/processors (e.g. <@>flex</@>) are needed
+</itemize>
+</itemize>
+<diagram>Pic/autoconf.png
+</slide>
+
+<slide>
+<continued>
+Creating a <@>configure.in</@> file ...
+<itemize>
+<item> requires developer to enter details about code
+<item> much of this can be auto-extracted from code
+</itemize>
+Hence, the <@>autoscan</@> command ...
+<itemize>
+<item> extract config information from source code
+<item> produce a "first draft" <@>configure.in</@> file
+<item> developer manually completes <@>configure.in</@>
+</itemize>
+<diagram>Pic/autoscan.png
+</slide>
+
+<slide>
+<continued>
+The <@>configure/autoconf</@> system is a nice example of automating,
+<q>routine</q> aspects of software development.
+<p>
+For further examples ...
+<itemize>
+<item> look at any non-trivial Open Source system <small>(sourceforge)</small>
+</itemize>
+<p>
+For more details about <@>configure/autoconf</@>, see the on-line documentation.
+</slide>

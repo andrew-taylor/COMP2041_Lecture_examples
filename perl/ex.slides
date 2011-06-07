@@ -1,0 +1,80 @@
+<title>Exercises
+
+<slide>
+<heading>Exercise: reverse
+Assume that Perl doesn't have <@>reverse</@>.
+<p>
+Write code to reverse an array <@>@a</@>.
+<p>
+Store the result in an array <@>@b</@>
+</slide>
+
+<slide>
+<heading>Exercise: sorting
+By default, <@>sort()</@> uses lexical (string) comparison.
+<p>
+Produce calls to <@>sort</@> that achieve
+<itemize>
+<item> sorting in ascending numeric order
+<item> sorting in descending numeric order
+<item> sorting in descending lexical order
+</itemize>
+</slide>
+
+<slide>
+<heading>Exercise: function definitions
+Consider the function definitions in the file <@>function.pl</@>.
+<p>
+What does each one do? Describe how it works.
+<p>
+Consider the function definitions in the file <@>functions.pl</@>.
+<p>
+What does each one do? Describe how it works.
+</slide>
+
+
+<slide>
+<heading>Exercise: uniq in Perl
+Implement a Perl version of Unix's <@>uniq</@>
+<itemize>
+<item> prints only one instance of consecutive identical lines
+<item> processes multiple files as a single stream or reads stdin
+<item> optional <@>-c</@> parameter prepends each line by count
+</itemize>
+</slide>
+
+<small>
+<slide>
+<heading>Exercise: track enrolments
+Consider a collection of compressed files of format
+<program>
+<$>Course</$>|<$>StuId</$>|<$>Name</$>|...
+</program>
+Each file has name like <@>2007s1_COMP.gz</@>, i.e.
+<program>
+<$>Year</$><$>Session</$>_<$>Prefix</$>.gz
+</program>
+Write a Perl script <@>track.pl</@> that gives enrolment counts
+<itemize>
+<item> example of usage <@>perl track.pl COMP3311 s1</@>
+<item> session code is optional (can be either <@>s1</@> or <@>s2</@>)
+<item> uses all files matching <$>Prefix</$> (e.g. COMP)
+<item> does sensible error checking/reporting
+</itemize>
+Develop this by transforming the <@>track</@> shell script.
+</slide>
+
+<slide>
+<heading>Exercise: auto-indexing text
+Write a script to produce an index of words in text
+<itemize>
+<item> everything mapped to lower case
+<item> words are defined as <@>/[a-zA-Z']+/</@>
+<item> possessives are dropped (e.g. John's <$><rightarrow></$> John)
+<item> all '-suffixes are dropped (e.g. they're <$><rightarrow></$> they)
+<item> "stop words" are removed <small>(see file <tt>stop.words</tt>)</small>
+<item> remove single-letter "words" <small>("a" and "i" are stop words)</small>
+<item> output shows <$>word</$> <$>line<sub>1</sub>,line<sub>2</sub>,...</$> for all words
+</itemize>
+Implement as a shell, PHP and Perl script.
+</slide>

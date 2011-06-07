@@ -1,0 +1,68 @@
+<title>Plagiarism Detection
+<title>A Shell Case Study - Plagiarism Detection
+<slide>
+<heading>Problem
+<p>
+We have a set of files each containing C programs which
+are submitted programming assignments.
+<p>
+We'd like to automatically detect suspiciously similar files
+to be investigated as possible plagiarism cases.
+</slide>
+<slide>
+<heading>Plagiarism Detection #0
+
+Diff compares files and its exit status indicates
+whether the files are identical (0 = identical).
+<p>
+Its has options to ignore some features in files which are
+often useful here.  The use of -i, -B and -w flags means changes in white-space and case
+won't affect comparisons
+<p>
+<source examples/plagiarism_detection.simple_diff.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #1
+
+We would also like to the ignore changes in comments.
+Diff doesn't (and shouldn't) have an option for that.
+<p>
+We can easily remove C line-based (//) comments
+using sed and a temporary file.
+<p>
+<source examples/plagiarism_detection.comments.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #2
+
+We can also easily ignore changes in variable names
+and strings by using sed.
+<p>
+The substitution <tt>s/"[^"]"/s/g</tt> changes strings to the letter s.
+<p>
+The substitution <tt>s/[a-zA-Z_][a-zA-Z0-9_]*/v/g</tt> changes variables to the letter v.
+<p>
+These changes aren't exact. We will miss a few strings
+and also change keywords and function names to the letter v.
+<p>
+This doesn't matter for our purposes.
+<p>
+<source examples/plagiarism_detection.identifiers.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #3
+
+We can ignore reordering of lines in the files by  sorting
+the transformed files.
+<p>
+<source examples/plagiarism_detection.reordering.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #4
+
+We can avoid comparing every to every other file by calculating
+a Cryptographic hash of the transformed file
+and then using sort and uniq to find files with the same hash
+<p>
+<source examples/plagiarism_detection.md5_hash.sh>
+</slide>

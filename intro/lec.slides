@@ -1,0 +1,477 @@
+<title>COMP[29]041 Introduction 11s1
+
+<slide>
+<~>
+<heading>COMP[29]041 - Software Construction 11s1
+<pp>
+<diagram>Pic/cselogo
+<pp>
+<center>
+Lecturer/Admin: <~> Andrew Taylor, <~> <small>andrewt<at>cse.unsw.edu.au</small> <br>
+<pp>
+<~> http://www.cse.unsw.edu.au/~cs2041/
+</center>
+</slide>
+
+<slide>
+<heading>Course Goals
+Overview: to expand your knowledge of programming.
+<p>
+First year deals with ...
+<itemize>
+<item> some aspects of programming <small>(e.g. basics, correctness)</small>
+<item> on relatively small tightly-specified examples
+</itemize>
+COMP[29]041 deals with ...
+<itemize>
+<item> other aspects of programming <small>(e.g. testing, performance)</small>
+<item> using a wider range of tools <small>(e.g. filters, Perl)</small>
+<item> on larger (less small) less specified examples
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Introduce you to:
+<itemize>
+<item> building software systems from components
+<item> treating software as an object of experimental study
+</itemize>
+Develop skills in:
+<itemize>
+<item> using software development tools <small>(e.g.  make, gprof, svn)</small>
+<item> building reliable, efficient, maintainable, portable software
+</itemize>
+<small>
+Ultimately: get you to the point where you could build some
+software, put it on SourceForge, have people use it and have
+it rated well.
+</small>
+</slide>
+
+<slide>
+<heading>Inputs
+At the start of this course you should be able to:
+<itemize>
+<item> produce a correct procedural program from a spec
+<item> understand fundamental data structures + algorithms <br>
+	<small>(char, int, float, array, struct, pointers, sorting, searching)</small>
+<item> appreciate the use of abstraction in computing
+</itemize>
+</slide>
+
+<slide>
+<heading>Outputs
+At the end of this course you should be able to:
+<itemize>
+<item> understand the capabilities of many programming tools
+<item> choose an appropriate tool to solve a given problem
+<item> apply that tool to develop a software solution
+<item> use appropriate tools to assist in the development 
+<item> show that your solution is reliable, efficient, portable
+</itemize>
+</slide>
+
+<slide>
+<heading>Syllabus Overview
+<enumerate>
+<item> Qualities of software systems
+<small>
+<itemize>
+<item> Correctness, clarity, reliability, efficiency, portability, ...
+</itemize>
+</small>
+<item> Techniques for software construction
+<small>
+<itemize>
+<item> Analysis, design, coding, testing, debugging, tuning
+<item> Interface design, documentation, configuration
+</itemize>
+</small>
+<item> Tools for software construction
+<small>
+<itemize>
+<item> Filters <~> (<em>grep, sed, cut, sort, uniq, tr,</em>...)
+<item> Scripting languages <~> (<em>Perl</em>, <em>shell</em>, CGI, ...)
+<item> Analysis/configuration/documentation tools <~> (make, svn/git, doxygen, gdb, gprof, ...)
+</itemize>
+</small>
+</enumerate>
+</slide>
+
+<slide>
+<heading>Lectures
+Lectures will:
+<itemize>
+<item> present a brief overview of theory
+<item> give practical demonstrations of tools
+<item> demonstrate problem-solving methods
+</itemize>
+Lecture notes available on the Web before each lecture.
+<p>
+Notes are available in 4-up PDF or HTML formats.
+<p>
+Lecture slides are a summary of notes + exercises.
+<p>
+Feel free to ask questions, but otherwise <brown>Keep Quiet</brown>.
+</slide>
+
+<slide>
+<heading>Tutorials
+Tutorials aim to:
+<itemize>
+<item> clarify any problems with lecture material
+<item> work through problems related to lecture topics
+<item> give practice with design skills <~> <small><red>(think before coding)</red></small>
+</itemize>
+<p>
+Tutorials start in week 2.
+<p>
+Tutorial questions available on the web the week before.
+<p>
+Tutorial answers available on the web after the week's last tutorial.
+<p>
+Use tutorials to discuss <em>how</em> solutions were reached.
+</slide>
+
+<slide>
+<continued>
+To get the best out of tutorials
+<itemize>
+<item> attempt the problems yourself, before reading answers
+<item> if you understand OK and get feasible answer, fine
+</itemize>
+Ask your tutor if ...
+<itemize>
+<item> if you aren't sure your answer is feasible/correct
+<item> if you don't know <em>how</em> the solution was reached
+<item> if you don't understand a question or how to solve it
+</itemize>
+<p>
+Do <em>not</em> keep quiet in tutorials ... talk, discuss, ...
+<p>
+Your tutor may ask for your attempt to start a discussion.
+</slide>
+
+<slide>
+<heading>Lab Classes
+Each tutorial is followed by a two-hour lab class.
+<p>
+Lab exercises aim to build skills that will help you to
+<itemize>
+<item> complete the assignment work
+<item> pass the final exam
+</itemize>
+Lab classes give you experience applying tools/techniques.
+<p>
+Each lab exercise is a small implementation/analysis task.
+<p>
+<p>
+<green>Do them yourself!</green> <~> and <~> <green>Don't fall behind!</green>
+</slide>
+
+<slide>
+<continued>
+Lab exercises contribute 10% to overall mark.
+<p>
+In order to get a mark, lab exercise for Week X must be
+<itemize>
+<sitem> submitted via <@>give</@> before Sunday at end of week X
+<sitem> demonstrated to the tutor <i>during</i> the Week X lab <br>
+	OR, demonstrated <i>at the start of</i> the Week X+1 lab
+</itemize>
+There are more than 10 marks available for labs.
+<p>
+</slide>
+
+<slide>
+<heading>Assignments
+Assignments give you experience applying tools/techniques <br>
+<small>(but to larger programming problems than the lab exercises)</small>
+<p>
+Assignments will be carried out individually.
+<p>
+They always take longer than you expect.
+<p>
+Don't leave them to the last minute.
+<p>
+There are late penalties applied to maximum assignment marks,
+typically
+<itemize>
+<item> 5%/day for first 2 days
+<item> 20%/day after that
+</itemize>
+Organising your time <$><Rightarrow></$> no penalty.
+</slide>
+
+<slide>
+<heading>Plagiarism
+You attempt Labs and Assignments unsupervised ...
+<pp>
+<brown><b>Plagiarism</b></brown> = <small>submitting someone else's work as your own.</small>
+<pp>
+We (staff+other students) get <b>very</b> annoyed by people who plagiarise.
+<p>
+Plagiarism will be checked for and <brown>penalized</brown>.
+<p>
+It's <b>not</b> clever to try to get through your degree by <brown>copying</brown>.
+<p>
+If you don't like programming, do another degree.
+</slide>
+
+<slide>
+<heading>Final Exam
+3-hour closed-book exam during the exam period.
+<p>
+2 hour prac section, 1 hour written sectionm
+<p>
+The exam contributes 60% to total mark for the course.
+<p>
+Requirements on exams to pass course:
+<itemize>
+<item> must score at least 50% (30/60) on exam
+<item> must solve twoimplementation tasks satisfactorily
+</itemize>
+If you fail to meet either hurdle, you receive UF grade.
+</slide>
+
+<slide>
+<continued>
+<p>
+Held in the CSE Labs <~> <small>(must know lab environment)</small>
+<p>
+Format:
+<itemize>
+<item> we supply printed and on-line documentation
+<item> we give you small programming exercises
+<item> you solve them using an appropriate language
+<item> prac tasks will be similar in style/difficulty to labs
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Multiple tests applied to each solution.
+<p>
+A solution that fails 1 or 2 test cases may be regarded as
+partly solved, and will receive part marks.
+<p>
+May be requirements about which languages can be used.
+<p>
+<em>Must</em> solve a minimum number of the programming tasks.
+</slide>
+
+<slide>
+<continued>
+<p>
+Written section:
+<itemize>
+<item> some multiple-choice/short answer questions
+<item> some descriptive/analytical questions
+</itemize>
+Questions will be similar in style to tutorial questions.
+</slide>
+
+<slide>
+<continued>
+How to pass the  Exam:
+<itemize>
+<sitem> do the Lab exercises <em>yourself</em>
+<sitem> do the Assignments <em>yourself</em>
+<sitem> practise programming outside classes
+<sitem> treat each Lab class like a mini Prac Exam
+</itemize>
+How to pass the Written Exam:
+<itemize>
+<sitem> understand the Tutorial questions
+<sitem> read the lecture notes
+<sitem> prepare as for other written exams
+</itemize>
+</slide>
+
+<slide>
+<heading>Supplementary Exams
+Supplementary exams are only available to students who
+<itemize>
+<item> do <em>not</em> attend the exam
+<item> have a serious documented reason for not attending
+<item> score <$><geq></$> 40% for labs and assignments
+</itemize>
+If you attend an exam
+<itemize>
+<item> you are making a statement that you are "fit and healthy enough"
+<item> it is your only chance to pass (i.e. no second chances)
+</itemize>
+</slide>
+
+<slide>
+<heading>Assessment Summary
+<program>
+ass    = mark for assignments     (out of 30)
+labs   = mark for assessed labs   (out of 10)
+exam   = mark for exam            (out of 60)
+
+okExam = (exam &gt= 30/60 && two implementation task solved)
+
+mark   = ass + labs + pexam + texam
+grade  = HD|DN|CR|PS  if mark &gt;= 50 && okExam
+       = FL           if mark &lt; 50 && okExam
+       = UF           if !okExam
+</program>
+</slide>
+
+<slide>
+<heading>How to Pass this Course
+Software construction is a <em>skill</em> that improves with practice.
+<p>
+The more you practise, the easier you will find assignments/exams.
+<p>
+Don't restrict practice to lab times and two days before assignments due.
+<p>
+It also helps to pay attention in lectures and tutorials.
+</slide>
+
+<slide>
+<heading>Reading Material
+<b>General References:</b>
+<itemize>
+<item> <blue>Kernighan &amp; Pike</blue>,
+	<a href="http://books.google.com.au/books?id=to6M9_dbjosC">The Practice of Programming</a>,
+	<br><small>Addison-Wesley, 1998.
+	<br>(Inspiration for 2041 - philosophy and some tool details)</small>
+<item> <blue>McConnell</blue>,
+	<a href="http://books.google.com.au/books?id=QnghAQAAIAAJ">Code Complete</a> (2ed),
+	<br><small>Microsoft Press, 2004.
+	<br>(Many interesting case studies and practical ideas)</small>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+<b>Perl Reference Books:</b>
+<itemize>
+<item> <blue>Wall, Christiansen &amp; Orwant </blue>,
+	<a href="http://books.google.com.au/books?id=xx5JBSqcQzIC">Programming Perl</a> (3ed),
+	<br><small>O'Reilly, 2000.
+		<~> (Original &amp; best Perl reference manual)</small>
+<item> <blue>Schwartz, Phoenix &amp; Foy</blue>,
+	<a href="http://books.google.com.au/books?id=lNVHi3TunxsC">Learning Perl</a> (5ed),
+	<br><small>O'Reilly, 2008.
+		<~> (gentle &amp;  careful introduction to Perl)</small>
+<item> <blue>Christiansen &amp; Torkington</blue>,
+	<a href="http://books.google.com.au/books?id=IzdJIax6J5oC">Perl Cookbook</a> (2ed),
+	<br><small>O'Reilly, 2003.
+		<~> (Lots and lots of interesting Perl examples)</small>
+<item> <blue>Schwartz &amp; Phoenix</blue>,
+	<a href="http://books.google.com.au/books?id=EeDqu4npkqMC">Learning Perl Objects, References, and Modules</a> (2ed),
+	<br><small>O'Reilly, 2003.
+		<~> (gentle &amp;  careful introduction to parts of Perl mostly  not covered in this course)</small>
+<item> <blue>Schwartz, Phoenix &amp; Foy</blue>,
+	<a href="http://books.google.com.au/books?id=oziJDqV0rRMC">Intermediate Perl </a> (2ed),
+	<br><small>O'Reilly, 2008.
+		<~> (good book to read after 2041 - starts where this course finishes)</small>
+<item> <blue>Sebesta</blue>,
+	<a href="http://books.google.com.au/books?id=mYXfQwAACAAJ">A Little Book on Perl</a>,
+	<br><small>Prentice Hall, 1999.
+		<~> (Modern, concise introduction to Perl)</small>
+<item> <blue>Orwant, Hietaniemi, MacDonald</blue>,
+	<a href="http://books.google.com.au/books?id=z9xMfXGoWd0C">Mastering Algorithms with Perl</a>,
+	<br><small>O'Reilly, 1999.
+		<~> (Algorithms and data structures via Perl)</small>
+</itemize>
+</slide>
+<slide>
+<continued>
+<b>Shell Programming:</b>
+<itemize>
+<item> <blue>Kochgan &amp; Wood 2003</blue>,
+	<a href="http://books.google.com.au/books?id=hxEL__hcpSoC">Unix® Shell Programming</a>,
+	<br><small>Sams Publishing 2003
+		<~> (Careful intoduction to Shell Programming)</small> 
+<item> <blue>Peek, O'Reilly, Loukides</blue>,
+	<a href="http://books.google.com.au/books?id=Qu6H8fnAvGoC">Bash Cookbook</a>,
+	<br><small>O'Reilly, 2007.
+		<~> (Recipe(example) based intro to Shell programming)</small>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+<b>Unix Tools Reference Books:</b>
+<itemize>
+<item> <blue>Powers, Peek, O'Reilly, Loukides</blue>,
+	<a href="http://books.google.com.au/books?id=tDDb5zRoONwC">Unix Power Tools</a> (3ed),
+	<br><small>O'Reilly, 2003.
+		<~> (Comprehensive guide to common Unix tools)</small>
+<item> <blue>Loukides &amp; Oram</blue>,
+	<a href="http://books.google.com.au/books?id=IWzjnR8xLW0C">Programming with GNU Software</a>,
+	<br><small>O'Reilly, 1997.
+		<~> (Tutorial on the GNU programming tools (gcc,gdb,...))</small> 
+<item> <blue>Robbins</blue>,
+	<a href="http://books.google.com.au/books?id=YkNiiLupct4C">Unix in a Nutshell</a> (4ed),
+	<br><small>O'Reilly, 2006.
+		<~> (Concise guide to Unix and its toolset)</small>
+<item> <blue>Kernighan &amp; Pike</blue>,
+	<a href="http://books.google.com.au/books?id=mcO0Vh9efE0C">The Unix Programming Environment</a>,
+	<br><small>Prentice Hall, 1984.
+		<~> (Pre-cursor to the textbook, intro to Unix tools)</small>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+All tools in the course have extensive on-line documentation.
+<p>
+Links to this material are available in the course Web pages.
+<p>
+You are expected to master these systems largely by reading the manuals.
+<p>
+However ...
+<itemize>
+<item> we will also give introductory lectures on them 
+<item> the lab exercises will give practice in using them
+</itemize>
+<brown>Note:</brown> <i>"The ability to read software manuals is an invaluable skill"</i> <~> <small>(jas,1999)</small>
+</slide>
+
+<slide>
+<heading>Home Computing
+All of the tools in the course are available under Unix and Linux.
+<p>
+Most have also been ported to <small></small> MS Windows. <br>
+<small>(generally via the CygWin project)</small>
+<p>
+All tools should be available on Mac. <br>
+<small>(given that Mac OS X is based on FreeBSD Unix)</small>
+<p>
+Links to downloads will be placed on course Web site.
+</slide>
+
+<slide>
+<continued>
+There may be minor incompatibilities between Unix, Windows and Mac
+versions of tools.
+<p>
+Therefore ... <em>test your assignments at CSE</em> before you submit them.
+<p>
+Or ... remove Windows from your PC and install Linux
+<br>
+<small>(plus KDE/Gnome and OpenOffice if you need an Office-like environment)</small>
+<p>
+<small>
+<brown>Note:</brown> we expect that any software that <em>you</em>
+produce will be portable to all platforms.
+<p>
+This is accomplished by adhering to <i>standards</i>.
+</small>
+</slide>
+
+<slide>
+<heading>Conclusion
+The goal is for you to become a better programmer
+<itemize>
+<item> more confident in your own ability
+<item> producing a better end-product
+<item> ultimately, enjoying the programming process
+</itemize>
+</slide>

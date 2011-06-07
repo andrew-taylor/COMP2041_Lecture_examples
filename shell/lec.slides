@@ -1,0 +1,669 @@
+<title>Shells and Scripting
+
+<slide>
+<heading>Command Interpreters
+A <em>command interpreter</em> is a program that executes other programs.
+<p>
+Aim: allow users to execute the commands provided on a computer system.
+<p>
+Command interpreters come in two flavours:
+<itemize>
+<item> graphical <~> (e.g. Windows or Mac desktop)
+<itemize>
+<item> advantage: easy for naive users to start using system
+</itemize>
+<item> command-line <~> (e.g. Unix shell)
+<itemize>
+<item> advantage: programmable, powerful tool for expert users
+</itemize>
+</itemize>
+On Unix/Linux, <@>bash</@> has become defacto standard shell.
+</slide>
+
+<slide>
+<heading>What Shells Do
+All Unix shells have the same basic mode of operation:
+<session>
+loop
+   if (interactive) print a prompt
+   read a line of user input
+   apply transformations to line
+   split line into words (/\s+/)
+   use first word in line as command name
+   execute that command,
+      using other words as arguments
+end loop
+</session>
+Note that "<@>line of user input</@>" could be a line from a file.
+<p>
+In that case, the shell is reading a "script" of commands
+and acting as a kind of programming language interpreter.
+</slide>
+
+<slide>
+<continued>
+The "<@>transformations</@>" applied to input lines include:
+<itemize>
+<item> history substitution ... e.g. <~> <@>!20  !awk</@>
+<item> file name expansion ... e.g. <~> <@>*.c  enr.07s?</@>
+<item> variable evaluation ... e.g. <~> <@>$PWD  ${x-20}</@>
+</itemize>
+To "<@>execute that command</@>" the shell needs to:
+<itemize>
+<item> find file containing named program <~> (<red><@>PATH</@></red>)
+<item> start new process for execution of program
+</itemize>
+</slide>
+
+<slide>
+<heading>Unix Processes
+A Unix process executes in this environment
+<p>
+<diagram>Pic/unixproc.png
+</slide>
+
+<slide>
+<continued>
+Components of process environment <small>(C programmer's view)</small>:
+<itemize>
+<item> <@>char *argv[]</@> - command line "words"
+<item> <@>int argc</@> - size of <@>argv[]</@>
+<item> <@>char *env[]</@> - <@>name=value</@> pairs from shell
+<item> <@>FILE *stdin</@> - buffered byte-stream, <@>int getc(FILE *)</@>
+<item> <@>FILE *stdout</@> - buffered byte-stream, <@>putc(int, FILE *)</@>
+<item> <@>FILE *stderr</@> - non-buffered byte-stream, <@>putc</@>
+<item> <@>exit(int)</@> - terminate program, set exit status
+<item> <@>return int</@> - terminate <@>main()</@>, set exit status
+</itemize>
+</slide>
+
+<slide>
+<heading>Shell as Interpreter
+The shell can be viewed as a programming language interpreter.
+<p>
+As with all interpreters, the shell has:
+<itemize>
+<item> a state <~> (collection of variables and their values)
+<item> control <~> (current location, execution flow)
+</itemize>
+Different to most interpreters, the shell:
+<itemize>
+<item> modifies the program code before finally executing it
+<item> has an infinitely extendible set of basic operations
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Basic operations in shell scripts are a sequence of <em>words</em>.
+<program>
+CommandName  Arg1  Arg2  Arg3  ...
+</program>
+<p>
+A <em>word</em> is defined to be any sequence of:
+<itemize>
+<item> non-whitespace characters <~> (e.g. <@> x, y1, aVeryLongWord</@>)
+<item> characters enclosed in double-quotes <~> (e.g. <@> "abc", "a b c"</@>)
+<item> characters enclosed in single-quotes <~> (e.g. <@> 'abc', 'a b c'</@>)
+</itemize>
+We discuss the different kinds of quote later.
+</slide>
+
+<slide>
+<heading>Shell Scripts
+Consider a file called "<@>hello</@>" containing
+<program>
+#!/bin/sh
+
+echo Hello, World
+</program>
+How to execute it? 
+<session>
+$ sh hello           <comment># execute the script</comment>
+<small><i>or</i></small>
+$ chmod +x hello     <comment># make the file executable</comment>
+$ ./hello            <comment># execute the script</comment>
+</session>
+</slide>
+
+<slide>
+<continued>
+The next simplest shell program: "Hello, <i>YourName</i>"
+<program>
+#!/bin/sh
+
+echo -n "Enter your name: "
+read name
+echo Hello, $name
+</program>
+Shell variables:
+<session>
+$ read x     <comment># read a value into variable x</comment>
+$ y=John     <comment># assign a value to variable y</comment>
+$ echo $x    <comment># display the <i>value of</i> variable x</comment>
+$ z="$y $y"  <comment># assign two copies of y to variable z</comment>
+</session>
+<p>
+<small>Note: spaces matter ... do <i>not</i> put spaces around the <@>=</@> symbol.</small>
+</slide>
+
+<slide>
+<continued>
+More on shell variables:
+<itemize>
+<item> no need to declare shell variables; simply use them
+<item> are local to the current execution of the shell.
+<item> all variables have type string
+<item> initial value of variable = empty string
+<item> note that <~> <@>x=1</@> <~> is equivalent to <~> <@>x="1"</@>
+</itemize>
+Examples:
+<session>
+$ x=5  y="6"  z=abc
+$ echo $(( $x + $y ))
+<b>11</b>
+$ echo $(( $x + $z ))
+<b>5</b>
+</session>
+</slide>
+
+<slide>
+<continued>
+Examples: 
+<session>
+$ x=1  y=fred
+$ echo $x$y
+<b>1fred</b>
+$ echo $xy        <comment># the aim is to display "1y"</comment>
+
+$ echo "$x"y
+<b>1y</b>
+$ echo ${x}y
+<b>1y</b>
+$ echo ${j-10}    <comment># give value of j or 10 if no value</comment>
+<b>10</b>
+$ echo ${j=33}    <comment># set j to 33 if no value (and give $j)</comment>
+<b>33</b>
+$ echo ${x:?No Value}   <comment># display "No Value" if $x not set</comment>
+<b>1</b>
+$ echo ${xx:?No Value}  <comment># display "No Value" if $xx not set</comment>
+-bash: xx: No Value
+</session>
+</slide>
+
+<slide>
+<continued>
+Some shell built-in variables with pre-assigned values:
+<center>
+<table 2>
+<row><col1> <@>$0</@> </col1> <col2> the name of the command </col2> </row>
+<row><col1> <@>$1</@> </col1> <col2> the first command-line argument </col2> </row>
+<row><col1> <@>$2</@> </col1> <col2> the second command-line argument </col2> </row>
+<row><col1> <@>$3</@> </col1> <col2> the third command-line argument </col2> </row>
+<row><col1> <@>$#</@> </col1> <col2> count of command-line arguments </col2> </row>
+<row><col1> <@>$*</@> </col1> <col2> all of the command-line arguments (together)</col2> </row>
+<row><col1> <@>$<at></@> </col1> <col2> all of the command-line arguments (separately)</col2> </row>
+<row><col1> <@>$?</@> </col1> <col2> exit status of the most recent command</col2> </row>
+<row><col1> <@>$$</@> </col1> <col2> process ID of this shell</col2> </row>
+</table>
+</center>
+The last one is useful for generating unique filenames.
+</slide>
+
+<slide>
+<continued>
+Tip: debugging for shell scripts
+<itemize>
+<item> the shell transforms commands before executing
+<item> can be useful to know what commands are executed
+<item> can be useful to know what transformations produced
+<item> <@>set -x</@> shows each command after transformation
+</itemize>
+i.e. execution trace
+</slide>
+
+<slide>
+<heading>Exercises: shell scripts (1)
+<enumerate>
+<item> Write a script called <@>l</@> which runs <@>ls</@>
+	on supplied files, with <@>ls</@> arguments <@>-las</@>
+<p>
+<item> Write a script called <@>wtally</@> which produces a
+	word-frequency profile of text on its standard input
+	or in a named file. A <i>word</i> is defined to be
+	any sequence of letters or apostrophes (e.g. "cat",
+	"running", "can't", etc.)
+<p>
+<item> Write a script called <@>args</@> which shows information
+	about the script, including all of its command-line
+	arguments, one per line
+</enumerate>
+</slide>
+
+<slide>
+<heading>Quoting
+Quoting can be used for three purposes in the shell:
+<itemize>
+<item> to group a sequence of words into a single "word"
+<item> to control the kinds of transformations that are performed
+<item> to capture the output of commands (back-quotes)
+</itemize>
+The three different kinds of quotes have three different effects:
+<center>
+<deftable 6>
+<row>
+  <col1>single-quote (<@>'</@>)</col1>
+  <col2>grouping, turns off all transformations</col2>
+</row>
+<row>
+  <col1>double-quote (<@>"</@>)</col1>
+  <col2>grouping, no transformations except <@>$</@> and <@>`</@></col2>
+</row>
+<row>
+  <col1>backquote (<red><@>`</@></red>)</col1>
+  <col2>no grouping, capture command results</col2>
+</row>
+</deftable>
+</center>
+</slide>
+
+<slide>
+<continued>
+Single-quotes are useful to pass shell meta-characters in args:
+e.g. <~> <@>grep 'S.*[0-9]+$' < myfile</@>
+<p>
+Use double-quotes to
+<itemize>
+<item> construct strings using the values of shell variables 
+<p>
+<small>e.g. <~> <@>"x=$x, y=$y"</@> <~~> like Java's <~~> <@>("x=" + x + ", y=" + y)</@></small>
+<item> prevent empty variables from "vanishing" <br>
+<p>
+<small>e.g. <~> use <~> <@>test "$x" = "abc"</@> <~> rather than <~> <@>test $x = "abc"</@> <~> in case <@>$x</@> is empty</small>
+<item> for values obtained from the command line or a user
+<p>
+<small>e.g. <~> use <~> <@>test -f " $1" </@> <~> rather than <~> <@>test -f $1</@> <~> in case <br>
+	<@>$1</@> contains a path with spaces (e.g. <@>C:/Program Files/app/data</@></small>
+</itemize>
+</slide>
+
+<slide>
+<heading>Back-quotes
+Back-quotes capture output of command as shell values.
+<p>
+For <@>`</@><i>Command</i><@>`</@>, the shell:
+<enumerate>
+<item> performs variable-substitution (as for double-quotes)
+<item> executes the resulting command and arguments
+<item> captures the standard output from the command
+<item> converts it to a single string
+<item> uses this string as the value of the expression
+</enumerate>
+</slide>
+
+<slide>
+<continued>
+Example: convert GIF files to PNG format.
+<p>
+Original and converted files share the same prefix <br>
+(e.g. <@>/x/y/abc.gif</@> is converted to <@>/x/y/abc.png</@>)
+<program>
+#!/bin/sh
+# ungif - convert gifs to PNG format
+
+for f in "$@"
+do
+    dir=`dirname "$f"`
+    prefix=`basename "$f" .gif`
+    outfile="$dir/$prefix.png"
+    giftopnm "$f" | pnmtopng > "$outfile"
+done
+</program>
+</slide>
+
+<slide>
+<heading>Connecting Commands
+The shell provides <em>I/O redirection</em> to allow us to change
+where processes read from and write to.
+<p>
+<deftable 5>
+<row>
+   <col1><@><< infile</@></col1>
+   <col2>connect <@>stdin</@> to the file <@>infile</@></col2>
+</row>
+<row>
+   <col1><@>>> outfile</@></col1>
+   <col2>connect <@>stdout</@> to the file <@>outfile</@></col2>
+</row>
+<row>
+   <col1><@>>>> outfile</@></col1>
+   <col2>apppend <@>stdout</@> to the file <@>outfile</@></col2>
+</row>
+<row>
+   <col1><@>2>> outfile</@></col1>
+   <col2>connect <@>stderr</@> to the file <@>outfile</@></col2>
+</row>
+<row>
+   <col1><@>2>>&amp;1 >> outfile</@></col1>
+   <col2>connect <@>stderr</@>+<@>stdout</@> to <@>outfile</@> </col2>
+</row>
+</deftable>
+Beware: <@>>></@> truncates file before executing command.
+<p>
+To avoid accidents, use <@>noclobber</@> (<@>-C</@>)
+</slide>
+
+<slide>
+<continued>
+Many commands accept list of input files:
+<p>
+E.g. <~> <@>cat file1 file2 file3</@>
+<p>
+These commands also typically adopt the conventions:
+<itemize>
+<item> read contents of <@>stdin</@> if no filename arguments
+<item> treat the filename <@>-</@> as meaning <@>stdin</@>
+</itemize>
+E.g. <~> <@>cat -n < file</@> <~> and <~> <@>cat a - b - c</@>
+<p>
+If a command does not allow this, use:
+<p>
+E.g. <~> <@>cat file1 file2 file3 | Command</@>
+</slide>
+
+<slide>
+<continued>
+The shell sets up the environment for each command in a pipeline and
+connects them together:
+<p>
+<diagram>Pic/pipeline.png
+</slide>
+
+<slide>
+<heading>Exit Status and Control
+Process exit status is used for control in shell scripts:
+<itemize>
+<item> zero exit status means command successful <$><Rightarrow></$> true
+<item> non-zero exit status means error occurred <$><Rightarrow></$> false
+</itemize>
+Mostly, exit status is simply ignored <~> <small>(e.g. when interactive)</small>
+<p>
+One application of exit statuses:
+<itemize>
+<item> AND lists <~~> <$>cmd<sub>1</sub></$> <@>&&</@> <$>cmd<sub>2</sub></$> <@>&& ... &&</@> <$>cmd<sub>n</sub></$> <br>
+	<small>(<$>cmd<sub>i+1</sub></$> is executed only if <$>cmd<sub>i</sub></$> succeeds (zero exit status))</small>
+<item> OR lists <~~> <$>cmd<sub>1</sub></$> <@>||</@> <$>cmd<sub>2</sub></$> <@>|| ... ||</@> <$>cmd<sub>n</sub></$> <br>
+	<small>(<$>cmd<sub>i+1</sub></$> is executed only if <$>cmd<sub>i</sub></$> fails (non-zero exit status))</small>
+</itemize>
+</slide>
+
+<slide>
+<heading>Testing
+The <@@>test</@@> command performs a test or combination of tests and
+<itemize>
+<item> returns a zero exit status if the test succeeds
+<item> returns a non-zero exit status if the test fails
+</itemize>
+Provides a variety of useful testing features:
+<itemize>
+<item> string comparison <~> ( <@>=  !=</@> )
+<item> numeric comparison <~> ( <@>-eq  -ne  -lt</@> )
+<item> checks on files <~> ( <@>-f  -x  -r</@> )
+<item> boolean operators <~> ( <@>-a  -o  !</@> )
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+test "$msg" = "Hello"
+    <comment># does the variable msg have the value "Hello"?</comment>
+
+test "$x" -gt "$y"
+    <comment># does x contain a numeric value larger than y?</comment>
+
+msg="hello there"
+test $msg = Hello
+    <comment># Error: expands to "test hello there = Hello"?</comment>
+
+test "$x" -ge 10 -a "$x" -le 20
+    <comment># is the value of x in range 10..20?</comment>
+
+test -r xyz -a -d xyz
+    <comment># is the file xyz a readable directory?</comment>
+[ -r xyz -a -d xyz ]
+    <comment># alternative syntax; requires closing ]</comment>
+</program>
+<small>Note: use of quotes, spaces around values/operators</small>
+</slide>
+
+<slide>
+<heading>Sequential Execution
+Combine commands in pipelines and AND and OR lists.
+<p>
+Commands executed sequentially if separated by semicolon or newline.
+<program>
+<$>cmd<sub>1</sub></$> ; <$>cmd<sub>2</sub></$> ; ... ; <$>cmd<sub>n</sub></$>
+<small>or</small>
+<$>cmd<sub>1</sub></$>
+<$>cmd<sub>2</sub></$>
+...
+<$>cmd<sub>n</sub></$>
+</program>
+</slide>
+
+<slide>
+<heading>Grouping
+Commands can be grouped using <@> ( ... ) </@> or <@> { ... } </@>
+<p>
+<@>(</@><$>cmd<sub>1</sub></$> <@>; ...</@> <$>cmd<sub>n</sub></$>) <@></@> are executed in a new sub-shell.
+<p>
+<@>{</@><$>cmd<sub>1</sub></$> <@>; ...</@> <$>cmd<sub>n</sub></$> <@>}</@> are executed in the current shell.
+<p>
+Exit status of group is exit status of last command.
+<p>
+Beware: state of sub-shell (e.g. <@>$PWD</@>, other variables) is lost after <@>(...)</@>,
+hence
+<session>
+$ cd /usr/share;  x=123
+$ ( cd $HOME;  x=abc; )
+$ echo $PWD $x
+<b>/usr/share 123</b>
+$ { cd $HOME;  x=abc; }
+$ echo $PWD $x
+<b>/home/cs2041 abc</b>
+</session>
+
+</slide>
+
+<slide>
+<heading>If Command
+The <@@>if-then-else</@@> construct allows conditional execution:
+<program>
+if <$>testList<sub>1</sub></$>
+then
+   <$>commandList<sub>1</sub></$>
+elif <$>testList<sub>2</sub></$>
+then
+   <$>commandList<sub>2</sub></$>
+...
+else
+   <$>commandList<sub>n</sub></$>
+fi
+</program>
+Keywords <@>if</@>, <@>else</@> etc, are only recognised
+at the start of a command (after newline or semicolon).
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+# Check whether a file is readable
+
+if [ -r $HOME ]     <comment># neater than:  if test -r $HOME</comment>
+then
+   echo "$0: \$HOME is readable"
+fi
+
+# Test whether a user exists in passwd file
+
+if grep "^$user" /etc/passwd > /dev/null
+then
+    <$>... do something if they do exist ...</$>
+else
+   echo "$0: $user does not exist"
+fi
+</program>
+</slide>
+
+<slide>
+<heading>Case command
+<@@>case</@@> provides multi-way choice based on patterns:
+<program>
+case <$>word</$> in
+<$>pattern<sub>1</sub></$>)  <$>commandList<sub>1</sub></$> ;;
+<$>pattern<sub>2</sub></$>-2)  <$>commandList<sub>2</sub></$>-2 ;;
+...
+<$>pattern<sub>n</sub></$>)  <$>commandList<sub>n</sub></$> ;;
+esac
+</program>
+The <$>word</$> is compared to each <$>pattern<sub>i</sub></$> in turn.
+<p>
+For the first matching pattern, corresponding <$>commandList<sub>i</sub></$>
+is executed and the statement finishes.
+<p>
+Patterns are those used in filename expansion <~> ( <@>* ? []</@> ).
+</slide>
+
+<slide>
+<continued>
+Examples:
+<sprogram>
+# Checking number of command line args
+
+case $# in
+0)  echo "You forgot to supply the argument" ;;
+1)   <$>... process the argument ...</$>  ;;
+*)  echo "You supplied too many arguments" ;;
+esac
+
+# Classifying a file via its name
+
+case "$file" in
+*.c)  echo "$file looks like a C source-code file" ;;
+*.h)  echo "$file looks like a C header file" ;;
+*.o)  echo "$file looks like a an object file" ;;
+...
+?)    echo "$file's name is too short to classify it" ;;
+*)    echo "I have no idea what $file is" ;;
+esac         
+</sprogram>
+</slide>
+
+<slide>
+<heading>Loop commands
+<@@>while</@@> loops iterate based on a test command list:
+<program>
+while <$>testList</$>
+do
+   <$>commandList</$>
+done
+</program>
+<@@>for</@@> loops set a variable to successive words from a list:
+<program>
+for <$>var</$> in <$>wordList</$>
+do
+   <$>commandList</$>  # ... generally involving  var
+done
+</program>
+</slide>
+
+<slide>
+<continued>
+Examples of <@@>while</@@>:
+<program>
+# Check the system status every ten minutes
+
+while true
+do
+   uptime ; sleep 600
+done
+
+# Interactively prompt the user to process files
+
+echo -n "Next file: "
+while read filename
+do
+   process < "$filename" >> results
+   echo -n "Next file: "
+done
+</program>
+</slide>
+
+<slide>
+<continued>
+Examples of <@@>for</@@>:
+<program>
+# Compute sum of a list of numbers from command line
+
+sum=0
+for n in "$@"    <comment># use "$@" to preserve args</comment>
+do
+   sum=`expr $sum + "$n"`
+done
+
+# Process files in $PWD, asking for confirmation
+
+for file in *
+do
+   echo -n "Process $file? "
+   read answer
+   case "$answer" in
+      [yY]*) process < $file >> results ;;
+      *)     ;;
+   esac
+done
+</program>
+</slide>
+
+<slide>
+<heading>Exercises: shell scripts (2)
+<enumerate>
+<item> Write a shell script called <@>isint</@> that checks
+	whether its argument looks like an integer value
+<p>
+	Include suitable error checking and reporting
+	(e.g. missing argument)
+<p>
+<item> Write a shell script called <@>istext</@> that checks
+	whether its argument is a text file
+<p>
+	Include suitable error checking and reporting
+        (e.g. missing argument, not a file)
+<item> Write a shell script called <@>iota</@> to generate
+	a sequence of integers one per line, with usage:
+<session>
+iota 
+  <comment># gives 1 2 3 4 5 6 7 8 9 10 ...</comment>
+iota <$>lo</$>
+  <comment># e.g. iota 4 gives 4 5 6 7 8 9 10 ...</comment>
+iota <$>lo</$> <$>hi</$>
+  <comment># e.g. iota 4 8 gives 4 5 6 7 8</comment>
+iota <$>lo</$> <$>hi</$> <$>step</$>
+  <comment># e.g. iota 2 12 3 gives 2 5 8 11</comment>
+</session>
+Include appropriate error checking.
+<item> Write a shell script called <@>prod</@> to compute
+	the product of a sequence of numbers given one per
+	line on standard input
+<itemize>
+<item> consider what kind of errors might occur
+<item> how should each be handled?
+</itemize>
+<item> Make a link from <@>prod</@> called <@>sum</@> and
+	modify the script so that it behaves differently
+	depending on how it is invoked.
+</enumerate>
+</slide>

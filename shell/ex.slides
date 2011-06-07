@@ -1,0 +1,59 @@
+<title>Shells and Scripting
+
+<slide>
+<heading>Exercises: shell scripts (1)
+<enumerate>
+<item> Write a script called <@>l</@> which runs <@>ls</@>
+	on supplied files, with <@>ls</@> arguments <@>-las</@>
+<p>
+<item> Write a script called <@>wtally</@> which produces a
+	word-frequency profile of text on its standard input
+	or in a named file. A <i>word</i> is defined to be
+	any sequence of letters or apostrophes (e.g. "cat",
+	"running", "can't", etc.)
+<p>
+<item> Write a script called <@>args</@> which shows information
+	about the script, including all of its command-line
+	arguments, one per line
+</enumerate>
+</slide>
+
+<slide>
+<heading>Exercises: shell scripts (2)
+<enumerate>
+<item> Write a shell script called <@>isint</@> that checks
+	whether its argument looks like an integer value
+<p>
+	Include suitable error checking and reporting
+	(e.g. missing argument)
+<p>
+<item> Write a shell script called <@>istext</@> that checks
+	whether its argument is a text file
+<p>
+	Include suitable error checking and reporting
+        (e.g. missing argument, not a file)
+<item> Write a shell script called <@>iota</@> to generate
+	a sequence of integers one per line, with usage:
+<session>
+iota 
+  <comment># gives 1 2 3 4 5 6 7 8 9 10 ...</comment>
+iota <$>lo</$>
+  <comment># e.g. iota 4 gives 4 5 6 7 8 9 10 ...</comment>
+iota <$>lo</$> <$>hi</$>
+  <comment># e.g. iota 4 8 gives 4 5 6 7 8</comment>
+iota <$>lo</$> <$>hi</$> <$>step</$>
+  <comment># e.g. iota 2 12 3 gives 2 5 8 11</comment>
+</session>
+Include appropriate error checking.
+<item> Write a shell script called <@>prod</@> to compute
+	the product of a sequence of numbers given one per
+	line on standard input
+<itemize>
+<item> consider what kind of errors might occur
+<item> how should each be handled?
+</itemize>
+<item> Make a link from <@>prod</@> called <@>sum</@> and
+	modify the script so that it behaves differently
+	depending on how it is invoked.
+</enumerate>
+</slide>

@@ -1,0 +1,494 @@
+<title>Version Control
+
+<slide>
+<heading>Version Control
+Any large, useful software system ...
+<itemize>
+<item> will undergo many revisions in its lifetime
+<item> most likely undertaken by several different programmers
+<item> who may work on the code concurrently and independently <br>
+<small>(happens frequently on large Open Source projects like Linux)</small>
+</itemize>
+
+The process of code change needs to be managed so that
+<itemize>
+<item> no (useful) changes are lost
+<item> the changes produce "consistent" versions of the system
+<item> we can roll back to earlier versions of the code when problems are discovered
+</itemize>
+
+</slide>
+
+<slide>
+<continued>
+Consider the following (common nowadays) scenario:
+<itemize>
+<item> a software system contains a source code file <@>x.c</@>
+<item> system is worked on by several teams of programmers
+<item> Ann in Sydney adds a new feature in her copy of <@>x.c</@>
+<item> Bob in San Jose fixes a bug in his copy of <@>x.c</@>
+</itemize>
+Ultimately, we need to ensure that
+<itemize>
+<item> all changes are properly recorded <~> <small>(when, who, why)</small>
+<item> both the new feature and the bug fix are in the next release
+<item> if we later find bugs in old release, they can be fixed
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Manual solution to above problems:
+<itemize>
+<item> Ann requests/receives a copy of <@>x.c</@> v2.1 from Manager
+<item> Bob requests/receives a copy of <@>x.c</@> v2.1 from Manager
+<item> Ann sends her new version of <@>x.c</@> back to Manager
+<item> Bob sends his new version of <@>x.c</@> back to Manager
+<item> Manager ensures that all changes are incorporated
+<small>
+<itemize>
+<item> might need to ask Ann and Bob for help if changes conflict
+</itemize>
+</small>
+<item> Manager sets up the merged version as v2.2 of <@>x.c</@>
+<item> Col requests/receives a copy of <@>x.c</@> v2.2 from Manager
+</itemize>
+Problem: eventually Manager is overwhelmed with requests.
+</slide>
+
+<slide>
+<heading>Version Control Systems
+<em>Version control systems</em> aim to solve the above problems.
+<p>
+Version control systems (VCSs) are also called ...
+<itemize>
+<item> revision control systems
+<item> source (code) control systems
+<item> (source) code management systems
+</itemize>
+There are various approaches to solving the problems, <br>
+leading to different families of version control systems.
+<p>
+While VCSs could be used for all kinds of documents, <br>
+we focus on their use for managing source code files.
+</slide>
+
+<slide>
+<continued>
+A <em>version control system</em> allows software developers to:
+<itemize>
+<item> share development work on a system
+<item> recreate old versions of a system when needed
+<item> identify the current versions of source code files
+<item> restrict who is allowed to modify each source code file
+</itemize>
+This allows change to be managed/controlled in a systematic way.
+<p>
+VCSs also try to minimise resource use in maintaining multiple versions.
+</slide>
+
+<slide>
+<heading>Labelling Versions
+How to identify an important version? <~> <small>(unique identifier)</small>
+<p>
+Common approach: file name + version "number" (e.g. Perl 5.8.1)
+<p>
+No "standard" for <$>a.b.c</$> version numbers, but typically:
+<itemize>
+<item> <$>a</$> is major version number <small>(changes when functionality changes)</small>
+<item> <$>b</$> is minor version number <small>(changes when internals change)</small>
+<item> <$>c</$> is patch level <small>(changes after each set of bug fixes are added)</small>
+</itemize>
+<small>
+Examples: <~> Oracle 7.3.2, 8.0.5, 8.1.5, ... gcc 2.7.2.3, 2.95.2 ... etc.
+</small>
+</slide>
+
+<slide>
+<continued>
+How to store multiple versions (e.g. v<$>3.2.3</$> and v<$>3.2.4</$>)?
+<p>
+We <em>could</em> simply store one complete file for each version.
+<p>
+Alternative approach:
+<itemize>
+<item> store complete file for version <$>3.2.3</$>
+<item> store differences between <$>3.2.3</$> and <$>3.2.4</$>
+</itemize>
+A <em>delta</em> is the set of differences between two successive
+versions of a file.
+<p>
+Many VCSs store a combination of complete versions and deltas for each file.
+<p>
+</slide>
+
+<slide>
+<continued>
+Creating version <$>N</$> of file F (F<$><sub>N</sub></$>) from a collection of
+<itemize>
+<sitem> complete copies of F whose versions <$><< N</$>
+<sitem> deltas for all versions in between complete copies
+</itemize>
+is acheived via:
+<program>
+get list of complete copies of F
+choose highest complete version <$>V << N</$>
+f = copy of F<$><sub>V</sub></$>
+foreach delta between V .. N {
+   f = f + delta
+}
+<comment># f == F<$><sub>N</sub></$> (i.e. version N of F)</comment>
+</program>
+Programs like <@>patch</@> can apply deltas.
+</slide>
+
+<slide>
+<continued>
+Storage/bandwidth requirements with VCSs:
+<itemize>
+<item> complete files, <~> deltas, <~> complete current version
+</itemize>
+An example of why deltas are useful:
+<small>
+<itemize>
+<item> the Google Chrome upgrades in the background almost daily
+<item> Google Chrome is ~10MB
+<item> bsdiff delta = 700KB
+<item> google custom delta (Courgette) = 80KB
+<item> 200 full upgrades/year = 2GB/year
+<item> 200 bsdiff upgrades/year = 140Mb/year
+<item> 200 Courgette upgrades/year = 16Mb/year
+</itemize>
+</small>
+</slide>
+
+<slide>
+<heading>History of Unix/Linux VCSs
+1970's ... <em>SCCS</em> (source code control system)
+<itemize>
+<item> first version control system
+<item> centralized VCS - single central repository
+<item> introduced idea of multiple versions via delta's
+<item> single user model: lock - modify - unlock
+<item> only one user working on a file at a time 
+</itemize>
+<p>
+1980's ... <em>RCS</em> (revision control system)
+<itemize>
+<item> similar functionality to SCCS <br>
+    <small>(essentially a clean open-source re-write of SCCS)</small>
+<item> centralized VCS - single central repository
+<item> single user model: lock - modify - unlock
+<item> only one user working on a file at a time 
+<item> still available and in use 
+</itemize>
+</slide>
+
+<slide>
+<continued>
+~1990 ... <em>CVS</em> (concurrent version system)
+<itemize>
+<item> centralized VCS - single central repository
+<item> SCCS/RCS locked check-out replaced by copy-modify-merge model
+<item> multiple user can work on a file simultaneously and later merge changes
+<item> allows distributed development essential for open source projects
+<item> web-accessible interface promoted wide-dist projects
+<item> poor handling of file metadata, renames, links 
+</itemize>
+<p>
+Early 2000's ... <em>Subversion</em> (svn)
+<itemize>
+<item> depicted as "CVS done right"
+<item> many cvs weakness fixed 
+<item> solid, well documented, widely used system
+<item> but essentially the same model as CVS
+<item> centralized VCS - single central repository
+<item> Andrew recommends you use svn for assignments/projects unless you are sure distributed-VCS needed
+<item> generally easier to use and better supported than git et al.
+</itemize>
+</slide>
+
+<slide>
+<continued>
+~2000... <em>Bitkeeper</em> 
+<itemize>
+<item> distributed VCS - multiple repositories, no "master"
+<item> every user has their own repository
+<item> written by Larry McVoy (also wrote Sun TeamWare distributed VCS in 19990s)
+<item> Commercial system which allowed limited use for Linux kernel
+<item> until dispute over  licensing issues
+</itemize>
+
+Mid 2000's... <em>Git</em> 
+<itemize>
+<item> distributed VCS - multiple repositories, no "master"
+<item> every user has their own repository
+<item> created by Linux Torvalds for Linux kernel
+<item> external revisions imported as new branches
+<item> flexible handling of branching
+<item> various auto-merging algorithms (experimentation)
+<item> open source competitors: bazaar <small>(Canonical!)</small>, darcs <small>(Haskell!)</small>, Mercurial
+<item> Andrew recommends you use git if you need powerful distributed-VCS
+<item> not better than competitors but appears better supported
+<item> substantial time investment to learn to use Git's  full power
+</itemize>
+</slide>
+
+
+<slide>
+<heading>Repository
+Many VCSs use the notion of a <em>repository</em>
+<itemize>
+<item> store all versions of all objects (files) managed by VCS
+<item> may be be single file, directory tree, database,...
+<item> possibly be accessed by filesystem, http, ssh or custom protocol
+<item> possibly structured as a collection of <em>projects</em>
+</itemize>
+<p>
+Git and svn use a directory tree to store their repository.
+<p>
+Our simple VCS just keeps all information in a single hash:
+<p>
+E.g.: each of versions of a file in: <dollar>repository{<dollar>version}{<dollar>file}.
+<p>
+And its stores this  hash in a single  file (.vcs)
+<p>
+<sprogram>
+use Storable;
+sub read_file($);
+sub write_file($$);
+$repository_file = "./.vcs";
+%repository = %{retrieve($repository_file)} if -r $repository_file;
+# ...
+store(\%repository, $repository_file);
+
+sub read_file($) {
+    my ($file) = @_;
+    open(my $f, '&lt;', $file) or die;
+    return do {local $/; &lt;$f>}
+}
+
+sub write_file($$) {
+    my ($file, $contents) = @_;
+    open my $f, '>', $file or die "Can not write '$file': $!";
+    print $f $contents;
+}
+</sprogram>
+</slide>
+
+<slide>
+<heading>Creating an empty repository:
+<itemize>
+<item> svnadmin create svn_repository init
+<item> git init
+<item> ./vcs.pl init
+</itemize>
+<p>
+Our simple VCS just needs to initialize some variables:
+<p>
+<sprogram>
+$repository{CURRENT_COMMIT} = 0;
+%{$repository{STAGING_AREA}} = ();
+print "Created empty repository\n";
+</sprogram>
+</slide>
+
+<slide>
+<heading>Placing Files under Version Control
+<itemize>
+<item> svn add FILES
+<item> git add FILES
+<item> ./vcs.pl add FILES
+</itemize>
+<p>
+Our simple VCS saves the current contents of the files 
+<p>
+Git does something similar.
+<p>
+SVN just notes that this file should be included in the next commit.
+<p>
+<sprogram>
+# copy files to staging area
+foreach $file (@ARGV) {
+    $repository{STAGING_AREA}{$file} = read_file($file);
+}
+print "Files staged are: ", join(" ", keys %{$repository{STAGING_AREA}}), "\n";
+</sprogram>
+</slide>
+
+<slide>
+<heading>Saving a Version
+<itemize>
+<item> svn commit -m LOG_MESSAGE
+<item> git commit  -m LOG_MESSAGE
+<item> ./vcs.pl commit  LOG_MESSAGE
+</itemize>
+<p>
+Our simple VCS labels each version with an integer (<dollar>repository{CURRENT_COMMIT}).
+<p>
+It records the files from its staging area under this version number.
+<p>
+It also records the most recent version of each file (<dollar>repository{LATEST}) 
+<p>
+<sprogram>
+my $commit = ++$repository{CURRENT_COMMIT};
+# commit staged  files to repository
+foreach $file (keys %{$repository{STAGING_AREA}}) {
+    $repository{LATEST}{$file} = $repository{$commit}{$file} = $repository{STAGING_AREA}{$file};
+}
+%{$repository{STAGING_AREA}} = ();
+$repository{LOG_MESSAGE}{$commit} = "@ARGV";
+print "Commited as commit #$commit: ", join(" ", keys %{$repository{$commit}}), "\n";
+</sprogram>
+</slide>
+
+<slide>
+<heading>Checking out a version
+Common to want to retrieve an old version of a system.
+<itemize>
+<item> svn checkout [--revision revision]
+<item> git checkout  [branch]
+<item> ./vcs.pl checkout  [version]
+</itemize>
+<p>
+Our simple VCS has to work backwards through versions
+from the requested version to find the appropriate version of the file.
+<p>
+<sprogram>
+my $checkout_commit =  shift @ARGV || $repository{CURRENT_COMMIT};
+my %written;
+# go through commits in reverse order extracting last commit of each file
+foreach $commit (reverse 1..$checkout_commit) {
+    foreach $file (keys %{$repository{$commit}}) {
+        next if $written{$file}++;
+        print "Checking out from commit #$commit: $file\n";
+        write_file($file, $repository{$commit}{$file});
+    }
+}
+</sprogram>
+</slide>
+
+<slide>
+<heading>Reviewing commits
+<itemize>
+<item> svn log [many options]
+<item> git log [huge number of options]
+<item> ./vcs.pl log
+</itemize>
+<p>
+Our simple VCS just prints the log message for each commit and
+which files it contained.
+<p>
+<sprogram>
+foreach $commit (1..$repository{CURRENT_COMMIT}) {
+    print "Commit #$commit\n";
+    print "Log message: $repository{LOG_MESSAGE}{$commit}\n";
+    print "Files: ", join(" ", keys %{$repository{$commit}}), "\n";
+}
+</sprogram>
+</slide>
+<slide>
+<heading>Checking Status of Files
+<itemize>
+<item> svn status
+<item> git status 
+<item> ./vcs.pl log
+</itemize>
+<p>
+Our simple VCS indicates files in the current directory
+not in the repository or which are different to the latest version in the repository.
+<p>
+<sprogram>
+my $commit = $repository{CURRENT_COMMIT}; 
+foreach $file (glob "*") {
+    my $contents = read_file($file);
+    if (defined $repository{STAGING_AREA}{$file}) {
+        print "Modified: $file\n" if $contents ne  $repository{STAGING_AREA}{$file};
+    } elsif (defined $repository{LATEST}{$file}) {
+        print "Unstaged: $file\n" if $contents ne $repository{LATEST}{$file};
+    } else {
+        print "Untracked: $file\n";
+    }
+}
+</sprogram>
+</slide>
+<slide>
+<heading>Inspecting file dfifferences
+<itemize>
+<item> svn diff [options]
+<item> git diff [many options]
+<item> ./vcs.pl unimplemented
+</itemize>
+</slide>
+<slide>
+<heading>Updating your copy from repository
+<itemize>
+<item> svn update
+<item> git pull
+<item> ./vcs.pl unimplemented
+</itemize>
+</slide>
+
+<slide>
+<heading>A Simple Version Control System in Perl - complete source
+<source examples/vcs.pl>
+</slide>
+<slide>
+<heading>Using our simple Simple Version Control System
+<sprogram>
+% vcs.pl init
+Created empty repository
+% vcs.pl add *.[ch]
+Files staged are: world.c world.h graphics.c graphics.h main.c
+% vcs.pl commit 'initial import'
+Commited as commit #1: world.c world.h graphics.c graphics.h main.c
+% echo >>world.c
+% echo >>graphics.c
+% vcs.pl add world.c
+% echo >>world.c
+%  vcs.pl status
+Untracked: Makefile
+Unstaged: graphics.c
+Modified: world.c
+% vcs.pl add world.c graphics Makefile
+Files staged are: world.c graphics.c Makefile
+% vcs.pl commit 'Minor changes'
+Commited as commit #2: world.c graphics.c Makefile
+% vcs.pl log
+Commit #1
+Log message: initial import
+Files: world.c world.h graphics.c graphics.h main.c
+Commit #2
+Log message: Minor changes
+Files: world.c graphics.c Makefile
+</sprogram>
+</slide>
+
+<slide>
+<heading>Example: Using SVN with an Assignment
+<sprogram>
+svnadmin create /home/you/cs2041/repository
+chmod 700  /home/you/cs2041/repository
+svn checkout file:///home/you/cs2041/repository ~/cs2041/ass2
+cd ~/cs2041/ass2
+cp /home/cs2041/ass2/code/* .
+svn add  pack.c pack.h lib.c lib.h
+svn commit -m 'code we were given by lecturer'
+vi pack.c lib.c
+svn commit -m 'part 1 finished'
+</sprogram>
+</slide>
+
+<slide>
+<heading>Example: Using Git with an Assignment
+<sprogram>
+mkdir ~/cs2041/ass2
+cd ~/cs2041/ass2
+cp /home/cs2041/ass2/code/* .
+git-init
+git-add .
+git commit -m 'code we were given by lecturer'
+vi pack.c lib.c
+git commit -m 'part 1 finished'
+</sprogram>
+</slide>

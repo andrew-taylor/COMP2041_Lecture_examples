@@ -1,0 +1,87 @@
+<title>Language Safety
+<slide>
+<heading>Consequences of bugs: 
+<itemize>
+<item> compiler gives syntax/semantic error
+	<~~> <small>(if you're very lucky)</small>
+<item> program halts with run-time error
+	<~~> <small>(if you're lucky)</small>
+<item> program never halts
+	<~~> <small>(not lucky, but at least you know)</small>
+<item> program completes, but gives incorrect results
+	<~~> <small>(if you're <em>un</em>lucky)</small>
+<item> program appears correct, but has security holes
+	<~~> <small>(if you're <em>un</em>lucky)</small>
+</itemize>
+</slide>
+
+<slide>
+<heading>Perl and Language Safety
+We've seen Perl's design in Perl introduces
+quite a few possibilities for bugs and security holes.
+<p>
+For contrast let examine the design of C - particular wrt invalid programs.
+</slide>
+<slide>
+<heading>Invalid C Program - changing nearby local variable
+<source examples/stack_bug0.c>
+</slide>
+<slide>
+<heading>Invalid C Program - non-termination
+<source examples/stack_bug1.c>
+</slide>
+<slide>
+<heading>Invalid C Program - exploring the stack
+<source examples/stack_inspect.c>
+</slide>
+<slide>
+<heading>Invalid C Program - changing non-local variable
+<source examples/stack_bug2.c>
+</slide>
+<slide>
+<heading>Invalid C Program - changing return address
+<source examples/stack_bug3.c>
+</slide>
+<slide>
+<heading>Invalid C Program - diverting function return 
+<source examples/stack_bug3a.c>
+</slide>
+<slide>
+<heading>Invalid C Program - diverting function return 
+<source examples/stack_bug4.c>
+</slide>
+<slide>
+<heading>Invalid C Program - buffer overflow
+<source examples/stack_bug5.c>
+</slide>
+<slide>
+<heading>Tools to Detect Invalid C Programs
+There exist a number of tool to assist C programmers
+avoid problems stemming from invalid C programs.
+<p>
+A compiler can run extra checks (e.g. data-flow analysis)
+to detect invalid programs.
+<p>
+gcc will do this if you supply the -O -Wall flags.
+<p>
+A  C implementation can choose to behave helpfully
+with an invalid program.
+<p>
+For example, a C implementation can check array bounds
+and report indexes out of bounds.
+<p>
+Few implementation do so because it would slow execution.
+<p>
+gcc's mudflap extension does this and also checks the validity of pointers.
+<p>
+A C implementation can also check at run-time that only uninitialized
+values are not used.
+<p>
+Expensive as you must track array elements
+<p>
+Valgrind does this at the binary level.
+</slide>
+<slide>
+<heading>Tools to Detect Invalid C Programs
+<source examples/debug_examples.c>
+</slide>

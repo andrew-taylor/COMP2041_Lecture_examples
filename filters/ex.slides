@@ -1,0 +1,76 @@
+<title>Exercises on Filters and Regular Expressions
+
+<slide>
+<heading>Exercise: cat/more
+Using the supplied files, do the following:
+<enumerate>
+<item> look at the contents of each file
+<item> produce a copy of count.c with line numbers
+<item> look for "invisible" characters in the files?
+</enumerate>
+</slide>
+
+<slide>
+<heading>Exercise: wc
+Using the supplied files, answer the following:
+<enumerate>
+<item> how many different programs does UNSW offer?
+<item> how many times was WebCMS accessed?
+<item> how many students are studying in CSE?
+<item> how many words are there in the book?
+<item> how many lines are there in the story?
+</enumerate>
+</slide>
+
+<slide>
+<heading>Exercise: head/tail
+Using the supplied files, answer the following:
+<enumerate>
+<item> what is the opening sentence in the story?
+<item> what is the first line in the count.c program?
+<item> what were the first 10 accesses to WebCMS?
+<item> what were the last 20 access to WebCMS?
+</enumerate>
+</slide>
+
+<slide>
+<heading>Exercise: grep
+Using the supplied files, answer the following:
+<enumerate>
+<item> what COMP courses are there?
+<item> which courses are taught by CSE?
+<item> how many courses are computer-related?
+<item> what computer-related courses aren't taught by CSE?
+<item> how many students are enrolled in COMP2041?
+<item> how many women are enrolled in COMP2041?
+<item> how many students are studying COMP3511/9511?
+<item> how many times were WebCMS course menus accessed?
+</enumerate>
+</slide>
+
+<slide>
+<heading>Exercise: combining filters
+Using the supplied files, answer the following:
+<enumerate>
+<item> how many students are enrolled in each course?
+<item> what students have only a single name <small>('.' as firstname)</small>?
+<item> what programs are COMP2041 students enrolled in (codes)?
+<item> what programs are COMP2041 students enrolled in (names)?
+<item> how many students are there from each program?
+<item> how many COMP2041 students are first-years?
+<item> what are the most common words in the book?
+</enumerate>
+</slide>
+
+<slide>
+<heading>Exericse: awk
+Using the <@>marks</@> file, answer the following:
+<enumerate>
+<item> how many people sat the exam?
+<item> produce a list of student id + total mark
+<item> what is the average mark for question 1?
+<item> how many people failed the exam?
+<item> who were the ten best students?
+</enumerate>
+</slide>
+

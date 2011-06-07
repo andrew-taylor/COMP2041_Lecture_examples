@@ -1,0 +1,1158 @@
+<title>Performance
+
+<slide>
+<heading>Performance
+Why do we care about performance?
+<p>
+Good performance <$><Rightarrow></$> less hardware, happy users.
+<p>
+Bad performance <$><Rightarrow></$> more hardware, unhappy users.
+<p>
+<small>(Even efficient systems have unhappy users if interface is poorly designed)</small>
+<p>
+Generally: <~> performance = execution time <~> <small>(cpu,observed)</small>
+<p>
+Other measures: memory/disk space, network traffic, disk i/o.
+</slide>
+
+<slide>
+<continued>
+In the 1960's, performance was a significant problem.
+<p>
+Hardware: <~> 16KB memory, <~> 128KB disk, <~> 1000instr/sec.
+<p>
+So, much programming effort was spent on efficiency "tricks".
+<p>
+Unfortunately, there is usually a trade-off between ...
+<itemize>
+<item> execution <em>efficiency</em> achieved by "tweaking" code
+<item> the <em>understandability</em> of the code
+</itemize>
+Despite remarkable engineering feats, 60's programs were:
+<itemize>
+<item> compact, fast, efficient, ... incomprehensible, incorrect
+</itemize>
+<p>
+<b>Knuth</b>: <q>Premature optimization is the root of all evil</q>
+</slide>
+
+<slide>
+<heading>Development Strategy
+Kernighan/Pike advocate a pragmatic approach to efficiency:
+<itemize>
+<item> first, make the program simple, clear, robust and <em>correct</em>
+<item> then, worry about efficiency ... if it's a problem at all
+</itemize>
+BUT:
+<itemize>
+<item> good design is always critical <br>
+	<small>(at design time, make sensible choice of data structures, algorithms)</small>
+<item> where possible, handle efficiency at system level <br>
+	<small>(e.g. buy a bigger machine, use compiler optimisation, ...)</small>
+</itemize>
+<b>Pike</b>: <q>A fast program that gets the wrong answer saves no time.</q>
+</slide>
+
+<slide>
+<continued>
+Strategy for developing efficient programs:
+<enumerate>
+<item> Design the program well
+<item> Implement the program well**
+<item> Test the program well
+<item> Only after you're sure it's working, <em>measure</em> performance
+<item> If <small>(and only if)</small> performance is inadequate, <em>find</em> the "hot spots"
+<item> <em>Tune</em> the code to fix these
+<item> Repeat measure-analyse-tune cycle until performance ok
+</enumerate>
+<p>
+<small>
+(** see "Programming Pearls", "Practice of Programming", etc. etc.)
+</small>
+</slide>
+
+<slide>
+<heading>Performance Example
+Consider a program to test for prime numbers.
+<p>
+An integer <$>n</$> is <i>prime</i> if it has no divisors except 1 and <$>n</$>
+<p>
+Straightforward, literal, C implementation:
+<program>
+int is_prime(long long n) {
+    long long i, ndiv = 0;
+
+    for (i = 1; i <= n; i++)
+        if (n % i == 0)
+            ndiv++;
+    return ndiv == 2;
+}
+</program>
+<p>
+By inspection, it's clearly correct. How about performance?
+</slide>
+
+<slide>
+<continued>
+One obvious aspect of performance: the algorithm is <$>O(n)</$>.
+<program>
+3 is prime                0.01sec
+4 is not prime            0.00sec
+11 is prime               0.00sec
+15 is not prime           0.00sec
+1257787 is prime          0.17sec
+1257788 is not prime      0.16sec
+10000987 is prime         1.27sec
+10000988 is not prime     1.26sec
+123456791 is prime        15.93sec
+123456792 is not prime    15.80sec
+2147483647 ???            >3mins
+2147483646 ???            >3mins
+</program>
+</slide>
+
+<slide>
+<continued>
+An "optimization" that doesn't help ...
+<itemize>
+<item> we don't need to check 1 and <$>n</$>
+<item> so, eliminate them from the loop and change the test
+</itemize>
+<program>
+int is_prime(long long n) {
+    long long i, ndiv = 0;
+    for (i = 2; i < n; i++)
+        if (n % i == 0)
+            ndiv++;
+    return ndiv == 0;
+}
+</program>
+No surprise ... the execution time hardly changes at all.
+</slide>
+
+<slide>
+<continued>
+If we think more about the definition of primality ...
+<itemize>
+<item> if there are divisors, at least one must be <$><le> sqrt(n)</$>
+<item> hence we can terminate the loop at <$>sqrt(n)</$> <~> <$><Rightarrow> O(sqrt(n))</$>
+<item> also, terminate as soon as we find any divisor
+</itemize>
+<program>
+int is_prime(long long n) {
+    long long i;
+    assert(n > 2);
+    for (i = 2; i <= sqrt(n); i++)
+        if (n % i == 0)
+            return 0;
+    return 1;
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+Execution time is acceptable even for the largest numbers:
+<p>
+<program>
+3 is prime                0.00sec
+4 is not prime            0.01sec
+11 is prime               0.00sec
+15 is not prime           0.00sec
+1257787 is prime          0.00sec
+1257788 is not prime      0.00sec
+10000987 is prime         0.01sec
+10000988 is not prime     0.00sec
+123456791 is prime        0.01sec
+123456789 is not prime    0.01sec
+2147483647 is prime       0.03sec
+2147483646 is not prime   0.03sec
+</program>
+</slide>
+
+<slide>
+<continued>
+What if we want to squeeze <em>even more</em> performance out of it?
+<p>
+Some possibilities:
+<itemize>
+<item> don't recompute fixed <@>sqrt(n)</@> on each iteration
+	<br> <small>(compute it once before loop, store in variable, use variable in test)</small>
+<item> if a number is even, it's not prime
+	<br> <small>(add a special test for evens before entering the loop)</small>
+<item> each non-prime odd number has at least one odd factor
+	<br> <small>(ignore evens, iterate only over the odd numbers in the loop)</small>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+These considerations lead to the following code:
+<program>
+int is_prime(long long n) {
+    long long i, limit = sqrt(n);
+    if (n == 1) return 0;
+    if (n == 2) return 1;
+    if (n % 2 == 0) return 0;
+    for (i = 3; i <= limit; i+=2)
+        if (n % i == 0)
+            return 0;
+    return 1;
+}
+</program>
+<p>
+<b>But</b> code is now less clear, performance gains are marginal. <br>
+This is generally a sign to stop tuning.
+</slide>
+
+<slide>
+<heading>When to Tune?
+We should only consider tuning the performance of a program:
+<itemize>
+<item> <em>after</em> testing shows program is correct,
+<item> and <em>only if</em> the program is going to be used frequently.
+</itemize>
+<b>Pike</b>'s Guideline:
+<p>
+<center>
+<i>the time spent making a program faster <br>
+should not be more than the time the speedup will save <br>
+during the lifetime of the program</i>
+</center>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<itemize>
+<item> a quick C/Perl program to process some numbers
+<small>
+<itemize>
+<item> why bother tuning? you'll use it once and throw it away.
+</itemize>
+</small>
+<item> a C/Perl program that you write in a Prac Exam
+<small>
+<itemize>
+<item> why bother tuning? the main aim is to make it work.
+</itemize>
+</small>
+<item> a CGI script to collect feedback on a course
+<small>
+<itemize>
+<item> not worth tuning? observed slowness is probably network latency
+</itemize>
+</small>
+</itemize>
+More examples <small>(in all of these, performance is critical):</small>
+<itemize>
+<item> a Web search engine e.g. Google <small>(or Yahoo, Alta Vista, ...)</small>
+<small>
+<itemize>
+<item> extremely large data; millions of people use it daily
+</itemize>
+</small>
+<item> a Unix filter like <@>grep</@> or <@>sort</@> or <@>perl</@>
+<small>
+<itemize>
+<item> millions of people use it hundreds of times each day.
+</itemize>
+</small>
+<item> a library function like <@>sqrt</@> or <@>printf</@> or <@>malloc</@>
+<small>
+<itemize>
+<item> millions of programs use it millions of times each day.
+</itemize>
+</small>
+</itemize>
+</slide>
+
+<slide>
+<heading>Algorithm Efficiency
+At design stage, two possible ways to consider efficiency:
+<itemize>
+<item> complexity results <$><Rightarrow></$> algorithms and data structures
+	<p> <small>(theoretical approach ... complexity theory .... <$>O(n), O(logn),</$> ...)</small>
+<item> "back of the envelope" calculations <$><Rightarrow></$> likely performance
+	<p> <small>(practical/heuristic approach ... requires knowledge of operation costs)</small>
+</itemize>
+Both methods use a similar underlying strategy:
+<itemize>
+<item> first, identify the critical/expensive/frequent operations
+<item> determine a measure of cost in terms of these
+</itemize>
+</slide>
+
+<slide>
+<heading>Complexity Example
+Sorting an array containing <$>n</$> integer values (SelectionSort):
+<p>
+<program>
+for (i = 0; i < n-1; ++i) {
+    min = i;
+    for (j = i+1; j < n; ++j)
+        if (a[j] < a[min]) min = j;
+    swap(a[i], a[min]);
+}
+</program>
+<p>
+Outer loop: #iter = <@>n-1</@>
+<~>
+<$>C<sub>body</sub> <~>=<~> C<sub><@>=</@></sub> + C<sub><@>for</@></sub> + C<sub><@>swap</@></sub></$>
+<p>
+Inner loop: 
+#iter = <$>n-1 + n-2 + ... + 1</$>
+	= <$><frac>n(n-1)<over>2</frac></$>
+	= <$><frac>(n<sup>2</sup>-n)<over>2</frac></$>
+<p>
+Cost:
+<~~>
+<$><frac>(n<sup>2</sup>-n)<over>2</frac> <times> C<sub><@><<</@></sub> + n-1 <times> (C<sub><@>=</@></sub> + C<sub><@>swap</@></sub>) <~><Rightarrow><~> O(n<sup>2</sup>)</$>
+</slide>
+
+<slide>
+<heading>Performance Estimates
+Complexity analysis = theoretical performance estimation.
+<p>
+It assists us to choose the most appropriate <i>algorithm</i>.
+<p>
+We can also consider an experimental approach to performance:
+<itemize>
+<item> determine the critical (frequent/expensive) operations in the system
+<item> estimate the likely number of occurrences on classes of data
+<item> combine the two to produce a cost <em>estimate</em>
+</itemize>
+E.g. a program reads 100 disk pages and performs 100,000 adds per page.
+<p>
+<$>Cost <~>=<~> 100(Cost(disk) + 10<sup>5</sup>.Cost(add)) <~>=<~> 10<sup>2</sup>(10<sup>-1</sup>s +10<sup>5</sup>.10<sup>-6</sup>s) </$>
+<p>
+Need to know relative costs of various operations.
+</slide>
+
+<slide>
+<heading>Performance Analysis
+Performance <i>estimates</i> give us some idea of performance in advance.
+<p>
+Often, however ..
+<itemize>
+<item> assumptions made in estimating performance are invalid
+<item> we overlook some frequent and expensive operation
+</itemize>
+The fundamental technique of performance evaluation is to
+<em>measure</em> the implemented program.
+<p>
+<em>Performance analysis</em> can be performed at various levels of detail:
+<itemize>
+<item> coarse-grained ... get an overview of performance characteristics
+<item> fine-grained ... find detailed explanations for performance
+</itemize>
+</slide>
+
+<slide>
+<heading>Performance Analysis under Unix
+Unix has many tools for performance analysis.
+<p>
+We look briefly at three of them:
+<itemize>
+<item> <tt>time</tt> - elapsed execution time <br>
+<small>(a useful coarse measure of performance)</small>
+<item> <tt>gprof</tt> - flat profile <br>
+<small>(gives list of time spent in each function)</small>
+<item> <tt>gprof</tt> - call-graph profile <br>
+<small>(gives details of which function called which other function and how much it cost)</small>
+<item> <tt>oprofile</tt> system-wide profile <br>
+<small>similar information to gprof but system wide and can be line-based</small>
+</itemize>
+</slide>
+<p>
+
+<slide>
+<heading>Benchmarks
+One way to measure performance:
+execute program on sample data and measure elapsed time.
+<p>
+A standard collection of sample data (<em>benchmark</em>)
+is useful for this task.
+<p>
+E.g. sorting benchmark
+<p>
+<center>
+<table 4>
+<tr>
+<td> <b><i>Data</i></b> </td>
+<td> <b>Random</b> </td>
+<td> <b><~>Sorted<~></b> </td>
+<td> <b>Reverse</b> </td>
+</tr>
+<tr>
+<td> small (<$><approx> 10</$>) </td>
+<td> ?? </td>
+<td> ?? </td>
+<td> ?? </td>
+</tr>
+<tr>
+<td> medium (<$><approx> 10<sup>3</sup></$>) </td>
+<td> ?? </td>
+<td> ?? </td>
+<td> ?? </td>
+</tr>
+<tr>
+<td> large (<$><approx> 10<sup>6</sup></$>) </td>
+<td> ?? </td>
+<td> ?? </td>
+<td> ?? </td>
+</tr>
+</table>
+</center>
+</slide>
+
+<slide>
+<continued>
+Benchmarking allows us to compare alternative programs for the same task.
+<p>
+Things to beware of with benchmarks:
+<itemize>
+<item> must compare programs in similar (identical) envrionments
+<itemize>
+<item> eliminate system effects ... system load, caching
+</itemize>
+<item> avoid data sample bias ... use likely/varied sample data
+<item> benchmarks give coarse view of program performance
+</itemize>
+<p>
+Benchmarks are not useful as a basis for performance tuning.
+<br>
+<small>(because they provide no (direct) information on reasons for inefficiency)</small>
+</slide>
+
+<slide>
+<heading>The <large><code>time Command</code></large>
+The <@>time</@> command:
+<itemize>
+<item> monitors the execution of a program on some data
+<item> gives an overview of resource usage for that execution
+</itemize>
+<p>
+What resources it measures:
+<itemize>
+<item> user cpu time  <br>
+	<small>time spent in executing code for your program and
+	the libraries it uses</small>
+<item> system cpu time <br>
+	<small>time spent in executing system calls (e.g. <@>open</@>)
+	on behalf of the program</small>
+</itemize>
+</slide>
+
+<slide>
+<continued>
+What other resources it measures:
+<itemize>
+<item> elapsed time <br>
+	<small>difference in wall-clock time between when the program
+	started and finished</small>
+<item> % machine share <br>
+	<small>what percentage of processor time was dedicated to the
+	process during execution</small>
+<item> memory usage <br>
+	<small>maximum amount of memory space occupied by the process</small>
+<item> i/o statistics <br>
+	<small>how much disk traffic the program generated</small>
+</itemize>
+Note: not all systems measure all resource usages.
+</slide>
+
+<slide>
+<continued>
+Things to note when interpreting <@>time</@> output:
+<itemize>
+<item> cpu times are measured imprecisely
+<itemize>
+<item> may be different for each execution of the same program
+<item> to overcome variation - run several trials and average
+</itemize>
+<item> elapsed time depends on machine share
+<itemize>
+<item> if your program gets a greater share of the CPU, it finishes quicker
+</itemize>
+<item> different shells/Unixes have different format of <@>time</@> output
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Examples of <@>/usr/bin/time</@> use:
+<session>
+$ <b>export TIME='%Uu %Ss %E %P %X+%Dk %I+%Oio %Fpf+%Ww'</b>
+$ <b>/usr/bin/time ./pa</b> << <b>data1</b> >> <b>/dev/null</b>
+
+1.01u 0.22s 0:02.50 67% 0+104k 3+5io 14pf+0w
+
+$ <b>/usr/bin/time ./pb</b> << <b>data1</b> >> <b>/dev/null</b>
+
+6.02u 0.14s 0:07.32 90% 0+80k 2+5io 13pf+0w
+
+$ <b>/usr/bin/time ./pc</b> << <b>data1</b> >> <b>/dev/null</b>
+
+2.23u 0.23s 0:03.05 75% 0+72k 2+5io 13pf+0w
+</session>
+</slide>
+
+<slide>
+<heading>Empirical Study of Execution
+Decades of empirical study of program execution have shown that programs
+spend most of their execution time in a small part of their code.
+<p>
+This is often quoted as the 90/10 rule <~> <small>(or 80/20 rule or ...)</small>:
+<p>
+<center>
+``90% of the execution time is spent in 10% of the code''
+</center>
+<p>
+This means that
+<itemize>
+<item> most of the code has little impact on overall performance
+<item> small parts of the code account for most execution time
+</itemize>
+We should clearly concentrate efforts at improving efficiency in
+the 10% of code which accounts for most of the execution time.
+</slide>
+
+<slide>
+<heading>Profiles
+We need a method for locating the <em>hot spots</em>
+(the 10% of code that is executed frequently).
+<p>
+An <i>execution profile</i> for a program is
+<itemize>
+<item> the total cost of performing each <em>code block</em>
+<item> for one execution of the program
+</itemize>
+Cost may be measured via
+<itemize>
+<item> a count of the number of times the block is executed
+<item> the total execution time spent within that block
+</itemize>
+Profiles typically collected at function level
+	<~> <small>(i.e. code block = function)</small>.
+</slide>
+
+<slide>
+<continued>
+A profile shows how much each code block costs ...
+<diagram>Pic/profgraph
+Software tools can generate profiles of program execution.
+</slide>
+
+<slide>
+<heading>The <large><code>gprof</code></large> Command
+The <@>gprof</@> command display execution profiles for programs
+that have been compiled with the <@>-pg</@> flag.
+<p>
+When such a program is executed, it runs as normal but
+leaves profiling information in a file called <@>gmon.out</@>.
+<p>
+The command <@>gprof</@> reads <@>gmon.out</@> and prints a profile
+on standard output.
+<p>
+Example of use:
+<session>
+$ <b>gcc -pg -o xyz xyz.c</b>
+$ <b>xyz</b> < <b>data</b> > <b>/dev/null</b>
+$ <b>gprof xyz</b> | <b>less</b>
+</session>
+For further usage details, <@>man gprof</@>.
+</slide>
+
+<slide>
+<continued>
+The <@>gprof</@> command works at the function level.
+<p>
+It gives a table (<em>flat profile</em>) containing:
+<itemize>
+<item> number of times each function was called
+<item> % of total execution time spent in the function
+<item> average execution time per call to that function
+<item> execution time for this function and its children
+</itemize>
+Arranged in order from most expensive function down.
+<p>
+It also gives a <em>call graph</em>, a list for each function:
+<itemize>
+<item> which functions called this function
+<item> which functions were called by this function
+</itemize>
+</slide>
+
+<slide>
+<heading>Profile Example
+Consider the following program that
+<itemize>
+<item> searches for words in text containing a given substring
+<item> displays each such word once (in alphabetical order)
+</itemize>
+<program>
+int main(int argc, char*argv[])
+{
+    char  word[MAXWORD];  /* current word */
+    Words matches;        /* list of matching words */
+    char  *substring;     /* string to look for */
+    FILE  *input;         /* the input file */
+
+    /* ... Check command-line arguments and open input file ... */
+
+    /* Process the file - find the matching words */
+    matches = NULL;
+    while (getWord(input, word) != NULL) {
+        if (contains(word,substring) && !member(word, matches))
+            insert(word, &matches);
+    }
+    printWords(matches);
+    return 0;
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+Flat profile for this program (<@>xwords et data3</@>):
+<p>
+<sprogram>
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  us/call  us/call  name    
+ 75.00      0.03     0.03    30212     0.99     0.99  getWord
+ 25.00      0.04     0.01    30211     0.33     0.33  contains
+  0.00      0.04     0.00      489     0.00     0.00  member
+  0.00      0.04     0.00      267     0.00     0.00  insert
+  0.00      0.04     0.00        1     0.00 40000.00  main
+  0.00      0.04     0.00        1     0.00     0.00  printWords
+</sprogram>
+<p>
+Note: <@>wc data3</@> <~><$><rightarrow></$><~> <@>7439  30211  188259</@>.
+</slide>
+
+<slide>
+<continued>
+Call graph for the same execution (<@>xwords et data3</@>):
+<p>
+<sprogram>
+index % time    self  children    called     name
+                0.00    0.04       1/1           _start [2]
+[1]    100.0    0.00    0.04       1         main [1]
+                0.03    0.00   30212/30212       getWord [3]
+                0.01    0.00   30211/30211       contains [4]
+                0.00    0.00     489/489         member [5]
+                0.00    0.00     267/267         insert [6]
+                0.00    0.00       1/1           printWords [7]
+-----------------------------------------------
+[2]    100.0    0.00    0.04                 _start [2]
+                0.00    0.04       1/1           main [1]
+-----------------------------------------------
+                0.03    0.00   30212/30212       main [1]
+[3]     75.0    0.03    0.00   30212         getWord [3]
+-----------------------------------------------
+                0.01    0.00   30211/30211       main [1]
+[4]     25.0    0.01    0.00   30211         contains [4]
+-----------------------------------------------
+                0.00    0.00     489/489         main [1]
+[5]      0.0    0.00    0.00     489         member [5]
+-----------------------------------------------
+                0.00    0.00     267/267         main [1]
+[6]      0.0    0.00    0.00     267         insert [6]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[7]      0.0    0.00    0.00       1         printWords [7]
+</sprogram>
+</slide>
+
+<slide>
+<heading>A Profiling Success
+<small>[Courtesy Rob Pike]</small>
+<p>
+Once upon a time, a profile of <@>awk</@> revealed that this loop:
+<p>
+<program>
+for (i = 0; i < MAXFLD; i++)
+    clearfield(i);
+</program>
+<p>
+was taking 30% of the total execution time.
+<p>
+To allow for large inputs, <@>MAXFLD</@> was set to 200, but for most
+data, the actual number of fields is more like 2-3.
+<p>
+Modified the code to keep track of used fields:
+<p>
+<program>
+for (i = 0; i < numfields; i++)
+    clearfield(i);
+</program>
+<p>
+Caused <@>awk</@> to run 25% faster 
+	<~> <small>(along with the 1000's of programs using <@>awk</@>)</small>
+</slide>
+
+<slide>
+<heading>Exercise: Profiling
+Examine profiles for the following programs:
+<itemize>
+<item> <@>flower1</@> ... convert text to lower case
+<item> <@>flower2</@> ... convert text to lower case
+<item> <@>markov</@> ... random text generator
+</itemize>
+Comment on overall efficiency of each program.
+</slide>
+
+<slide>
+<heading>Performance Improvement
+Once you have a profile, you can identify which region of code is "hot".
+<p>
+To improve the performance:
+<itemize>
+<item> change the algorithm and/or data-structures
+<itemize>
+<item> may give orders-of-magnitude better performance
+<item> but it is extremely costly to rebuild the system
+</itemize>
+<item> use simple efficiency tricks to reduce costs
+<itemize>
+<item> may improve performance by one order-of-magnitude 
+</itemize>
+<item> use the compiler's optimization switches <~> (<@>gcc -O</@>)
+<itemize>
+<item> may improve performance by one order-of-magnitude 
+</itemize>
+</itemize>
+</slide>
+
+<slide>
+<heading> Efficiency Tricks
+<em>Avoid unnecessary repeated evaluation</em> ...
+<p>
+Compilers detect straight-forward examples
+but may not handle some examples obvious to humans.  
+<p>
+<program>
+for (i = 1; i <<= N; ++i) x += f(y);
+<comment>becomes</comment>
+res = f(y);
+for (i = 1; i <<= N; ++i) x += res;
+</program>
+</slide>
+
+<slide>
+<continued>
+<em>Use local variable instead of global variables</em> ...
+<p>
+May enable compiler to optimize some operations.
+<p>
+<program>
+i = k + 1;
+i = i - j;
+x = a[i];
+</program>
+If <@>i</@> is local then compiler may generate:
+<program>
+x = a[k+1-j];
+</program>
+</slide>
+
+<slide>
+<continued>
+<em>Use pointers rather than indexes</em> ...
+<p>
+Because dereferencing cheaper than index computation.
+<p>
+But modern compilers can generate equivalent code
+whether you use array indexing or pointer arithmetic.
+<p>
+<program>
+for (i = 0; i < N; i++) a[i]...
+<comment>becomes</comment>
+endOfa = &a[N];
+for (p = a; p < &endOfa; p++) *p ...
+</program>
+</slide>
+
+<slide>
+<continued>
+<em>Unroll loops</em> ... less comparison and branching.
+<p>
+Modern compilers can unroll loops automatically:
+<program>
+for (i = 0; i < N; i++)
+    a[i] = b[i] + c[i];
+<comment>becomes</comment>
+for (i = 0; i < N; i += 4) {
+    a[i+0] = b[i+0] + c[i+0];
+    a[i+1] = b[i+1] + c[i+1];
+    a[i+2] = b[i+2] + c[i+2];
+    a[i+3] = b[i+3] + c[i+3];
+}
+</program>
+</slide>
+
+<slide>
+<continued>
+Duff's device (a hideous but clever "optimisation"):
+<program>
+i = 0;  n = <$>lengthOfArray</$>;
+switch (n%4) {
+case 0: while (i < n) {
+        a[i] = b[i] + c[i]; i++;
+case 3: a[i] = b[i] + c[i]; i++;
+case 2: a[i] = b[i] + c[i]; i++;
+case 1: a[i] = b[i] + c[i]; i++;
+} }
+</program>
+Implements a partially-unrolled loop.
+<p>
+<small>
+Interlaces <@>switch</@> and <@>while</@>; exploits <@>case</@> fall-through. <br>
+But may clash with look-ahead/pipelining of modern architectures.
+</small>
+</slide>
+
+<slide>
+<continued>
+Caching
+<itemize>
+<item> remember earlier results instead of recomputing
+<item> store computed value with the data used to compute it
+</itemize>
+Buffering
+<itemize>
+<item> perform input/output in chunks to minimise disk traffic
+</itemize>
+Separate out special cases
+<itemize>
+<item> can help to make loops uniform, thus reducing tests
+</itemize>
+Use data instead of code
+<itemize>
+<item> implement a function via a lookup table, rather than computing
+</itemize>
+</slide>
+
+<slide>
+<heading>Performance Improvement Example - Word Count 
+
+This program for producing sorted counts of words
+<url examples/count_words0.c>count_words0.c
+is slow on large inputs e.g.
+<sprogram>
+% gcc -O3 count_words0.c -o count_words0
+% time count_words0 <WarAndPeace.txt >/dev/null
+real    0m52.726s
+user    0m52.643s
+sys     0m0.020s
+</sprogram>
+<p>
+We can instrument the program to collect profiling information
+and examine it with gcc 
+<p>
+<sprogram>
+% gcc -p -g count_words0.c -o count_words0_profile
+% head -10000 WarAndPeace.txt|count_words0_profile >/dev/null
+% gprof count_words0_profile
+....
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 88.90      0.79     0.79    88335     0.01     0.01  get
+  7.88      0.86     0.07     7531     0.01     0.01  put
+  2.25      0.88     0.02    80805     0.00     0.00  get_word
+  1.13      0.89     0.01        1    10.02   823.90  read_words
+  0.00      0.89     0.00        2     0.00     0.00  size
+  0.00      0.89     0.00        1     0.00     0.00  create_map
+  0.00      0.89     0.00        1     0.00     0.00  keys
+  0.00      0.89     0.00        1     0.00     0.00  sort_words
+....
+</sprogram>
+<p>
+Its clear that only the functions <i>get</i> and to a much lesser extent <i>put</i>
+are relevant to performance improvement.
+<p>
+Examine <i>get</i> and we find it traverses a linked list.
+<p>
+So replace it with a binary tree and the program runs 200x faster
+on War and Peace.
+<p>
+<sprogram>
+% gcc -O3 count_words1.c -o count_words1
+% time count_words1 <WarAndPeace.txt >/dev/null
+real    0m0.277s
+user    0m0.268s
+sys     0m0.008s
+</sprogram>
+</slide>
+
+<slide>
+<continued>
+
+Was C the best choice for our count words program.
+<p>
+For comparison Shell:
+<p>
+<source examples/count_words.sh>
+<p>
+And Perl:
+<p>
+<source examples/count_words.pl>
+<p>
+Shell and Perl are slower - but a lot less code.
+<p>
+So faster to write, less bugs to find, easier to maintain/modify
+<p>
+<sprogram>
+% time count_words1 <WarAndPeace.txt >/dev/null
+real    0m0.277s
+user    0m0.268s
+sys     0m0.008s
+% time count_words.sh <WarAndPeace.txt >/dev/null
+real    0m0.564s
+user    0m0.584s
+sys     0m0.036s
+% time count_words.pl <WarAndPeace.txt >/dev/null
+real    0m0.643s
+user    0m0.632s
+sys     0m0.012s
+% wc count_words1.c count_words.sh count_words.pl
+ 286  759 5912 count_words1.c
+   8   19   82 count_words.sh
+  14   43  301 count_words.pl
+ 308  821 6295 total
+</sprogram>
+</slide>
+
+<slide>
+<heading>Performance Improvement Example - cp
+
+Here is a cp implementation in C using low-level calls to read/write
+<p>
+<source examples/cp0.c>
+<p>
+Its suprisingly slow comapred to /bin/cp
+<p>
+<sprogram>
+% time /bin/cp input_file /dev/null
+real    0m0.006s
+user    0m0.000s
+sys     0m0.004s
+% gcc  cp0.c -o cp0
+% time ./cp0 input_file /dev/null
+real    0m6.683s
+user    0m0.932s
+sys     0m5.740s
+% gcc -O3 cp0.c -o cp0
+% time ./cp0 input_file /dev/null
+real    0m6.688s
+user    0m0.900s
+sys     0m5.776s
+</sprogram>
+<p>
+Notice that most execution time is spent executing system calls and as a consequence gcc -O3 is no help.
+<p>
+cp0.c is making 2 system calls for every byte copied - a huge overhead.
+<p>
+If it is modified to buffer its I/O into 8192 byte block it runs 1000x faster.
+<p>
+It now makes 2 system calls for every 8192 bytes copied
+<p>
+<source examples/cp1.c>
+<p>
+<sprogram>
+% time ./cp1 input_file /dev/null
+real    0m0.005s
+user    0m0.000s
+sys     0m0.008s
+</sprogram>
+<p>
+If we use the portable stdio library instead of a low-level copy,
+even a byte-byte by loop runs suprisingly fast, because stdio buffers the I/O behind the scenes.
+<p>
+<source examples/cp2.c>
+<p>
+<sprogram>
+% gcc -O3 cp2.c -o cp2
+% time ./cp2 input_file /dev/null
+real    0m0.456s
+user    0m0.448s
+sys     0m0.008s
+</sprogram>
+<p>
+And with a little more complex code we get reasonable speed with portability:
+<p>
+<source examples/cp7.c>
+<p>
+<sprogram>
+% gcc -O3 cp7.c -o cp7
+% time ./cp7 input_file /dev/null
+real    0m0.095s
+user    0m0.084s
+sys     0m0.012s
+</sprogram>
+<p>
+For comparison Perl code which does a copy via an array of lines:
+<p>
+<source examples/cp4.pl>
+<p>
+<sprogram>
+real    0m0.248s
+user    0m0.168s
+sys     0m0.032s
+</sprogram>
+<p>
+And Perl code which unsets Perl's line terminator variable
+so a single read returns the whole file:
+<p>
+<p>
+<source examples/cp5.pl>
+<p>
+<sprogram>
+real    0m0.029s
+user    0m0.008s
+sys     0m0.020s
+</sprogram>
+<p>
+</slide>
+
+<slide>
+<heading>Performance Improvement Example - Fibonacci
+
+Here is a simple Perl program to calculate the n-th Fibonacci number:
+<p>
+<source examples/fib0.pl>
+<p>
+It become slow near n=35.
+<p>
+<sprogram>
+% time fib0.pl 35
+fib(35) = 9227465
+real    0m10.776s
+user    0m10.729s
+sys     0m0.016s
+</sprogram>
+<p>
+we can rewrite in C.
+<p>
+<source examples/fib0.c>
+<p>
+Faster but the program's complexity doesn't change
+and it becomes  become slow near n=45.
+<p>
+<sprogram>
+% gcc -O3 -o fib0 fib0.c
+% time fib0 35
+fib(45) = 1134903170
+real    0m4.994s
+user    0m4.976s
+sys     0m0.004s
+</sprogram>
+</slide>
+<slide>
+<continued>
+It is very easy to cache already computed results in a Perl hash.
+<p>
+<source examples/fib1.pl>
+<p>
+This changes the program's complexity from exponential to linear.
+<p>
+<sprogram>
+% time fib1.pl 45
+fib(45) = 1134903170
+real    0m0.004s
+user    0m0.004s
+sys     0m0.000s
+</sprogram>
+<p>
+Now for Fibonanci we could also easily change the program to an
+iterative form which would be linear too.
+<p>
+But memoization is a general technique which can be employed in a variety
+of situations to improve perfrormnce.  There is even a Perl package to support it.
+<p>
+<source examples/fib2.pl>
+</slide>
+
+<slide>
+<heading>Performance Improvement Example - Caching
+
+Here is a simple C program which allocates an nxm array
+and then initializes use one of two different loops.
+<p>
+<source examples/cachegrind_example.c>
+<p>
+Although the loops are almost identically, the first loop
+runs 20x faster on a large array!
+<p>
+<sprogram>
+% time ./cachegrind_example 0 32000 32000
+allocating a 32000x32000 array = 4096000000 bytes
+writing to array i-j order
+real    0m0.893s
+user    0m0.364s
+sys     0m0.524s
+% time ./cachegrind_example 1 32000 32000
+allocating a 32000x32000 array = 4096000000 bytes
+writing to array j-i order
+real    0m15.189s
+user    0m14.633s
+sys     0m0.528s
+</sprogram>
+<p>
+The tool valgrind which we used to find used of uninitialized variable
+at runtime also can give memory caching infomation.
+<p>
+The memory subsystem is beyond the scope of this course but you
+can see valgrind explain the performance difference between these loops.
+<p>
+For the first loop D1 miss rate = 24.8% 
+<p>
+For the second loop D1 miss rate = 99.9% 
+<p>
+Due to the C array  memory layout the first loop
+produces much better caching performance.
+<p>
+Tuning caching performnce is important for some application and valgrind makes this much easier.
+<p>
+<sprogram>
+% valgrind '--tool=cachegrind' ./cachegrind_example 0 10000 10000
+allocating a 10000x10000 array = 400000000 bytes
+writing to array i-j order
+==7025== 
+==7025== I   refs:      225,642,966
+==7025== I1  misses:            882
+==7025== LLi misses:            875
+==7025== I1  miss rate:        0.00%
+==7025== LLi miss rate:        0.00%
+==7025== 
+==7025== D   refs:       25,156,289  (93,484 rd   + 25,062,805 wr)
+==7025== D1  misses:      6,262,957  ( 2,406 rd   +  6,260,551 wr)
+==7025== LLd misses:      6,252,482  ( 1,982 rd   +  6,250,500 wr)
+==7025== D1  miss rate:        24.8% (   2.5%     +       24.9%  )
+==7025== LLd miss rate:        24.8% (   2.1%     +       24.9%  )
+==7025== 
+==7025== LL refs:         6,263,839  ( 3,288 rd   +  6,260,551 wr)
+==7025== LL misses:       6,253,357  ( 2,857 rd   +  6,250,500 wr)
+==7025== LL miss rate:          2.4% (   0.0%     +       24.9%  )
+% valgrind '--tool=cachegrind' ./cachegrind_example 1 10000 10000
+allocating a 10000x10000 array = 400000000 bytes
+writing to array j-i order
+==7006== 
+==7006== I   refs:      600,262,960
+==7006== I1  misses:            876
+==7006== LLi misses:            869
+==7006== I1  miss rate:        0.00%
+==7006== LLi miss rate:        0.00%
+==7006== 
+==7006== D   refs:      100,056,288  (43,483 rd   + 100,012,805 wr)
+==7006== D1  misses:    100,002,957  ( 2,405 rd   + 100,000,552 wr)
+==7006== LLd misses:      6,262,481  ( 1,982 rd   +   6,260,499 wr)
+==7006== D1  miss rate:        99.9% (   5.5%     +        99.9%  )
+==7006== LLd miss rate:         6.2% (   4.5%     +         6.2%  )
+==7006== 
+==7006== LL refs:       100,003,833  ( 3,281 rd   + 100,000,552 wr)
+==7006== LL misses:       6,263,350  ( 2,851 rd   +   6,260,499 wr)
+==7006== LL miss rate:          0.8% (   0.0%     +         6.2%  )
+</sprogram>
+</slide>

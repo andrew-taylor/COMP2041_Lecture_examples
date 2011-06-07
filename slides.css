@@ -1,0 +1,14 @@
+body {font-size:22pt;font-family:Arial,sans-serif;background-color:#FFFFFF;margin-top:1px;}
+a {color:#000099; text-decoration:none}
+td {font-size:22pt;}
+h2 {color:#CC3300;font-size:32pt;margin-top:0px;}
+h3 {color:#CC3300;font-size:26pt;font-weight:bold;margin-top:0px;}
+ul {margin-top:0px;}
+li {margin-top:16px;}
+li.s {margin-top:6px;}
+li.i {margin-top:3px;}
+small {font-size:18pt;}
+code {font-size:100%;font-family:monospace;font-weight:bold;}
+pre {font-size:20pt;font-family:monospace;margin-bottom:0px;}
+pre.smaller {font-size:18pt;}
+span.refs {color:#6666FF;font-size:16pt;}

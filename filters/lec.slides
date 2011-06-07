@@ -1,0 +1,1018 @@
+<title>Filters and Regular Expressions
+
+<slide>
+<heading>What is a filter?
+<em>Filter</em>: a program that transforms a data stream.
+<p>
+On Unix, filters are commands that:
+<itemize>
+<item> read text from their standard input or named files
+<item> perform useful transformations on the text stream
+<item> write the transformed text to their standard output
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Example: <~> <@>cat MyProg.c</@>
+<itemize>
+<item> reads the text of the program in the file <@>MyProg.c</@>
+<item> writes the (untransformed) text to standard output (i.e. the screen)
+</itemize>
+Example: <~> <@>cat << MyProg.c</@>
+<itemize>
+<item> the shell (command interpreter)
+connects the file <@>MyProg.c</@> to standard input of <@>cat</@>
+<item> <@>cat</@> reads its standard input
+<item> writes the (untransformed) text to standard output (i.e. the screen)
+</itemize>
+</slide>
+
+<slide>
+<heading>Using Filters
+Unix I/O redirection can be used to specify filter source and destination:
+<diagram>Pic/filter1.png
+Alternatively, most filters allow multiple sources to be specified:
+<diagram>Pic/filter2.png
+</slide>
+
+<slide>
+<continued>
+In isolation, filters are reasonably useful
+<p>
+In combination, they provide a very powerful problem-solving toolkit.
+<p>
+Filters are normally used in combination via a pipeline:
+<diagram>Pic/filter3.png
+Note: similar style of problem-solving to function composition.
+</slide>
+
+<slide>
+<continued>
+Unix filters use common conventions for command line arguments:
+<itemize>
+<item> input can be specified by a list of file names
+<item> if no files are mentioned, the filter reads from standard input
+        <small>(which may have been connected to a file)</small>
+<item> the filename <q><b><@>-</@></b></q> corresponds to standard input
+</itemize>
+Examples:
+<program>
+<comment># read from the file data1</comment>
+filter data1
+filter << data1
+
+<comment># read from the files data1 data2 data3</comment>
+filter data1 data2 data3
+
+<comment># read from data1, then stdin, then data2</comment>
+filter data1 - data2
+</program>
+If filter doesn't cope with named sources, use <@>cat</@>
+at the start of the pipeline
+</slide>
+
+<slide>
+<continued>
+Filters normally perform multiple variations on a task.
+<p>
+Selection of the variation is accomplished via command-line options:
+<itemize>
+<item> options are introduced by a <b><@>-</@></b> ("minus" or "dash")
+<item> options have a "short" form, <b><@>-</@></b> followed by a single letter
+        <~> <small>(e.g. <@>-v</@>)</small>
+<item> options have a "long" form, <b><@>--</@></b> followed by a word
+        <~> <small>(e.g. <@>--verbose</@>)</small>
+<item> short form options can usually be combined
+        <~> <small>(e.g. <@>-av</@> <~><small>vs</small><~> <@>-a -v</@>)</small>
+<item> <@>--help</@> (or <@>-?</@>) often gives a list of all command-line options
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Most filters have <i>many</i> options for controlling their behaviour.
+<p>
+<green>Old joke:</green> every letter can be used as an option to <@>cat</@>.
+<p>
+Unix <b>man</b>ual entries describe how each option works.
+<p>
+To find what filters are available: <@>apropos</@> <i>keyword</i> (but not cygwin)
+<p>
+Another source of help: <@>info</@> 
+       <~> <small>(but beware: emacs)</small>
+<pp>
+The solution to all your problems: <green><b>RTFM</b></green>
+</slide>
+
+<slide>
+<heading>Delimited Input
+Many filters are able to work with text data formatted as <em>fields</em>
+(columns in spreadsheet terms).
+<p>
+Such filters typically have an option for specifying the delimiter or field separator.
+<br>
+<small>(Unfortunately, they often make different assumptions about the default column separator)</small>
+<p>
+Example (tab-separated columns):
+<program>
+John   99
+Anne   75
+Andrew 50
+Tim    95
+Arun   33
+Sowmya 76
+</program>
+</slide>
+
+<slide>
+<continued>
+Example (verticalbar-separated columns, enrolment file):
+<sprogram>
+COMP1011|2252424|Abbot, Andrew John    |3727|1|M
+COMP2011|2211222|Abdurjh, Saeed        |3640|2|M
+COMP1011|2250631|Accent, Aac-Ek-Murhg  |3640|1|M
+COMP1021|2250127|Addison, Blair        |3971|1|F
+COMP4012|2190705|Allen, David Peter    |3645|4|M
+COMP4910|2190705|Allen, David Pater    |3645|4|M
+</sprogram>
+Example (colon-separated columns, old Unix password file):
+<sprogram>
+root:ZHolHAHZw8As2:0:0:root:/root:/bin/bash
+jas:nJz3ru5a/44Ko:100:100:John Shepherd:/home/jas:/bin/bash
+cs1021:iZ3sO90O5eZY6:101:101:COMP1021:/home/cs1021:/bin/bash
+cs2041:rX9KwSSPqkLyA:102:102:COMP2041:/home/cs2041:/bin/bash
+cs3311:mLRiCIvmtI9O2:103:103:COMP3311:/home/cs3311:/bin/bash
+</sprogram>
+</slide>
+
+<slide>
+<heading><@>cat</@>: the simplest filter
+The <@>cat</@> command copies its input to output unchanged (identity filter).
+<p>
+When supplied a list of file names, it con<b>cat</b>enates them onto stdout. 
+<p>
+Some options:
+<p>
+<deftable>
+<row>
+  <col1><b><@>-n</@></b></col1>
+  <col2><b>n</b>umber output lines <small>(starting from 1)</small></col2>
+</row>
+<row>
+  <col1><b><@>-s</@></b></col1>
+  <col2><b>s</b>queeze consecutive blank lines into single blank line</col2>
+</row>
+<row>
+  <col1><b><@>-v</@></b></col1>
+  <col2>display control-characters in <b>v</b>isible form (e.g. <@>^C</@>)</col2>
+</row>
+</deftable>
+<p>
+The <@>tac</@> command copies files, but reverses the order of lines.
+</slide>
+
+<slide>
+<heading>Exercise: cat/more
+Using the supplied files, do the following:
+<enumerate>
+<item> look at the contents of each file
+<item> produce a copy of count.c with line numbers
+<item> look for "invisible" characters in the files?
+</enumerate>
+</slide>
+
+<slide>
+<heading><@>wc</@>: word counter
+The <@>wc</@> command is a summarizing filter.
+<p>
+Useful with other filters to count things.
+<p>
+<deftable>
+<row>
+  <col1><b><@>-c</@></b></col1>
+  <col2>counts the number of <b>c</b>haracters <~> <small>(incl. <@>\n</@>)</small></col2>
+</row>
+<row>
+  <col1><b><@>-w</@></b></col1>
+  <col2>counts the number of <b>w</b>ords <~> <small>(non-white space)</small></col2>
+</row>
+<row>
+  <col1><b><@>-l</@></b></col1>
+  <col2>counts the number of <b>l</b>ines</col2>
+</row>
+</deftable>
+<small>
+Some filters find counting so useful that they define
+their own options for it (e.g. <@>grep -c</@>)
+</small>
+</slide>
+
+<slide>
+<heading>Exercise: wc
+Using the supplied files, answer the following:
+<enumerate>
+<item> how many different programs does UNSW offer?
+<item> how many times was WebCMS accessed?
+<item> how many students are studying in CSE?
+<item> how many words are there in the book?
+<item> how many lines are there in the story?
+</enumerate>
+</slide>
+
+<slide>
+<heading><@>tr</@>: transliterate characters
+The <@>tr</@> command converts text char-by-char according to a mapping.
+<program>
+tr '<$>sourceChars</$>' '<$>destChars</$>' << <$>dataFile</$>
+</program>
+<p>
+Each input character from <$>sourceChars</$> is
+mapped to the corresponding character in <$>destChars</$>.
+<p>
+Example:
+<program>
+tr 'abc' '123' << <$>someText</$>
+</program>
+Has <$>sourceChars</$>=<@>'abc'</@>, <$>destChars</$>=<@>'123'</@>,
+        so <@>a</@> <$><rightarrow></$> <@>1</@>,
+        <@>b</@> <$><rightarrow></$> <@>2</@>,
+        <@>c</@> <$><rightarrow></$> <@>3</@>
+<p>
+Note: <@>tr</@> doesn't accept file name on command line.
+</slide>
+
+<slide>
+<continued>
+Characters that are not in <$>sourceChars</$> are copied unchanged to output.
+<p>
+If there is no corresponding character (i.e. <$>destChars</$> is shorter than <$>sourceChars</$>), then the last char in <$>destChars</$> is used.
+<p>
+Shorthands are available for specifying character lists:
+<p>
+E.g. <@>'a-z'</@> is equivalent to <@>'abcdefghijklmnopqrstuvwxyz'</@>
+<p>
+Note: newlines will be modified if the mapping specification requires it.
+</slide>
+
+<slide>
+<continued>
+Some options:
+<p>
+<deftable>
+<row>
+  <col1><b><@>-c</@></b></col1>
+  <col2>map all characters <em>not</em> occurring in <$>sourceChars</$> <small>(<b>c</b>omplement)</small></col2>
+</row>
+<row>
+  <col1><b><@>-s</@></b></col1>
+  <col2><b>s</b>queeze adjacent repeated characters out (only copy the first)</col2>
+</row>
+<row>
+  <col1><b><@>-d</@></b></col1>
+  <col2><b>d</b>elete all characters in <$>sourceChars</$> (no <$>destChars</$>)</col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+<comment># map all upper-case letters to lower-case equivalents</comment>
+tr 'A-Z' 'a-z' << text
+
+<comment># simple encryption (a->b, b->c, ... z->a)</comment>
+tr 'a-zA-Z' 'b-zaB-ZA' << text
+
+<comment># remove all digits from input</comment>
+tr -d '0-9' << text
+
+<comment># break text file into individual words, one per line</comment>
+tr -cs 'a-zA-Z0-9' '\n' << text
+</program>
+</slide>
+
+<slide>
+<heading><@>head</@>/<@>tail</@>: select lines
+The <@>head</@> command copies to output the first 10 lines of input.
+<p>
+The <@>tail</@> command copies to output the last 10 lines of input.
+<p>
+The <@>-</@><$>Number</$> option changes how many lines are copied.
+<p>
+E.g. <@>head -30</@> copies to output the first 30 lines of input.
+<p>
+Can combine <@>head</@> and <@>tail</@> to select a range of lines.
+<p>
+E.g. <@>head -100 | tail -20</@> copies lines 81..100 to output.
+<p>
+With more than one file prefixes with name (see labs).
+</slide>
+
+<slide>
+<heading>Exercise: head/tail
+Using the supplied files, answer the following:
+<enumerate>
+<item> what is the opening sentence in the story?
+<item> what is the first line in the count.c program?
+<item> what were the first 10 accesses to WebCMS?
+<item> what were the last 20 access to WebCMS?
+</enumerate>
+</slide>
+
+<slide>
+<heading><@>grep</@>: select lines matching a pattern
+The <@>grep</@> command only copies to output those lines in the input
+that match a specified pattern.
+<p>
+The pattern is supplied as a regular expression on the command line
+<small>(and should be quoted using single-quotes)</small>.
+<p>
+Some options:
+<p>
+<deftable>
+<row>
+  <col1><b><@>-i</@></b></col1>
+  <col2>ignore upper/lower-case difference in matching</col2>
+</row>
+<row>
+  <col1><b><@>-w</@></b></col1>
+  <col2>only match pattern if it makes a complete word</col2>
+</row>
+<row>
+  <col1><b><@>-v</@></b></col1>
+  <col2>only display lines that <em>do not</em> match the pattern</col2>
+</row>
+</deftable>
+<p>
+<small>(The name <@>grep</@> is an acronym for <b>G</b>lobally search with <b>R</b>egular <b>E</b>xpressions and <b>P</b>rint)</small>
+</slide>
+
+<slide>
+<heading>Regular Expressions
+A <em>regular expression</em> (regexp) is a pattern that specifies
+properties of text.
+<p>
+Regular expressions are used to locate pieces of text in a file.
+<p>
+In other words, they provide a searching mechanism for plain text.
+<p>
+In the Unix environment:
+<itemize>
+<item> a lot of data is available in plain text format
+<item> many tools make use of regular expressions for searching
+<item> effective use of regular expressions makes you more productive
+</itemize>
+<p>
+<small>A POSIX standard for regular expressions defines
+the "pattern language" used by many Unix tools.</small>
+</slide>
+
+<slide>
+<heading>Regular Expression Examples
+<deftable>
+<row>
+   <col1><b>Regexp</b></col1>
+   <col2><b>Matches</b></col2>
+</row>
+<row>
+   <col1><@>abc</@></col1>
+   <col2>the string of letters <@>"abc"</@> <br>
+   E.g. <@>abc</@></col2>
+</row>
+<row>
+   <col1><@>a.c</@></col1>
+   <col2>strings of letters containing <@>'a'</@> followed by <@>'c'</@>
+       with any single character in between<br>
+   E.g. <@>abc, aac, acc, aXc, a2c, ...</@></col2>
+</row>
+<row>
+   <col1><@>ab*c</@></col1>
+   <col2>strings of letters containing <@>'a'</@> followed by <@>'c'</@>
+       with any number of <@>'b'</@> letters in between<br>
+   E.g. <@>ac, abc, abbc, abbbc, ...</@></col2>
+</row>
+<row>
+   <col1><@>a|the</@></col1>
+   <col2>either the string <@>"a"</@> or the string <@>"the"</@> <br>
+   E.g. <@>a, the</@></col2>
+</row>
+<row>
+   <col1><@>[a-z]</@></col1>
+   <col2>any single lower-case letter <br>
+   E.g. <@>a, b, c, ... z</@></col2>
+</row>
+</table>
+</center>
+</slide>
+
+<slide>
+<heading>Atomic Patterns
+The POSIX regular expression language allows you to build up complex
+patterns from simple components using pattern constructors.
+<p>
+<em>Atomic patterns</em> are denoted by single characters:
+<itemize>
+<item> lower-case letters, upper-case letters, digits, some punctuation
+</itemize>
+An atomic pattern matches a literal example of itself anywhere in the input.
+<p>
+E.g. the pattern <@>a</@> matches the letter <@>a</@> anywhere in the input.
+<p>
+Some punctuation characters (e.g. <@>* [ ^</@>) have special meanings,
+but can also be used as atomic patterns by escaping them with <@>\</@> (backslash).
+<p>
+E.g. the pattern <@>\*</@> matches the <@>*</@> character anywhere in the input.
+<p>
+The special pattern <b>.</b> (dot) matches any single character.
+</slide>
+
+<slide>
+<heading>Bracket Expressions
+A <em>bracket expression</em>
+<itemize>
+<item> is denoted by <b><@>[</@></b><$>listOfCharacters</$><b><@>]</@></b>
+<item> matches any single character from the list of characters
+</itemize>
+E.g. <@>[aeiou]</@> matches any vowel.
+<p>
+Shorthand is available for ranges of characters <~> <b><@>[</@></b><$>first-last</$><b><@>]</@></b>
+<p>
+E.g. <@>[a-e]  [a-z]  [0-9]  [a-zA-Z]  [A-Za-z]  [a-zA-Z0-9]  [ -~]</@>
+<br>(the last matches any printable character)
+<p>
+The matching can be inverted <~> <b><@>[^</@></b><$>listOfCharacters</$><b><@>]</@></b>
+<p>
+E.g. <@>[^a-e]</@> matches any character <i>except</i> one of the first five letters
+<p>
+<small>Punctuation characters (except for <@>^\-[]</@>) lose their special meaning inside bracket expressions.</small>
+</slide>
+
+<slide>
+<heading>Anchors
+We can insist that a pattern appears at the start or end of a line
+<itemize>
+<item> the start of the line is denoted by <b><@>^</@></b> (uparrow)
+<item> the end of the line is denoted by <b><@>$</@></b> (dollar)
+</itemize>
+E.g. <@>^[abc]</@> matches either <@>a</@> or <@>b</@> or <@>c</@> at the
+start of a line.
+<p>
+E.g. <@>cat$</@> matches the string <@>cat</@> but only at the end of a line.
+</slide>
+
+<slide>
+<heading>Repetition
+We can specify repetitions of patterns
+<itemize>
+<item> <$>p</$><b><@>*</@></b> denotes zero or more repetitions of <$>p</$>
+<item> <$>p</$><b><@>+</@></b> denotes one or more repetitions of <$>p</$>
+<item> <$>p</$><b><@>?</@></b> denotes zero or one occurence of <$>p</$>
+</itemize>
+E.g. <@>[0-9]+</@> matches any sequence of digits (i.e. matches integers)
+<p>
+E.g. <@>[-'a-zA-Z]+</@> matches any sequence of letters/hyphens/apostrophes <br>
+<small>(this pattern could be used to match words in a piece of English text, e.g. <@>it's</@>, <@>John</@>, ...)</small>
+<p>
+E.g. <@>[^X]*X</@> matches any characters up to and including the first <@>X</@>
+</slide>
+
+<slide>
+<continued>
+If a pattern can match several parts of the input,
+the first and longest match is chosen.
+<p>
+Examples:
+<deftable>
+<row>
+  <col1><b>Pattern</b></col1>
+  <col2><b>Text</b> (with match underlined)</col2>
+</row>
+<row>
+  <col1><@>[0-9]+</@></col2>
+  <col2>i=<u>1234</u> <~> j=56789</col2>
+</row>
+<row>
+  <col1><@>[ab]+</@></col2>
+  <col2><u>aabbabababaaa</u>cabba</col2>
+</row>
+<row>
+  <col1><@>[+]+</@></col2>
+  <col2>C<u>++</u> is a hack</col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<heading>Alternation
+The notation <~> <$>pattern<sub>1</sub></$> <b><@>|</@></b> <$>pattern<sub>2</sub></$> <b><@>|</@></b> <~>...<~> <b><@>|</@></b> <$>pattern<sub>n</sub></$>
+<itemize>
+<item> matches any of the <$>pattern<sub>i</sub></$>'s
+<item> chooses the first and longest possible match
+</itemize>
+E.g. <@>a|b|c</@> matches any of the letters <@>a</@>, <@>b</@> or <@>c</@> <~> (same as <@>[abc]</@>)
+<p>
+E.g. <@>([0-9]+)|([a-z]+)</@> matches any sequence of letters or digits
+<p>
+<small>Note: parentheses are used for grouping i.e. to treat a complex pattern as an atomic pattern.</small>
+</slide>
+
+<slide>
+<heading>The grep family
+<@>grep</@> is one of a group of related filters
+using different kinds of pattern match:
+<itemize>
+<item> <@>grep</@> uses a limited form of POSIX regular expressions
+(no <@>+ ? |</@> or parentheses)
+<item><@>egrep</@> (extended grep) implements the full regexp syntax
+<item><@>fgrep</@> finds any of several (maybe even thousands of)
+fixed strings using an optimised algorithm.
+</itemize>
+<p>
+grep's options like <@>-i</@> and <@>-v</@> are recognised by all family members.
+<p>The regexp or fgrep's fixed string list can be stored in a file
+and accessed with the <@>-f</@> option:
+<@>fgrep -f magicwords data1</@>
+</slide>
+
+<slide>
+<heading>Exercise: grep
+Using the supplied files, answer the following:
+<enumerate>
+<item> what COMP courses are there?
+<item> which courses are taught by CSE?
+<item> how many courses are computer-related?
+<item> what computer-related courses aren't taught by CSE?
+<item> how many students are enrolled in COMP2041?
+<item> how many women are enrolled in COMP2041?
+<item> how many students are studying COMP3511/9511?
+<item> how many times were WebCMS course menus accessed?
+</enumerate>
+</slide>
+
+<slide>
+<heading><@>cut</@>: vertical slice
+The <@>cut</@> command prints selected parts of input lines.
+<itemize>
+<item> can select fields (assumes tab-separated columnated input)
+<item> can select a range of character positions
+</itemize>
+Some options:
+<p>
+<deftable>
+<row>
+  <col1><b><@>-f</@><$>listOfCols</$></b></col1>
+  <col2>print only the specified fields (tab-separated) on output</col2>
+</row>
+<row>
+  <col1><b><@>-c</@><$>listOfPos</$></b></col1>
+  <col2>print only chars in the specified positions</col2>
+</row> 
+<row>
+  <col1><b><@>-d'</@><$>c</$><@>'</@></b></col1>
+  <col2>use character <$>c</$> as the field separator</col2> 
+</row>
+</deftable>
+<p>
+Lists are specified as ranges (e.g. <@>1-5</@>) or comma-separated (e.g. <@>2,4,5</@>).
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+<comment># print the first column</comment>
+cut -f1 data 
+
+<comment># print the first three columns</comment>
+cut -f1-3 data
+
+<comment># print the first and fourth columns</comment>
+cut -f1,4 data
+
+<comment># print all columns after the third</comment>
+cut -f4- data
+
+<comment># print the first three columns, if '|'-separated</comment>
+cut -d'|' -f1-3 data
+
+<comment># print the first five chars on each line</comment>
+cut -c1-5 data
+</program>
+<small>Unfortunately, there's no way to refer to "last column" without counting the columns.</small>
+</slide>
+
+<slide>
+<heading><@>paste</@>: combine files
+The <@>paste</@> command displays several text files "in parallel" on output.
+<p>
+If the inputs are files <@>a</@>, <@>b</@>, <@>c</@>
+<itemize>
+<item> the first line of output is composed of the first lines of <@>a</@>, <@>b</@>, <@>c</@>
+<item> the second line of output is composed of the second lines of <@>a</@>, <@>b</@>, <@>c</@>
+</itemize>
+Lines from each file are separated by a tab character or specified delimiter(s).
+<p>
+If files are different lengths, output has all lines from longest file,
+with empty strings for missing lines.
+<p>
+Interleaves lines instead with <@>-s</@> (serial) option.
+</slide>
+
+<slide>
+<continued>
+Example: using <@>paste</@> to rebuild a file broken up by <@>cut</@>.
+<p>
+<program>
+<comment># assume "data" is a file with 3 tab-separated columns</comment>
+cut -f1 data >> data1
+cut -f2 data >> data2
+cut -f3 data >> data3
+paste data1 data2 data3 > newdata
+<comment># "newdata" should look the same as "data"</comment>
+</program>
+</slide>
+
+<slide>
+<heading><@>sort</@>: sort lines
+The <@>sort</@> command copies input to output but ensures that the
+output is arranged in some particular order of lines.
+<p>
+By default, sorting is based on the first characters in the line.
+<p>
+Other features of <@>sort</@>:
+<itemize>
+<item> understands that text data sometimes occurs in delimited fields. <br>
+(so, can also sort fields (columns) other than the first <small>(which is the default)</small>)
+<item> can distinguish numbers and sort appropriately
+<item> can ignore punctuation or case differences
+<item> can sort files "in place" as well as behaving like a filter
+<item> capable of sorting <i>very large</i> files
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Some options:
+<p>
+<deftable>
+<row>
+  <col1><b><@>-r</@></b></col1>
+  <col2>sort in descending order (<b>r</b>everse sort)</col2>
+</row>
+<row>
+  <col1><b><@>-n</@></b></col1>
+  <col2>sort numerically rather than lexicographically</col2>
+</row>
+<row>
+  <col1><b><@>-d</@></b></col1>
+  <col2>dictionary order: ignore non-letters and non-digits</col2>
+</row>
+<row>
+  <col1><b><@>-t'</@><$>c</$><@>'</@></b></col1>
+  <col2>use character <$>c</$> to separate columns (default: space)</col2>
+</row>
+<row>
+  <col1><b><@>-k</@><$>n</$><@>'</@></b></col1>
+  <col2>sort on column <$>n</$></col2>
+</row>
+</deftable>
+<small>Note: the <@>' '</@> around the separator char are usually not necessary,
+but are useful to prevent the shell from mis-interpreting shell meta-characters
+such as <@>'|'</@>.</small>
+<p>
+<small>Hint: to specify TAB as the field delimiter with an interactive shell like bash, type CTRL-v before pressing the TAB key.</small>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+<comment># sort numbers in 3rd column in descending order</comment>
+sort -nr -k3 data
+
+<comment># sort the password file based on user name</comment>
+sort -t: -k5 /etc/passwd
+ 
+</program>
+</slide>
+
+<slide>
+<heading><@>uniq</@>: remove or count duplicates
+The <@>uniq</@> command by default removes all but one copy of <em>adjacent</em> identical lines.
+<p>
+Some options:
+<p>
+<deftable>
+<row>
+  <col1><b><@>-c</@></b></col1>
+  <col2>also print number of times each line is duplicated</col2>
+</row>
+<row>
+  <col1><b><@>-d</@></b></col1>
+  <col2>only print (one copy of) duplicated lines</col2>
+</row>
+<row>
+  <col1><b><@>-u</@></b></col1>
+  <col2>only print lines that occur uniquely (once only)</col2>
+</row>
+</deftable>
+<p>
+Surprisingly useful tool for summarising data,
+typically after extraction by cut.
+Always preceded by sort (why?).
+<program>
+<comment># extract first field, sort, and tally</comment>
+cut -f1 data  |  sort  |  uniq -c
+</program>
+</slide>
+
+<slide>
+<heading><@>join</@>: database operator
+<p>
+<@>join</@> merges two files using the values in a field
+in each file as a common key.
+<p>
+The key field can be in a different position in each file,
+but the files must be ordered on that field.
+The default key field is 1.
+<P>Some options:
+<p>
+<deftable>
+<row>
+  <col1><b><@>-1</@> <i>k</i></b></col1>
+  <col2>key field in first file is <i>k</i></col2>
+</row>
+<row>
+  <col1><b><@>-2</@> <i>k</i></b></col1>
+  <col2>key field in second file is <i>k</i></col2>
+</row>
+<row>
+  <col1><b><@>-a</@> <i>N</i></b></col1>
+  <col2>print a line for each unpairable line in file <i>N</i> (1 or 2)</col2>
+</row>
+<row>
+  <col1><b><@>-i</@></b></col1>
+  <col2>ignore case</col2>
+</row>
+<row>
+  <col1><b><@>-t</@> <i>c</i></b></col1>
+  <col2>tab character is <i>c</i></col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+Given these two data files (tab-separated fields)
+<sprogram>
+<comment># data1:                            # data2:</comment>
+Bugs Bunny      1953            Warners Bugs Bunny
+Daffy Duck      1948            Warners Daffy Duck
+Donald Duck     1939            Disney  Goofy
+Goofy   1952                    Disney  Mickey Mouse
+Mickey Mouse    1937            Pixar   Nemo
+Nemo    2003
+Road Runner     1949
+</sprogram>
+the command <@>join -t'   ' -2 2 -a 1 data1 data2</@> gives
+<sprogram>
+Bugs Bunny      1953    Warners
+Daffy Duck      1948    Warners
+Donald Duck     1939
+Goofy   1952    Disney
+Mickey Mouse    1937    Disney
+Nemo    2003    Pixar
+Road Runner     1949
+</sprogram>
+</slide>
+
+<slide>
+<heading>Exercise: combining filters
+Using the supplied files, answer the following:
+<enumerate>
+<item> how many students are enrolled in each course?
+<item> what students have only a single name <small>('.' as firstname)</small>?
+<item> what programs are COMP2041 students enrolled in (codes)?
+<item> what programs are COMP2041 students enrolled in (names)?
+<item> how many students are there from each program?
+<item> how many COMP2041 students are first-years?
+<item> what are the most common words in the book?
+</enumerate>
+</slide>
+
+<slide>
+<heading><@>sed</@>: stream editor
+The <@>sed</@> command provides the power of interactive-style
+editing in <q>filter-mode</q>.
+<p>
+Invocation:
+<program>
+sed -e '<$>EditCommands</$>' <$>DataFile</$>
+sed -f <$>EditCommandFile</$> <$>DataFile</$>
+</program>
+How <@>sed</@> works:
+<itemize>
+<item> read each line of input
+<item> check if it matches any patterns or line-ranges
+<item> apply related editing commands to the line
+<item> write the transformed line to output
+</itemize>
+</slide>
+
+<slide>
+<continued>
+The editing commands are very powerful and subsume the actions of
+many of the filters looked at so far.
+<p>
+In addition, <@>sed</@> can:
+<itemize>
+<item> partition lines based on patterns rather than columns
+<item> extract ranges of lines based on patterns or line numbers
+</itemize>
+Option <@>-n</@> (<b>n</b>o printing):
+<itemize>
+<item> applies all editing commands as normal
+<item> displays no output, unless <@>p</@> appended to edit command
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Editing commands:
+<deftable>
+<row>
+  <col1><b><@>p</@></b></col1>
+  <col2>print the current line</col2>
+</row>
+<row>
+  <col1><b><@>d</@></b></col1>
+  <col2>delete (don't print) the current line</col2>
+</row>
+<row>
+  <col1><b><@>s/</@><$>RegExp</$><@>/</@><$>Replace</$><@>/</@></b></col1> <br>
+  <col2>substitute first occurrence of string matching <$>RegExp</$> by <$>Replace</$> string</col2>
+</row>
+<row>
+  <col1><b><@>s/</@><$>RegExp</$><@>/</@><$>Replace</$><@>/g</@></b></col1> <br>
+  <col2>substitute all occurrences of string matching <$>RegExp</$> by <$>Replace</$> string</col2>
+</row>
+<row>
+  <col1><b><@>q</@></b></col1>
+  <col2>terminate execution of <@>sed</@></col2>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+All editing commands can be qualified by line addresses or
+line selector patterns to limit lines where command is applied:
+<deftable>
+<row>
+  <col1><b><$>LineNo</$></b></col1>
+  <col2>selects the specified line</col2></row>
+</row>
+<row>
+  <col1><b><$>StartLineNo</$><@>,</@><$>EndLineNo</$></b></col1> <br>
+  <col2>selects all lines between specified line numbers</col2>
+</row>
+<row>
+  <col1><b><@>/</@><$>RegExp</$><@>/</@></b></col1>
+  <col2>selects all lines that match <$>RegExp</$></col2>
+</row>
+<row>
+  <col1><b><@>/</@><$>RegExp1</$><@>/,/</@><$>RegExp2</$><@>/</@></b></col1> <br>
+  <col2>selects all lines between lines matching reg exps</col2>
+</row>
+</deftable>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+<comment># print all lines</comment>
+sed -n -e 'p' << <$>file</$>
+
+<comment># print the first 10 lines</comment>
+sed -e '10q' << <$>file</$>
+sed -n -e '1,10p' << <$>file</$>
+
+<comment># print lines 81 to 100</comment>
+sed -n -e '81,100p' << <$>file</$>
+
+<comment># print the last 10 lines of the file?</comment>
+<red>sed -n -e '$-10,$p' << <$>file</$></red>  <comment># does NOT work</comment>
+</program>
+</slide>
+
+<slide>
+<continued>
+More Examples:
+<program>
+<comment># print only lines containing 'xyz'</comment>
+sed -n -e '/xyz/p' << <$>file</$>
+
+<comment># print only lines <em>not</em> containing 'xyz'</comment>
+sed -e '/xyz/d' << <$>file</$>
+
+<comment># show the passwd file, displaying only the
+# lines from "root" up to "nobody" (i.e. system accounts)</comment>
+sed -n -e '/^root/,/^nobody/p' /etc/passwd
+ 
+<comment># remove first column from ':'-separated file</comment>
+sed -e 's/[^:]*://' datafile
+
+<comment># reverse the order of the first two columns</comment>
+sed -e 's/\([^:]*\):\([^:]*\):\(.*\)$/\2:\1:\3/'
+</program>
+</slide>
+
+<slide>
+<heading><@>find</@>: search for files
+The <@>find</@> commands allows you to search for files based on
+specified properties
+<~> <small>(a filter for the file system)</small>
+<itemize>
+<item> searches an entire directory tree, testing each file for the required property.
+<item> takes some action for all "matching" files
+        <small>(usually just print the file name)</small>
+</itemize>
+Invocation:
+<program>
+find <$>StartDirectory</$> <$>Tests</$> <$>Actions</$>
+</program>
+where
+<itemize>
+<item> the <$>Tests</$> examine file properties like name, type, modification date
+<item> the <$>Actions</$> can be simply to print the name or execute an arbitrary command on the matched file
+</itemize>
+</slide>
+
+<slide>
+<continued>
+Examples:
+<program>
+<comment># find all the HTML files below /home/jas/web</comment>
+find  /home/jas/web  -name '*.html'  -print
+
+<comment># find all your files/dirs changed in the last 2 days</comment>
+find  ~  -mtime -2  -print
+
+<comment># show info on files changed in the last 2 days</comment>
+find  ~  -mtime -2  -type f  -exec ls -l {} \;
+
+<comment># show info on directories changed in the last week</comment>
+find  ~  -mtime -7  -type d  -exec ls -ld {} \;
+
+<comment># find directories either new or with '07' in their name</comment>
+find  ~  -type d  (  -name '*07*'  -o  -mtime -1  )  -print
+</program>
+</slide>
+
+<slide>
+<continued>
+More Examples:
+<program>
+<comment># find all <i>new</i> HTML files below /home/jas/web</comment>
+find  /home/jas/web  -name '*.html'  -mtime -1  -print
+
+<comment># find background colours in my HTML files</comment>
+find  ~/web  -name '*.html'  -exec grep -H 'bgcolor' {} \;
+
+<comment># above could also be accomplished via ...</comment>
+grep  -r  'bgcolor'  ~/web
+
+<comment># make sure that all HTML files are accessible</comment>
+find  ~/web  -name '*.html'  -exec chmod 644 {} \;
+
+<comment># remove any really old files ... Danger!</comment>
+find  /hot/new/stuff  -type f  -mtime +364  -exec rm {} \;
+find  /hot/new/stuff  -type f  -mtime +364  -ok rm {} \;
+</program>
+</slide>
+
+<slide>
+<heading>Filter summary by type
+<itemize>
+<sitem><em>Horizontal slicing</em> - select subset of lines: <br>
+	<~> <~> <~> <@>cat, head, tail, *grep, sed, uniq</@>
+<sitem><em>Vertical slicing</em> - select subset of columns:
+	<~> <@>cut</@>, <@>sed</@>
+<sitem><em>Substitution</em>:
+	<~> <@>tr</@>, <@>sed</@> 
+<sitem><em>Aggregation, simple statistics</em>:
+	<~> <@>wc</@>, <@>uniq</@> 
+<sitem><em>Assembly</em> - combining data sources:
+	<~> <@>paste</@>, <@>join</@> 
+<sitem><em>Reordering</em>:
+	<~> <@>sort</@> 
+<sitem><em>Viewing</em> (always end of pipeline):
+	<~> <@>more</@>, <@>less</@> 
+<sitem><em>File system filter</em>:
+	<~> <@>find</@> 
+<sitem><em>Programmable filters</em>:
+	<~> <@>sed</@>, (and <@>perl</@>)
+</itemize>
+</slide>

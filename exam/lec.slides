@@ -1,0 +1,216 @@
+<title>COMP2041/9041 Final Lecture
+<slide>
+<heading>Course Aims
+This course aims to explore a range techniques, language and tools 
+for the development of software systems.
+<p>
+Hopefully you now:
+<itemize>
+<item>
+understand a wider range of programming languages, tools and techniques
+<item>
+understand more about how/when to apply these languages, tools and techniques
+</itemize>
+You've been given only an introduction to these tpics
+but you should be better equipped to:
+<itemize>
+<item>
+given a problem and choose language/tools
+<item>
+construct a complete software system to meet the problem
+<item>
+determine how correct/reliable/efficient the system is
+<item>
+improve correctness/reliability/efficiency of the system
+</itemize>
+</slide>
+
+<slide>
+<heading>Syllabus/Topics
+<itemize>
+<item> Perl
+<item> Regular expressions
+<item> Shell
+<item> Unix filters
+<item> Generating  web content with Perl (CGI)
+<item> Version control, configuration (<@>make</@>)
+<item> Language choice - cost, peformance, security ..
+<item> Performance tuning
+</itemize>
+<p>
+All topics are potentially examinable but few exam questions on last 3.
+</slide>
+
+<slide>
+<heading>Assessment
+Assessment summary from the introductory lecture:
+<sprogram>
+labs   = mark for lab exercises  (out of 10)
+ass    = mark for assignments    (out of 30)
+prac   = mark for exam           (out of 60)
+
+okExam = implementation_questions_solved >= 2 && exam >= 30/60
+
+mark   = labs + ass + prac + exam
+grade  = HD|DN|CR|PS  if mark >= 50 && okExam
+       = UF           if mark >= 45 && !okExam
+       = PC|FL        if mark >= 45 && okExam
+       = FL           if mark < 50
+</sprogram>
+Note: <@>lab + ass</@> marks will be available before the Final Exam.
+<p>
+Check via <@>/home/cs2041/bin/classrun -sturec</@>
+</slide>
+
+<slide>
+<heading>Lab Marking
+You should have checked your tutors has recorded appropriate lab marks for you.
+<p>
+Disagreements should be referred to me.
+<p>
+I'll combine weekly lab marks into a lab mark out of 10 
+</slide>
+
+<slide>
+<heading>Exam
+The exam will be the Wednesday morning 15/6/2009  08:45-12:00 
+<p>
+Internal exam run in CSE labs.
+<p>
+Seating details will appear on class web page by Tuesday 14/6.
+<p>
+Materials:  <~> None required ...  <b>NOT</b> open book, Info Sheets supplied
+<p>
+Two parts, written and implementation.
+</slide>
+
+<slide>
+<heading>Written Part
+Must be completed during 1st hour of 3 hour exam - it will be collected after 1 hour.
+<p>
+Materials: <~> None required ...  <b>NOT</b> open book
+<p>
+No use of computer allowed during this part.
+<p>
+<itemize>
+<item> Emphasis on Perl/Shell/Regular expressions/CGI
+<item> Some questions will ask you to read Perl/Shell/regexps  and indicate what it does.
+<item> Some questions will be short answer/multiple choice.
+<item> Some questions might ask you to write code (e.g. CGI)
+<item> Few questions on other lecture topics (configuration, version control, performance,...)
+</itemize>
+<p>
+Exact format (skeleton exam) will be released several days prior to actual
+exam.
+</slide>
+
+<slide>
+<heading>Implementation Part
+Overview:  <~> 5 questions  <~>... <~> 2 hours  
+<p>
+You will get the implementation questions at the start of the 3 hours but you
+can not use the computer for the first hour,
+<p>
+You perform satisfactorily
+on the prac exam on the Exam to pass the course.
+This is defined as
+solving at least two of the questions completely.
+<p>
+Exact format (skeleton exam) will be released several days prior to actual
+exam.
+<p>
+
+<itemize>
+<item> Closed Book.
+<item> You will be given Perl, Shell, C  and Java info sheets which list useful functions and idioms.
+<item> Questions will describe a task and ask you to write a program that performs this task.
+<item> Questions will usually include examples.
+<item> Questions may or may not given you some code to start with.
+<item> No CGI in implementation part.
+<item> You may or may not be given test data or other files
+<item> 1 or more tests may be done on submission.  This does not guarantee any marks.  Do your own testing.
+<item> There may be no submission tests for some questions.
+<item> It is not sufficient to match any supplied examples.
+<item> You may use Perl, Shell, C or Java to answer any question. 
+</itemize>
+</slide>
+
+<slide>
+<heading>Implementation Part - Marking
+<itemize>
+<item> Your answers will be run through automatic marking software.
+<item> Please follow the input/output format shown exactly.
+<item> Please make your program behave exactly as specified.
+<item> All answers are also hand marked.  The automatic marking
+is to assist these markers.
+<item> No marks awarded for style or comments.
+<item> Use decent formatting so the marker (and you) can read the program.
+<item> Comments only necessary if you want to tell the marker something.
+<item> Minor errors will result in only a small penalty.
+<item> E.g. an answer correct except for a missing semi-colon would
+receive almost full marks.
+<item> No marks will given unless an answer contains a substantial
+part of a solution (> 33%).
+<item> No marks just for starting a question and writing some code
+</itemize>
+</slide>
+
+<slide>
+<heading>Special Consideration
+<p>
+By attending the exam, you are saying "I am well enough to sit it".
+<p>
+If you really are sick, stay home and apply for Special Consideration.
+<p>
+Applications for Special Consideration from people who sat the exam
+will be ignored.
+<p>
+Read the "Yellow Form" for details of under what conditions you
+might be eligible for a Supp .. it is <em>not</em> automatic.
+</slide>
+
+
+<slide>
+<heading>Provisional Results
+Provisional results will be made available via classrun when marking is complete -
+before Monday 27 June.  (I'll send e-mail). 
+<p>
+Final results will appear on  uni web pages (NSS).
+<p>
+The supplementary exams will only be available to students offered
+supplementary assessment by school or faculty examiners meetings.
+<p>
+Most people sitting the supplementary exams missed the original
+exam due to illness (and hence applied for <em>special consideration</em>).
+<p>
+The examiners meetings sometimes offer supplementary assessment to
+students with borderline results, e.g. with a final mark of 48 and passes
+in all other subjects.
+<p>
+Please don't ask me if you can sit the supplementary exams.
+It is up to the examiners meeting.
+<p>
+If you are disadvantaged in some way you
+should apply for special consideration at the student centre.
+<p>
+Students who have passed the subject are not normally offered supplementary assessment.
+<p>
+Contact the school office to find out if your application for supplementary assessment has
+been successful.
+<p>
+There is no alternative to the supplementary exam - if you miss it
+your grade will be FL.
+</slide>
+
+<slide>
+<heading>And that's all ...
+
+Good Luck
+<p>
+You've been a fun group of students to teach.
+<p>
+This course has been far from perfect but I hope
+you still managed to learnt something useful.
+<p>
+I hope you get the mark you deserve.
+</slide>
