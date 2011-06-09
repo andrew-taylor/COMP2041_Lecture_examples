@@ -403,8 +403,7 @@ the "pattern language" used by many Unix tools.</small>
    <col2>any single lower-case letter <br>
    E.g. <@>a, b, c, ... z</@></col2>
 </row>
-</table>
-</center>
+</deftable>
 </slide>
 
 <slide>

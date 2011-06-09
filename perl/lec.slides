@@ -694,7 +694,7 @@ sub mySub {
 }
 </program>
 <p>
-Note that <@>@args</@> is a global variable.
+Note that @args is a global variable.
 <p>
 To make it local, precede by <@>my</@>, e.g.
 <program>
@@ -1430,7 +1430,7 @@ sub mySub {
 }
 </program>
 <p>
-Note that <@>@args</@> is a global variable.
+Note that @args is a global variable.
 <p>
 To make it local, precede by <@>my</@>, e.g.
 <program>
