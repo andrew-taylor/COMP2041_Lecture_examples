@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+# Simple CGI script written by andrewt@cse.unsw.edu.au
+# with CGI security hole probably fixed
+
+use CGI qw/:all/;
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
+print header, start_html('A Simple Example');
+warningsToBrowser(1);
+
+$address = param("address");
+if (!defined $address) {
+	print start_form, 'Enter e-mail address: ', textfield('address'), end_form, end_html;
+	exit 0;
+}
+
+# This seems to avoid problems with Shell special characters
+# but it is safer to run mail directly rather via the shell
+$address = substr($address, 0, 256);
+# Remove all but characters legal in e-mail addresses
+$address =~ s/[^\w\.\@\-\!\#\$\%\&\'\*\+\-\/\=\?\^_\`\{\|\}\~]//g;
+# This stops quotes causing a shell syntax error 
+$address =~ s/'/\\'/g;
+system "echo hello|mail '$address'";
+print "Mail sent to $address\n", end_html;

@@ -1,0 +1,58 @@
+<html>
+<head><title>Make - Examples</title>
+
+</head>
+<body bgcolor=white>
+<center>
+<h2>Make - Examples</h2>
+</center>
+
+<OL>
+<P><LI>
+Basic <a href="Makefile.simple">Makefile.simple</a> for game program,
+with explicit build for each component object file
+and final application executable.
+
+<P><LI>
+Basic <a href="Makefile.variables">Makefile.variables</a> for game program,
+as above but including some variable definitions
+
+
+<P><LI>
+Basic <a href="Makefile.builtin_variables">Makefile.builtin_variables</a> for game program,
+as above but using some builtin variable definitions
+
+<P><LI>
+<a href="Makefile.implicit">Makefile.implicit</a> for game program,
+as above but relying on implicit rules and special variables
+<pre>
+make -f Makefile.1
+</pre>
+
+
+<P><LI>
+A simple version of make can be written in Perl.
+<a href="make0.pl">make0.pl</a>
+It can handle the first <a href="Makefile.simple">Makefile.simple</a> because it doesn't
+use comments or variables.
+
+<P><LI>
+
+By adding a few more lines of Perl:
+<a href="make1.pl">make1.pl</a>
+it can handle comments & variables, e.g. <a href="Makefile.variables">Makefile.variables</a>,
+but it doesn't implement built-in rules and special variables.
+</OL>
+
+<P><LI>
+
+By adding a few more lines of Perl:
+<a href="make2.pl">make2.pl</a>
+can handle some  builtin variables ($@,$*,$^,$<) 
+and implicit rule (.o files).
+allowing it to handle <a href="Makefile.builtin_variables">Makefile.builtin_variables</a> and 
+<a href="Makefile.implicit">Makefile.implicit</a>.
+</OL>
+
+
+</body> </html>

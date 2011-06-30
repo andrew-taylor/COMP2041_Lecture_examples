@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+# Simple CGI script written by andrewt@cse.unsw.edu.au
+# to demonstrate a  CGI security hole
+
+use CGI qw/:all/;
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
+
+print header, start_html('A Simple Example');
+warningsToBrowser(1);
+
+$login = param("login");
+if (!defined $login) {
+	print start_form, 'Enter login: ', textfield('login'), end_form, end_html;
+	exit 0;
+}
+
+$login = substr($login, 0, 32); # limit login to 32 characters
+$login =~ s/[^\w\-]//g;         # removed all but expected characters
+$user_id =`/usr/bin/id $login`;
+print "The user id of $login is '$user_id'\n", end_html;

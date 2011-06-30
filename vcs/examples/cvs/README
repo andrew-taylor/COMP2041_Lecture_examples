@@ -1,0 +1,15 @@
+f you have CVS installed on your system then you may obtain a snapshot of the latest source by performing the following commands. The commands will log you in and check out a copy of the sox module and place it in the subdirectory it was ran from.
+
+ cvs -d :pserver:anonymous@sox.cvs.sourceforge.net:/cvsroot/sox login
+ cvs -z3 -d :pserver:anonymous@sox.cvs.sourceforge.net:/cvsroot/sox co sox
+
+The anonymous CVS account does not need a password. When prompted for a password by the cvs command, enter nothing and hit Enter.
+
+To merge in future updates you may run the following command (when ran inside the sox directory that was created from your checkout):
+
+ cvs update
+
+If you make any changes to SoX that you would like to be included in future releases then you may use the following command to make an easy to read diff.
+
+ cvs diff -uw
+

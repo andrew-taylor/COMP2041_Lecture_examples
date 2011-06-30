@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+# Simple CGI script written by andrewt@cse.unsw.edu.au
+# to demonstrate a possible CGI security hole
+
+use CGI qw/:all/;
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
+print header, start_html('A Simple Example');
+warningsToBrowser(1);
+
+$login = param("login");
+if (!defined $login) {
+	print start_form, 'Enter login: ', textfield('login'), end_form, end_html;
+	exit 0;
+}
+
+# insecure $login may contain shell meta-characters
+# e.g it might be "andrewt;cat /etc/passwd"
+
+system "echo hello|mail $login";
+
+print "Mail sent to $login\n", end_html;

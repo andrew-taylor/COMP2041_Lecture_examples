@@ -1,0 +1,62 @@
+svnadmin create repository
+# can also accessed via http, or ssh+svn
+SVN=file:///home/cs2041/public_html/lec/09version_control/examples/svn/repository/
+svn import ../example_src $SVN -m "initializing repo"
+svn checkout $SVN work
+cd work
+echo '/* another line */' >>  world.c
+echo '/* a random change */' >>  main.c
+svn diff 
+svn commit -m 'only comments'
+svn status
+svn update
+# more changes
+svn diff|mail andrewt
+
+# suppose jane does 
+svn checkout $SVN janes_copy
+cd janes_copy
+echo "/* Jane's extra stuff */" >>world.c
+svn commit -m 'documented world.c'
+
+# suppose fred does 
+svn checkout $SVN freds_copy
+cd freds_copy
+echo "/* Jane's extra stuff */" >>graphics.c
+svn commit -m 'documented graphics.c'
+
+# they can both synchronize by running
+svn update
+
+# suppose jane changes the first line of main.c 
+echo "/* Jane is great */" >main.c.new
+cat main.c >>main.c.new && mv main.c.new main.c
+svn commit -m 'minor change'
+
+# and fred adds a line to main.c
+echo "/* Fred is great */" >>main.c
+# fred will be unable to commit
+svn commit -m 'just a minor change'
+#svn: Commit failed (details follow):
+#svn: File '/main.c' is out of date
+
+# because the changes are in different parts of main.c
+# svn update will add Jane's changes
+svn update
+# and fred can commit his
+svn commit -m 'just a minor change'
+
+# Now suppose jane adds a line to world.h
+echo "/* Jane rules */" >>world.h
+svn commit -m 'another a minor change'
+
+# And fred adds a line to world.h
+echo "/* Jane rules */" >>world.h
+# fred will be unable to commit
+svn commit -m 'another a minor change'
+# and svn update will be unable to add Jane's changes
+#svn update
+# Conflict discovered in 'world.h'.
+#Select: (p) postpone, (df) diff-full, (e) edit,
+
+# Fred will need to manually merge the changes

@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+# Simple CGI script written by andrewt@cse.unsw.edu.au
+# to simulate the security hole present is some linksys routers
+# This security hole was exploited to allow the routers
+# operating system to be user upgraded by entering a
+# command like this:
+#;cp${IFS}*/*/nvram${IFS}/tmp/n
+#;*/n${IFS}set${IFS}boot_wait=on
+#;*/n${IFS}commit
+#;*/n${IFS}show>tmp/ping.log
+
+use CGI qw/:all/;
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
+
+
+print header, start_html('Simulation of Linksys Ping Test Hole');
+warningsToBrowser(1);
+
+$host = param("host");
+if (!defined $host) {
+	print start_form, 'Enter host to ping: ', textfield('host'), end_form;
+} else {
+	print "<pre>";
+	system "ping -c 1 $host";
+	print "</pre>";
+}
+print end_html;

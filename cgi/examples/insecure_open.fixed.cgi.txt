@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+# Simple CGI script written by andrewt@cse.unsw.edu.au
+# to demonstrate removal of a CGI security hole
+
+use CGI qw/:all/;
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
+print header, start_html('A Simple Example');
+warningsToBrowser(1);
+
+$filename = param("filename");
+if (!defined $filename) {
+	print start_form, 'Enter filename: ', textfield('filename'), end_form, end_html;
+	exit 0;
+}
+
+chdir "/tmp";
+
+$filename = substr($filename, 0, 4096);
+$filename =~ s/\///;
+$filename =~ s/^\.*$//;
+open F, '<', $filename or die "Can not open $filename: $!";
+print "The contents of $filename are:<pre>";
+print <F>;
+print "</pre>", end_html;

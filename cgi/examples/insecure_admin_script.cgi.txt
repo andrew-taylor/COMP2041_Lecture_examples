@@ -1,0 +1,1 @@
+insecure_admin_script.cgi

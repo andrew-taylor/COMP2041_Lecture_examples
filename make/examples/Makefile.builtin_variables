@@ -1,0 +1,19 @@
+# Simple makefile with variables & a comment
+
+CC=gcc-4.3
+CFLAGS=-O3 -Wall
+
+game : main.o graphics.o world.o 
+	$(CC) $(CFLAGS) -o $@ main.o graphics.o world.o
+
+main.o : main.c graphics.h world.h
+	$(CC) $(CFLAGS) -c $<
+
+graphics.o : graphics.c world.h 
+	$(CC) $(CFLAGS) -c $*.c
+
+world.o : world.c world.h 
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f game main.o graphics.o world.o

@@ -1,0 +1,13 @@
+# gitweb in action
+http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=summary
+
+cp -rp ../example_src/ src/
+cd src
+git-init
+git-add .
+git commit -m "initial source"
+echo '/* another line */' >>  world.c
+echo '/* a random change */' >>  main.c
+git diff
+git commit -m 'only comments'
+git status

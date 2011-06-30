@@ -1,0 +1,16 @@
+# Simple makefile with variables
+# relying on implict rules and using
+CC=gcc-4.3
+CFLAGS=-O3 -Wall
+
+game : main.o graphics.o world.o 
+	$(CC) $(CFLAGS) -o $@ $^
+
+main.o : main.c graphics.h world.h
+
+graphics.o : graphics.c world.h 
+
+world.o : world.c world.h 
+
+clean:
+	rm -f game main.o graphics.o world.o

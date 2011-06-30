@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+# Simple CGI script written by andrewt@cse.unsw.edu.au
+# with CGI security hole  fixed
+
+use CGI qw/:all/;
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
+print header, start_html('A Simple Example');
+warningsToBrowser(1);
+
+$address = param("address");
+if (!defined $address) {
+	print start_form, 'Enter e-mail address: ', textfield('address'), end_form, end_html;
+	exit 0;
+}
+
+# Remove all but characters legal in e-mail addresses
+# and reduce to maximum allowed length
+$address = substr($address, 0, 256);
+$address =~ s/[^\w\.\@\-\!\#\$\%\&\'\*\+\-\/\=\?\^_\`\{\|\}\~]//g;
+
+open F, "|-", "mail", $address or die "Can not run mail";
+print F "Hello\n";
+close F;
+print "Mail sent to $address\n", end_html;
