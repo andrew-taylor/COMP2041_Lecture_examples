@@ -1,8 +1,8 @@
-<title>COMP[29]041 Introduction 11s1
+<title>COMP[29]041 Introduction 11s2
 
 <slide>
 <~>
-<heading>COMP[29]041 - Software Construction 11s1
+<heading>COMP[29]041 - Software Construction 11s2
 <pp>
 <diagram>Pic/cselogo
 <pp>
@@ -44,7 +44,7 @@ Develop skills in:
 </itemize>
 <small>
 Ultimately: get you to the point where you could build some
-software, put it on SourceForge, have people use it and have
+software, put it on sourceforge/google code/github, have people use it and have
 it rated well.
 </small>
 </slide>
@@ -92,8 +92,8 @@ At the end of this course you should be able to:
 <small>
 <itemize>
 <item> Filters <~> (<em>grep, sed, cut, sort, uniq, tr,</em>...)
-<item> Scripting languages <~> (<em>Perl</em>, <em>shell</em>, CGI, ...)
-<item> Analysis/configuration/documentation tools <~> (make, svn/git, doxygen, gdb, gprof, ...)
+<item> Scripting languages <~> ( <em>shell</em>, <em>Perl</em>+CGI, optionally Python)
+<item> Analysis/configuration/documentation tools <~> (make, svn/git, doxygen, gprof, ...)
 </itemize>
 </small>
 </enumerate>
@@ -166,6 +166,7 @@ Lab classes give you experience applying tools/techniques.
 <p>
 Each lab exercise is a small implementation/analysis task.
 <p>
+Often includes a challenge exercise needed to get an A (may be Python!)
 <p>
 <green>Do them yourself!</green> <~> and <~> <green>Don't fall behind!</green>
 </slide>

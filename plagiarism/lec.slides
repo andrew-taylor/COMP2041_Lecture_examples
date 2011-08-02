@@ -8,6 +8,15 @@ are submitted programming assignments.
 <p>
 We'd like to automatically detect suspiciously similar files
 to be investigated as possible plagiarism cases.
+<p>
+Students often try to disguise plagiarism by transforming the copied
+program using simple syntactic changes. they sometimes:
+
+<itemize>
+<item>changing or add comments
+<item>change variable names
+<item>re-order sections of code
+</itemize>
 </slide>
 <slide>
 <heading>Plagiarism Detection #0

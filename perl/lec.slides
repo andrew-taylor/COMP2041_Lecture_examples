@@ -974,7 +974,7 @@ Careless use of <@>$_</@> can make programs cryptic.
    <col2>default input and pattern match</col2>
 </row>
 <row>
-   <col1><@>$</@><$>i</$></col1>
+   <col1><@><dollar></@><$>i</$></col1>
    <col2>matching string for <$>i<sup>th</sup></$> regexp in pattern</col2>
 </row>
 <row>
@@ -1245,7 +1245,7 @@ We can deal with an entire hash at a time via <@>%</@><$>hashName</$>, e.g.
 
 <slide>
 <continued>
-Individual components of a hash are accessed via <@>$</@><$>hashName</$><@>{</@><$>keyString</$><@>}</@>
+Individual components of a hash are accessed via <@><dollar></@><$>hashName</$><@>{</@><$>keyString</$><@>}</@>
 <p>
 Examples:
 <program>
