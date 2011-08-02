@@ -170,6 +170,11 @@ Some options:
 </deftable>
 <p>
 The <@>tac</@> command copies files, but reverses the order of lines.
+<p>
+Simple C implementation of cat.
+<p>
+<source examples/cat.c>
+
 </slide>
 
 <slide>
@@ -206,6 +211,10 @@ Useful with other filters to count things.
 Some filters find counting so useful that they define
 their own options for it (e.g. <@>grep -c</@>)
 </small>
+<p>
+Simple C implementation of wc.
+<p>
+<source examples/wc.c>
 </slide>
 
 <slide>
