@@ -1,0 +1,8 @@
+#!/bin/sh
+# l [file|directories...] - list files
+# written by andrewt@cse.unsw.edu.au as a COMP2041 example
+# Short scripts can be used for convenience.
+# Note: "$@" like $* expands to the arguments to the script,
+# but preserves the integrity of each argument if it contains spaces.
+
+ls -las "$@"

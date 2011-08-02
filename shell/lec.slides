@@ -44,9 +44,8 @@ and acting as a kind of programming language interpreter.
 <continued>
 The "<@>transformations</@>" applied to input lines include:
 <itemize>
-<item> history substitution ... e.g. <~> <@>!20  !awk</@>
+<item> variable expansion ... e.g. <~> <@>$1  ${x-20}</@>
 <item> file name expansion ... e.g. <~> <@>*.c  enr.07s?</@>
-<item> variable evaluation ... e.g. <~> <@>$PWD  ${x-20}</@>
 </itemize>
 To "<@>execute that command</@>" the shell needs to:
 <itemize>
@@ -55,6 +54,43 @@ To "<@>execute that command</@>" the shell needs to:
 </itemize>
 </slide>
 
+<slide>
+<heading>Command Search PATH
+
+Shell scripts are intended to be executed as if they were system commands.
+If we have a script called <tt>bling</tt> in the current directory,
+we might be able to execute it with any of these:
+</p>
+<session>
+% sh bling   # file need not be executable
+% ./bling    # file must be executable
+% bling      # file must be executable and . in $PATH
+</session>
+<p>
+Shell searches for programs to run
+using the colon-separated list of directories in the variable PATH
+<p>
+Caution: only append the current directory to end of your path, e.g:
+<p>
+<session>
+% PATH=.:$PATH
+% cat >cat <<eof
+#!/bin/sh
+echo miaou
+eof
+% chmod 755 cat
+% cat /home/cs2041/public_html/index.html
+miaou
+%
+</session>
+<p>
+Obvious above ./cat is being run rather /bin/cat
+<p>
+Much hard to discover if it happens when you run
+another shell script which runs cat.
+<p>
+Safer not to have .  in your PATH at all.
+</slide>
 <slide>
 <heading>Unix Processes
 A Unix process executes in this environment
@@ -159,7 +195,9 @@ More on shell variables:
 </itemize>
 Examples:
 <session>
-$ x=5  y="6"  z=abc
+$ x=5
+$ y="6"
+$ z=abc
 $ echo $(( $x + $y ))
 <b>11</b>
 $ echo $(( $x + $z ))
@@ -171,7 +209,8 @@ $ echo $(( $x + $z ))
 <continued>
 Examples: 
 <session>
-$ x=1  y=fred
+$ x=1
+$ y=fred
 $ echo $x$y
 <b>1fred</b>
 $ echo $xy        <comment># the aim is to display "1y"</comment>
@@ -202,7 +241,7 @@ Some shell built-in variables with pre-assigned values:
 <row><col1> <@>$3</@> </col1> <col2> the third command-line argument </col2> </row>
 <row><col1> <@>$#</@> </col1> <col2> count of command-line arguments </col2> </row>
 <row><col1> <@>$*</@> </col1> <col2> all of the command-line arguments (together)</col2> </row>
-<row><col1> <@>$<at></@> </col1> <col2> all of the command-line arguments (separately)</col2> </row>
+<row><col1> <@>$@</@> </col1> <col2> all of the command-line arguments (separately)</col2> </row>
 <row><col1> <@>$?</@> </col1> <col2> exit status of the most recent command</col2> </row>
 <row><col1> <@>$$</@> </col1> <col2> process ID of this shell</col2> </row>
 </table>
@@ -220,24 +259,6 @@ Tip: debugging for shell scripts
 <item> <@>set -x</@> shows each command after transformation
 </itemize>
 i.e. execution trace
-</slide>
-
-<slide>
-<heading>Exercises: shell scripts (1)
-<enumerate>
-<item> Write a script called <@>l</@> which runs <@>ls</@>
-	on supplied files, with <@>ls</@> arguments <@>-las</@>
-<p>
-<item> Write a script called <@>wtally</@> which produces a
-	word-frequency profile of text on its standard input
-	or in a named file. A <i>word</i> is defined to be
-	any sequence of letters or apostrophes (e.g. "cat",
-	"running", "can't", etc.)
-<p>
-<item> Write a script called <@>args</@> which shows information
-	about the script, including all of its command-line
-	arguments, one per line
-</enumerate>
 </slide>
 
 <slide>
@@ -332,23 +353,23 @@ where processes read from and write to.
    <col2>connect <@>stdin</@> to the file <@>infile</@></col2>
 </row>
 <row>
-   <col1><@>>> outfile</@></col1>
+   <col1><@>> outfile</@></col1>
    <col2>connect <@>stdout</@> to the file <@>outfile</@></col2>
 </row>
 <row>
-   <col1><@>>>> outfile</@></col1>
+   <col1><@>>> outfile</@></col1>
    <col2>apppend <@>stdout</@> to the file <@>outfile</@></col2>
 </row>
 <row>
-   <col1><@>2>> outfile</@></col1>
+   <col1><@>2> outfile</@></col1>
    <col2>connect <@>stderr</@> to the file <@>outfile</@></col2>
 </row>
 <row>
-   <col1><@>2>>&amp;1 >> outfile</@></col1>
+   <col1><@>2>&1 > outfile</@></col1>
    <col2>connect <@>stderr</@>+<@>stdout</@> to <@>outfile</@> </col2>
 </row>
 </deftable>
-Beware: <@>>></@> truncates file before executing command.
+Beware: <@>></@> truncates file before executing command.
 <p>
 To avoid accidents, use <@>noclobber</@> (<@>-C</@>)
 </slide>
@@ -383,14 +404,18 @@ connects them together:
 <heading>Exit Status and Control
 Process exit status is used for control in shell scripts:
 <itemize>
-<item> zero exit status means command successful <$><Rightarrow></$> true
-<item> non-zero exit status means error occurred <$><Rightarrow></$> false
+<item> zero exit status means command successful <rightarrow> true
+<item> non-zero exit status means error occurred <rightarrow> false
 </itemize>
 Mostly, exit status is simply ignored <~> <small>(e.g. when interactive)</small>
 <p>
 One application of exit statuses:
 <itemize>
-<item> AND lists <~~> <$>cmd<sub>1</sub></$> <@>&&</@> <$>cmd<sub>2</sub></$> <@>&& ... &&</@> <$>cmd<sub>n</sub></$> <br>
+<item> AND lists <~~> <$>cmd<sub>1</sub></$>
+	<@>&&</@>
+	<$>cmd<sub>2</sub></$>
+	<@>&& ... &&</@>
+	<$>cmd<sub>n</sub></$> <br>
 	<small>(<$>cmd<sub>i+1</sub></$> is executed only if <$>cmd<sub>i</sub></$> succeeds (zero exit status))</small>
 <item> OR lists <~~> <$>cmd<sub>1</sub></$> <@>||</@> <$>cmd<sub>2</sub></$> <@>|| ... ||</@> <$>cmd<sub>n</sub></$> <br>
 	<small>(<$>cmd<sub>i+1</sub></$> is executed only if <$>cmd<sub>i</sub></$> fails (non-zero exit status))</small>
@@ -443,14 +468,16 @@ test -r xyz -a -d xyz
 Combine commands in pipelines and AND and OR lists.
 <p>
 Commands executed sequentially if separated by semicolon or newline.
-<program>
+<p>
 <$>cmd<sub>1</sub></$> ; <$>cmd<sub>2</sub></$> ; ... ; <$>cmd<sub>n</sub></$>
-<small>or</small>
+<p>
 <$>cmd<sub>1</sub></$>
+<p>
 <$>cmd<sub>2</sub></$>
+<p>
 ...
+<p>
 <$>cmd<sub>n</sub></$>
-</program>
 </slide>
 
 <slide>
@@ -466,7 +493,8 @@ Exit status of group is exit status of last command.
 Beware: state of sub-shell (e.g. <@>$PWD</@>, other variables) is lost after <@>(...)</@>,
 hence
 <session>
-$ cd /usr/share;  x=123
+$ cd /usr/share
+$ x=123
 $ ( cd $HOME;  x=abc; )
 $ echo $PWD $x
 <b>/usr/share 123</b>
@@ -504,7 +532,7 @@ Examples:
 
 if [ -r $HOME ]     <comment># neater than:  if test -r $HOME</comment>
 then
-   echo "$0: \$HOME is readable"
+   echo "$0: $HOME is readable"
 fi
 
 # Test whether a user exists in passwd file
@@ -629,41 +657,94 @@ done
 </slide>
 
 <slide>
-<heading>Exercises: shell scripts (2)
-<enumerate>
-<item> Write a shell script called <@>isint</@> that checks
-	whether its argument looks like an integer value
+<heading>Example Shell Script: Arguments
+
+One use for shell scripts is to provide a more convenient way of
+executing a complex pipeline or even just a single command with
+a complicated set of switches.
 <p>
-	Include suitable error checking and reporting
-	(e.g. missing argument)
+User often give these scripts very short names to save typing.
 <p>
-<item> Write a shell script called <@>istext</@> that checks
-	whether its argument is a text file
+Here is one named l (that's the lower-case letter "ell") runs the <tt>ls</tt> command
+with a set of commonly used options.
 <p>
-	Include suitable error checking and reporting
-        (e.g. missing argument, not a file)
-<item> Write a shell script called <@>iota</@> to generate
-	a sequence of integers one per line, with usage:
-<session>
-iota 
-  <comment># gives 1 2 3 4 5 6 7 8 9 10 ...</comment>
-iota <$>lo</$>
-  <comment># e.g. iota 4 gives 4 5 6 7 8 9 10 ...</comment>
-iota <$>lo</$> <$>hi</$>
-  <comment># e.g. iota 4 8 gives 4 5 6 7 8</comment>
-iota <$>lo</$> <$>hi</$> <$>step</$>
-  <comment># e.g. iota 2 12 3 gives 2 5 8 11</comment>
-</session>
-Include appropriate error checking.
-<item> Write a shell script called <@>prod</@> to compute
-	the product of a sequence of numbers given one per
-	line on standard input
-<itemize>
-<item> consider what kind of errors might occur
-<item> how should each be handled?
-</itemize>
-<item> Make a link from <@>prod</@> called <@>sum</@> and
-	modify the script so that it behaves differently
-	depending on how it is invoked.
-</enumerate>
+<source examples/l>
+</slide>
+<slide>
+<heading>Example Shell Script: Arguments
+
+A simple shell script which prints details of its arguments.
+
+<p>
+<source examples/args.sh>
+<p>
+
+<ssession>
+% cd /home/cs2041/public_html/lec/shell/examples
+% ./args.sh abc 1248 42 forty-two 'forty two'
+My name is ./args.sh
+My process number is 27876
+I have 5 arguments
+My arguments separately are abc 1248 42 forty-two forty two
+My arguments together are abc 1248 42 forty-two forty two
+My 5th argument is 'forty two'
+</ssession>
+</slide>
+<slide>
+<heading>Example Shell Script: Word Frequency
+
+Count the number of time each different word occurs
+in the files given as arguments.
+<p>
+<p>
+<source examples/word_frequency.sh>
+<p>
+For example
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/shell/examples
+% ./word_frequency.sh dracula.txt|tail
+   2124 it
+   2440 that
+   2486 in
+   2549 he
+   2911 a
+   3600 of
+   4448 to
+   4740 i
+   5833 and
+   7843 the
+</ssession>
+</slide>
+
+<slide>
+<heading>Example Shell Script: Counting
+
+A utility script to print the sub-range of integers
+specified by its arguments.
+<p>
+Useful to use on the command line or from other scripts
+<p>
+<source examples/iota.sh>
+</slide>
+
+<slide>
+<heading>Example Shell Script: Finding 
+
+Search $PATH for the specified programs
+
+<source examples/where.0.sh>
+
+Alternative implementation using while, and a cute use of grep and ||
+
+<source examples/where.1.sh>
+
+</slide>
+
+<slide>
+<heading>Example Shell Script: Convert Filenames to Lowercase
+
+A  script to convert the specified filenames to lower case.
+
+<source examples/tolower.sh>
 </slide>
