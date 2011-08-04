@@ -657,7 +657,7 @@ done
 </slide>
 
 <slide>
-<heading>Example Shell Script: Arguments
+<heading>Example Shell Script: ls convenience
 
 One use for shell scripts is to provide a more convenient way of
 executing a complex pipeline or even just a single command with
@@ -747,4 +747,20 @@ Alternative implementation using while, and a cute use of grep and ||
 A  script to convert the specified filenames to lower case.
 
 <source examples/tolower.sh>
+</slide>
+
+<slide>
+<heading>Example Shell Script: Watch a Website
+
+A script to repeated download a webpage until
+it matches a regex then notify an e-mail address.
+<p>
+For example to get e-mail when Kesha tickets go on sale you
+might run:
+<p>
+<ssession>
+% watch_website.sh http://ticketek.com.au/ 'Ke[sS$]+ha' andrewt@cse.unsw.edu.au
+</ssession>
+<p>
+<source examples/watch_website.sh>
 </slide>

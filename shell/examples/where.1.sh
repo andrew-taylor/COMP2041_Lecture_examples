@@ -23,5 +23,5 @@ do
             ls -ld "$f"
         fi
     done|
-    grep '.' || echo "$program not found"
+    egrep '.' || echo "$program not found"
 done
