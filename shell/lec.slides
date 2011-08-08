@@ -755,12 +755,28 @@ A  script to convert the specified filenames to lower case.
 A script to repeated download a webpage until
 it matches a regex then notify an e-mail address.
 <p>
-For example to get e-mail when Kesha tickets go on sale you
-might run:
+For example to get e-mail when Kesha tickets (not for yourself of course)
+go on sale you might run:
 <p>
 <ssession>
 % watch_website.sh http://ticketek.com.au/ 'Ke[sS$]+ha' andrewt@cse.unsw.edu.au
 </ssession>
 <p>
 <source examples/watch_website.sh>
+</slide>
+
+<slide>
+<heading>Example Shell Script: convert GIF files to PNG
+
+This scripts converts GIF files to PNG files via the intermediate PPM format.
+<p>
+<source examples/gif2png.sh>
+</slide>
+
+<slide>
+<heading>Example Shell Script: convert GIF files to PNG
+
+This scripts converts GIF files to PNG files via the intermediate PPM format.
+<p>
+<source examples/gif2png.sh>
 </slide>
