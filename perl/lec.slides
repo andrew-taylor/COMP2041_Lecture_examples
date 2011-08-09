@@ -98,10 +98,24 @@ perl -w -e '<$>PerlCode</$>'
 </program>
 Can use options with <@>#!</@>
 <program>
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 <$>PerlCode</$>
 </program>
+<p>
+you can also get warnings via a pragma:
+<p>
+<program>
+use warnings;
+</program>
+<p>
+To catch other possible problems
+<p>
+<program>
+use strict;
+</program>
+<p>
+Some programmers always use strict, others find it too annoying.
 </slide>
 
 <slide>
