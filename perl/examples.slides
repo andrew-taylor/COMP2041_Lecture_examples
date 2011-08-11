@@ -1,0 +1,86 @@
+<title>Perl Examples
+<slide>
+<heading>Exponential Concatenation
+<source examples/exponential_concatenation.pl>
+<p>
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% .large_string.pl 30
+String of 2^30 = 1073741824 characters created
+</ssession>
+</slide>
+<slide>
+<heading>Array growth demo
+<source examples/array_growth_demo.pl>
+</slide>
+<slide>
+<heading>/bin/echo
+Implementations of /bin/echo in Perl.
+<p>
+Looping through arguments:
+<p>
+<source examples/echo.0.pl>
+<p>
+Using interpolation of an arrays inside a strings:
+<p>
+<source examples/echo.1.pl>
+<p>
+Using join:
+<p>
+<source examples/echo.2.pl>
+<p>
+</slide>
+<slide>
+<heading>Swapping Harry & Hermione
+<p>
+For each file given as an argument replace occurrences of Harry with Hermione
+and vice-versa.  Assumes Zaphod does not occur in file (could use \n instead of Zaphod).
+<p>
+<source examples/gender_reversal.0.pl>
+<p>
+The unix filter-like behaviour of  &lt;&gt; can be used to read files
+<p>
+Perl's -i option replaces the file with output from the script.
+<p>
+<source examples/gender_reversal.1.pl>
+<p>
+Perl's default variable $_, can make the script more concise.
+<p>
+<source examples/gender_reversal.2.pl>
+<p>
+Perl's -p option also provides unix filter like behaviour:
+<p>
+<source examples/gender_reversal.3.pl>
+<p>
+Perl's -e option allows the script to be put on the command line:
+<program>
+perl -i -p -e 's/Herm[io]+ne/Zaphod/g;s/Harry/Hermione/g;s/Zaphod/Harry/g' *.txt
+</program>
+</slide>
+<slide>
+<heading>/usr/bin/cp 
+Implementations of /bin/cp in Perl.
+<p>
+Simple line by line copying:
+<p>
+<source examples/cp.0.pl>
+<p>
+Simple line by line copying with $_:
+<p>
+<source examples/cp.1.pl>
+<p>
+Reading entire file into an array:
+<p>
+<source examples/cp.2.pl>
+<p>
+Cheating - using system to run /bin/cp :
+<p>
+<source examples/cp.3.pl>
+<p>
+A Perl trick: making the line separator udnefined so
+we can slurp the whole file into a scalar variable with a single read
+<p>
+<source examples/cp.4.pl>
+</slide>

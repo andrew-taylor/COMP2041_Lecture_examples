@@ -11,9 +11,8 @@ Has grown to become a replacement for <@>awk</@>, <@>sed</@>,
 <p>
 An extremely useful tool to know because it:
 <itemize>
-<item> runs on Unix, Linux, Mac, Amiga, OS/2, VMS, DOS, Windows, ...
-<item> de facto standard for complex scripting tasks 
-	<small>(once were shell scripts)</small>
+<item> runs on Unix variants (Linux/Android/OSX/IOS/..), Windows/DOS variants, Plan 9, OS2, OS390, VMS..
+<item> very widely used for complex scripting tasks 
 <item> has standard libraries for many applications (Web/CGI, DB, ...)
 </itemize>
 Perl has been influential: PHP, Python, Ruby, ... even Java <small>(interpreted)</small>
@@ -988,20 +987,32 @@ Careless use of <@>$_</@> can make programs cryptic.
    <col2>default input and pattern match</col2>
 </row>
 <row>
-   <col1><@><dollar></@><$>i</$></col1>
-   <col2>matching string for <$>i<sup>th</sup></$> regexp in pattern</col2>
+   <col1><@>@ARGV</@></col1>
+   <col2>list (array) of command line arguments</col2>
 </row>
 <row>
    <col1><@>$0</@></col1>
    <col2>name of file containing executing Perl script (cf. shell)</col2>
 </row>
 <row>
-   <col1><@>$$</@></col1>
-   <col2>process number of executing Perl script (cf. shell)</col2>
+   <col1><@><dollar></@><$>i</$></col1>
+   <col2>matching string for <$>i<sup>th</sup></$> regexp in pattern</col2>
 </row>
 <row>
-   <col1><@>@ARGV</@></col1>
-   <col2>list (array) of command line arguments</col2>
+   <col1><@>$!</@></col1>
+   <col2>last error from system call such as open
+</row>
+<row>
+   <col1><@>$.</@></col1>
+   <col2>line number for input file stream
+</row>
+<row>
+   <col1><@>$/</@></col1>
+   <col2>line separator, none if undefined
+</row>
+<row>
+   <col1><@>$$</@></col1>
+   <col2>process number of executing Perl script (cf. shell)</col2>
 </row>
 <row>
    <col1><@>%ENV</@></col1>

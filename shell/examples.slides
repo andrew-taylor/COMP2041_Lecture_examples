@@ -1,0 +1,194 @@
+<title>Shell Script Examples
+<slide>
+<heading>Example Shell Script: ls convenience
+
+One use for shell scripts is to provide a more convenient way of
+executing a complex pipeline or even just a single command with
+a complicated set of switches.
+<p>
+User often give these scripts very short names to save typing.
+<p>
+Here is one named l (that's the lower-case letter "ell") runs the <tt>ls</tt> command
+with a set of commonly used options.
+<p>
+<source examples/l>
+</slide>
+<slide>
+<heading>Example Shell Script: Arguments
+
+A simple shell script which prints details of its arguments.
+
+<p>
+<source examples/args.sh>
+<p>
+
+<ssession>
+% cd /home/cs2041/public_html/lec/shell/examples
+% ./args.sh abc 1248 42 forty-two 'forty two'
+My name is ./args.sh
+My process number is 27876
+I have 5 arguments
+My arguments separately are abc 1248 42 forty-two forty two
+My arguments together are abc 1248 42 forty-two forty two
+My 5th argument is 'forty two'
+</ssession>
+</slide>
+<slide>
+<heading>Example Shell Script: Word Frequency
+
+Count the number of time each different word occurs
+in the files given as arguments.
+<p>
+<p>
+<source examples/word_frequency.sh>
+<p>
+For example
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/shell/examples
+% ./word_frequency.sh dracula.txt|tail
+   2124 it
+   2440 that
+   2486 in
+   2549 he
+   2911 a
+   3600 of
+   4448 to
+   4740 i
+   5833 and
+   7843 the
+</ssession>
+</slide>
+
+<slide>
+<heading>Example Shell Script: Counting
+
+A utility script to print the sub-range of integers
+specified by its arguments.
+<p>
+Useful to use on the command line or from other scripts
+<p>
+<source examples/iota.sh>
+</slide>
+
+<slide>
+<heading>Example Shell Script: Finding 
+
+Search $PATH for the specified programs
+
+<source examples/where.0.sh>
+
+Alternative implementation using while, and a cute use of grep and ||
+
+<source examples/where.1.sh>
+
+</slide>
+
+<slide>
+<heading>Example Shell Script: Convert Filenames to Lowercase
+
+A  script to convert the specified filenames to lower case.
+
+<source examples/tolower.sh>
+</slide>
+
+<slide>
+<heading>Example Shell Script: Watch a Website
+
+A script to repeated download a webpage until
+it matches a regex then notify an e-mail address.
+<p>
+For example to get e-mail when Kesha tickets (not for yourself of course)
+go on sale you might run:
+<p>
+<ssession>
+% watch_website.sh http://ticketek.com.au/ 'Ke[sS$]+ha' andrewt@cse.unsw.edu.au
+</ssession>
+<p>
+<source examples/watch_website.sh>
+</slide>
+
+<slide>
+<heading>Example Shell Script: convert GIF files to PNG
+
+This scripts converts GIF files to PNG files via the intermediate PPM format.
+<p>
+<source examples/gif2png.sh>
+</slide>
+
+<slide>
+<heading>Plagiarism Detection - the problem
+Problem
+<p>
+We have a set of files each containing C programs which
+are submitted programming assignments.
+<p>
+We'd like to automatically detect suspiciously similar files
+to be investigated as possible plagiarism cases.
+<p>
+Students often try to disguise plagiarism by transforming the copied
+program using simple syntactic changes. they sometimes:
+
+<itemize>
+<item>changing or add comments
+<item>change variable names
+<item>re-order sections of code
+</itemize>
+</slide>
+<slide>
+<heading>Plagiarism Detection #0
+
+Diff compares files and its exit status indicates
+whether the files are identical (0 = identical).
+<p>
+Its has options to ignore some features in files which are
+often useful here.  The use of -i, -B and -w flags means changes in white-space and case
+won't affect comparisons
+<p>
+<source examples/plagiarism_detection.simple_diff.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #1
+
+We would also like to the ignore changes in comments.
+Diff doesn't (and shouldn't) have an option for that.
+<p>
+We can easily remove C line-based (//) comments
+using sed and a temporary file.
+<p>
+<source examples/plagiarism_detection.comments.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #2
+
+We can also easily ignore changes in variable names
+and strings by using sed.
+<p>
+The substitution <tt>s/"[^"]"/s/g</tt> changes strings to the letter s.
+<p>
+The substitution <tt>s/[a-zA-Z_][a-zA-Z0-9_]*/v/g</tt> changes variables to the letter v.
+<p>
+These changes aren't exact. We will miss a few strings
+and also change keywords and function names to the letter v.
+<p>
+This doesn't matter for our purposes.
+<p>
+<source examples/plagiarism_detection.identifiers.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #3
+
+We can ignore reordering of lines in the files by  sorting
+the transformed files.
+<p>
+<source examples/plagiarism_detection.reordering.sh>
+</slide>
+<slide>
+<heading>Plagiarism Detection #4
+
+We can avoid comparing every to every other file by calculating
+a Cryptographic hash of the transformed file
+and then using sort and uniq to find files with the same hash
+<p>
+<source examples/plagiarism_detection.md5_hash.sh>
+</slide>

@@ -1,0 +1,122 @@
+<title>Python for Perl Programmers
+<slide>
+<heading>Python in 2041/9041
+We will introduce <b>briefly</b> Python in lectures after Perl
+and compare it to Perl.
+<p>
+May be a written exam question on Python.
+<p>
+Challenge part of lab exercises may involve Python.
+<p>
+Opportunity for student coping <b>well</b> with Perl to
+teach themselves Python.
+<p>
+Alls student who get 90+ in 2041/9041 should learn some python.
+</slide>
+<slide>
+<heading>Python
+<p>
+<p>
+Developed in the 1990s by Guido van Rossum at CWI (Netherlands) - now at Google.
+<p>
+Similar niche to Perl.
+<p>
+Much simpler syntax than Perl.
+<p>
+No variable interpolation in strings, use % operator instead
+<p>
+Regular expressions used via functions, not embedded in language
+<p>
+Indenting used to group statements - unlike Perl/C/Java/... 
+<p>
+Python has a more elaborate type system but more straightforward semantics.
+<p>
+Python (like C) does less implicit conversions than perl, e.g. you have to
+convert strings explictly to numbers.
+<p>
+Core python does not have arrays (numpy has arrays).
+<p>
+Python lists can be indexed but do not automatically grow.
+<p>
+</slide>
+
+<slide>
+<heading>Syntax Conventions
+Perl uses non-alphabetic characters such as $, @, % and & to associate 
+types with variables. 
+<p>
+Python associates types with values.
+<p>
+<center>
+<table 2>
+<tr>
+ <th>Perl</th>
+ <th>Python</th>
+</tr>
+<tr>
+ <td>$s = "string"</td>
+ <td>s = "string"</td>
+</tr>
+<tr>
+ <td>@a = (1,2,3)</td>
+ <td>a = (1,2,3)</td>
+</tr>
+<tr>
+ <td>%a = (1 => 'one', 2 => 'two', 3 => 'three')</td>
+ <td>a = {1 : 'one', 2 : 'two', 3 : 'three')</td>
+</tr>
+<tr>
+ <td>$a[42] = 'answer'</td>
+ <td>a[42] = 'answer'</td>
+</tr>
+<tr>
+ <td>$h{'answer'} = 42</td>
+ <td>h['answer'] = 42</td>
+</tr>
+</table>
+</center>
+<p>
+Note, Python uses [] to access both elements of lists and dicts (hashes).
+<p>
+Unlike Perl you must assign a value to a variable before using it.
+<p>
+This includes indexing so you can not write just this:
+<p>
+<pre>
+h['answer'] = 42
+</pre>
+You can write:
+<pre>
+h = {}
+h['answer'] = 42
+</pre>
+or
+<pre>
+h = {'answer':42}
+</pre>
+<p>
+Lists do not grow automatically.
+You can not write this:
+<pre>
+h = []
+h[0] = 'zero'
+</pre>
+You can write
+<pre>
+h = []
+h.append('zero')
+</pre>
+or
+<pre>
+h = ['zero']
+</pre>
+<p>
+A useful idiom to create a large list of constants is:
+<pre>
+h = [0] * 100 
+</pre>
+</slide>
+
+<slide>
+<heading>To be Continued
+</slide>

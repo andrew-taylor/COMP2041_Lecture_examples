@@ -1,0 +1,64 @@
+<title>Python Examples
+<slide>
+<heading>Exponential Concatenation
+<source examples/exponential_concatenation.py>
+<p>
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% .large_string.py 30
+String of 2^30 = 1073741824 characters created
+</ssession>
+</slide>
+<slide>
+<heading>/bin/echo
+Implementations of /bin/echo in Perl.
+<p>
+Looping through arguments:
+<p>
+<source examples/echo.0.py>
+<p>
+Using join:
+<p>
+<source examples/echo.2.py>
+<p>
+</slide>
+<slide>
+<heading>Swapping Harry & Hermione
+<p>
+For each file given as an argument replace occurrences of Harry with Hermione
+and vice-versa.  Assumes Zaphod does not occur in file.
+<p>
+<source examples/gender_reversal.0.py>
+<p>
+</slide>
+<slide>
+<heading>/usr/bin/cp 
+Implementations of /bin/cp in Perl.
+<p>
+Simple line by line copying:
+<p>
+<source examples/cp.0.py>
+<p>
+A with statement is better pratice in general
+as it ensures file is closed
+<p>
+<source examples/cp.1.py>
+<p>
+Reading entire file into an array:
+<p>
+<source examples/cp.2.py>
+<p>
+Passing file iterator to writelines
+<p>
+<source examples/cp.3.py>
+<p>
+Using shutil.copyfile
+<p>
+<source examples/cp.4.py>
+<p>
+Cheating - running /bin/cp:
+<p>
+<source examples/cp.5.py>
+</slide>
