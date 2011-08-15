@@ -12,8 +12,25 @@ String of 2^30 = 1073741824 characters created
 </ssession>
 </slide>
 <slide>
+<heading>Count lines
+Count the number of lines on standard input.
+<p>
+A straightforward solution:
+<p>
+<source examples/line_count.0.py>
+<p>
+Or we can read input into a list and use the list length:
+<p>
+<source examples/line_count.1.py>
+<p>
+Or more succintly:
+<p>
+<source examples/line_count.2.py>
+<p>
+</slide>
+<slide>
 <heading>/bin/echo
-Implementations of /bin/echo in Perl.
+Implementations of /bin/echo in Python.
 <p>
 Looping through arguments:
 <p>
@@ -35,7 +52,7 @@ and vice-versa.  Assumes Zaphod does not occur in file.
 </slide>
 <slide>
 <heading>/usr/bin/cp 
-Implementations of /bin/cp in Perl.
+Implementations of /bin/cp in Python.
 <p>
 Simple line by line copying:
 <p>

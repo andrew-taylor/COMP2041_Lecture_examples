@@ -11,7 +11,7 @@ Challenge part of lab exercises may involve Python.
 Opportunity for student coping <b>well</b> with Perl to
 teach themselves Python.
 <p>
-Alls student who get 90+ in 2041/9041 should learn some python.
+Student aiming to get 90+ in 2041/9041 should learn some python.
 </slide>
 <slide>
 <heading>Python
@@ -59,11 +59,11 @@ Python associates types with values.
 </tr>
 <tr>
  <td>@a = (1,2,3)</td>
- <td>a = (1,2,3)</td>
+ <td>a = [1,2,3]</td>
 </tr>
 <tr>
  <td>%a = (1 => 'one', 2 => 'two', 3 => 'three')</td>
- <td>a = {1 : 'one', 2 : 'two', 3 : 'three')</td>
+ <td>a = {1 : 'one', 2 : 'two', 3 : 'three'})</td>
 </tr>
 <tr>
  <td>$a[42] = 'answer'</td>

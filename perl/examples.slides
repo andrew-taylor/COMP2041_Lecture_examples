@@ -16,6 +16,36 @@ String of 2^30 = 1073741824 characters created
 <source examples/array_growth_demo.pl>
 </slide>
 <slide>
+<heading>Count lines
+Count the number of lines on standard input.
+<p>
+A straightforward solution:
+<p>
+<source examples/line_count.0.pl>
+<p>
+Which can be simplified because we don't need to store the line
+just count it.
+<p>
+<source examples/line_count.1.pl>
+<p>
+And be made even more succint:
+<p>
+<source examples/line_count.2.pl>
+<p>
+Or we can read the input into an array and use the array size.
+<p>
+<source examples/line_count.3.pl>
+<p>
+Or we can use less obvious parts of Perl.
+<p>
+Assignment to () forces a list context and hence reading all lines of input.
+<p>
+The special variable $. contains the current line number
+<p>
+<source examples/line_count.4.pl>
+<p>
+</slide>
+<slide>
 <heading>/bin/echo
 Implementations of /bin/echo in Perl.
 <p>
