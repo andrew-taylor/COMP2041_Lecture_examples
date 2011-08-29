@@ -109,8 +109,196 @@ Cheating - using system to run /bin/cp :
 <p>
 <source examples/cp.3.pl>
 <p>
-A Perl trick: making the line separator udnefined so
+A Perl trick: making the line separator undefined so
 we can slurp the whole file into a scalar variable with a single read
 <p>
 <source examples/cp.4.pl>
+</slide>
+<slide>
+<heading>wget.pl - fetch a web page
+Fetch a web page removing HTML tags and constants
+<p>
+Lines between script or style tags are skipped.
+<p>
+Non-blank lines are printed
+<p>
+<source examples/wget.pl>
+</slide>
+<slide>
+<heading>Print nth-word on every line
+Authors sometimes hide secret messages on a particular (e.g first) word
+of every line of a text,
+<p>
+This script prints the nth-word on every line of its input files/stdin.
+<p>
+Note use of the external program fmt to make the output easier to read.
+<p>
+<source examples/nth_word.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% nth_word.pl 9 dracula.txt 
+on train I through as the which Turkish
+nightfall Royale.  with recipe called
+should indeed, without London, among
+...
+</ssession>
+</slide>
+<slide>
+<heading>Find a student to expel
+Process a file listing mark deductions for 2041 students
+to find the student with the largest total number of mark deductions.
+<p>
+Note use of a hash to store total mark deduction for each student.
+<p>
+<source examples/expel_student.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% head mark_deductions.txt 
+"James Shi'En Yager","Wore mismatched socks","11/08/11", "1 marks deducted"
+"Kunal Kaushik Magafas","Obscene word on t-shirt","06/07/11", "1 marks deducted"
+"Chun Kin Ricky Smith","Runs Windows on laptop","18/08/11", "4 marks deducted"
+"Honglin Kua","Doesn't play nice","25/07/11", "1 marks deducted"
+"Christopher Stewart Marr","Urinated on CSE lab computer","29/08/11", "15 marks deducted"
+"Cynthia Flottum","Doesn't play nice","18/07/11", "1 marks deducted"
+"Phuc Wei","Bit another student","20/08/11", "7 marks deducted"
+"William Miao Oakley","Didn't listen to Andrew","19/07/11", "3 marks deducted"
+"Ximing Tee","Wore mismatched socks","02/07/11", "1 marks deducted"
+"Elbert Coutts","Attended lecture in underpants","18/08/11", "10 marks deducted"
+% expel_student.pl mark_deductions.txt 
+Expel Chun Kin Ricky Smith who had 85 marks deducted
+</ssession>
+<p>
+The  data file mark_deductions.txt above was generated with this Perl script:
+<p>
+<source examples/generate_mark_deductions.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% generate_mark_deductions.pl enrollments
+"Ahmed Moussa","Doesn't play nice","27/08/11", "1 marks deducted"
+"Hui-Lyn Winwood","Kesha found on their ipod","23/08/11", "9 marks deducted"
+"Ahmed Moussa","Disappointed their mother","24/07/11", "4 marks deducted"
+...
+</ssession>
+</slide>
+<slide>
+<heading>Count Enrollments Summary
+Process enrollment data to count enrollments in each course.
+<p>
+Note use of a hash to store tally enrollments.
+<p>
+<source examples/count_enrollments.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% count_enrollments.pl enrollments
+Intro to Computing has 92 students enrolled
+Computing 1A has 336 students enrolled
+Computing 1B has 292 students enrolled
+Solving Problems with Software has 45 students enrolled
+Higher Computing 1A has 178 students enrolled
+...
+</ssession>
+</slide>
+<slide>
+<heading>Count first names
+Process enrollment data to count occurences of a first name.
+<p>
+Note use of a hash to store first names.
+<p>
+<source examples/count_first_names.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% count_first_names.pl enrollments
+There are  2 people with the first name Aaron
+There are  2 people with the first name Abdelsalam
+There are  1 people with the first name Abdu
+...
+</ssession>
+</slide>
+<slide>
+<heading>Find duplicate first names
+Process enrollment data to list instances
+of multiple people of the same first name being enrolled in a course.
+<p>
+<source examples/duplicate_first_names.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% duplicate_first_names.pl enrollments
+In COMP1001 there are 2 people with the first name Albert
+In COMP1001 there are 2 people with the first name Ashwin
+In COMP1001 there are 2 people with the first name Benny
+...
+</ssession>
+</slide>
+<slide>
+<heading>List student courses
+Process enrollment data to list the courses being taken by each
+student enrolled in the specified courses
+<p>
+Note use of a hash of space-separated strings to store the courses
+taken by each student.
+<p>
+<source examples/list_student_courses.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% list_student_courses.pl enrollments COMP2041
+Simon Saunders is taking:
+COMP2011 Data Organisation
+COMP2041 Software Construction
+Waqas Napis is taking:
+COMP2041 Software Construction
+Benson D'Este is taking:
+COMP2021 Digital System Structures
+COMP2041 Software Construction
+COMP2711 Higher Data Organisation
+...
+</ssession>
+</slide>
+<slide>
+<heading>Course statistics
+Process enrollment data to print a summary of the other courses being taken by
+student enrolled in the specified courses
+<p>
+Note use of a hash of arrays to store the courses
+taken by each student.
+<p>
+Note use of grep to search array.
+<p>
+Note custom sorting.
+<p>
+<source examples/course_statistics.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% course_statistics.pl enrollments COMP2041
+0.5% of COMP2041 students take COMP9315(Database Systems Implementat'n)
+0.5% of COMP2041 students take COMP9314(Next Generation Database Systs)
+1.0% of COMP2041 students take COMP3141(Software Sys Des&Implementat'n)
+...
+23.2% of COMP2041 students take COMP2011(Data Organisation)
+27.8% of COMP2041 students take COMP2021(Digital System Structures)
+100.0% of COMP2041 students take COMP2041(Software Construction)
+</ssession>
 </slide>

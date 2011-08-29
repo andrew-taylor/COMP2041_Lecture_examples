@@ -79,3 +79,152 @@ Cheating - running /bin/cp:
 <p>
 <source examples/cp.5.py>
 </slide>
+<slide>
+<heading>wget.py - fetch a web page
+Fetch a web page removing HTML tags and constants
+<p>
+Text between script or style tags is removed skipped.
+<p>
+Non-blank lines are printed
+<p>
+<source examples/wget.0.py>
+<p>
+Line at time (but not skipping between script & style tags)
+<p>
+<source examples/wget.0.py>
+</slide>
+<slide>
+<heading>Print nth-word on every line
+Authors sometimes hide secret messages on a particular (e.g first) word
+of every line of a text,
+<p>
+This script prints the nth-word on every line of its input files/stdin.
+<p>
+Note use of the external program fmt to make the output easier to read.
+<p>
+<source examples/nth_word.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% nth_word.py 9 dracula.txt 
+on train I through as the which Turkish
+nightfall Royale.  with recipe called
+should indeed, without London, among
+...
+</ssession>
+</slide>
+<slide>
+<heading>Count Enrollments Summary
+Process enrollment data to count enrollments in each course.
+<p>
+Note use of a dict to store tally enrollments.
+<p>
+<source examples/count_enrollments.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% count_enrollments.py enrollments
+Intro to Computing has 92 students enrolled
+Computing 1A has 336 students enrolled
+Computing 1B has 292 students enrolled
+Solving Problems with Software has 45 students enrolled
+Higher Computing 1A has 178 students enrolled
+...
+</ssession>
+</slide>
+<slide>
+<heading>Count first names
+Process enrollment data to count occurences of a first name.
+<p>
+Note use of a dict to store first names.
+<p>
+<source examples/count_first_names.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% count_first_names.py enrollments
+There are  2 people with the first name Aaron
+There are  2 people with the first name Abdelsalam
+There are  1 people with the first name Abdu
+...
+</ssession>
+</slide>
+<slide>
+<heading>Find duplicate first names
+Process enrollment data to list instances
+of multiple people of the same first name being enrolled in a course.
+<p>
+<source examples/duplicate_first_names.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% duplicate_first_names.py enrollments
+In COMP1001 there are 2 people with the first name Albert
+In COMP1001 there are 2 people with the first name Ashwin
+In COMP1001 there are 2 people with the first name Benny
+...
+</ssession>
+</slide>
+<slide>
+<heading>List student courses
+Process enrollment data to list the courses being taken by each
+student enrolled in the specified courses
+<p>
+Note use of a dict of space-separated strings to store the courses
+taken by each student.
+<p>
+<source examples/list_student_courses.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% list_student_courses.py enrollments COMP2041
+Simon Saunders is taking:
+COMP2011 Data Organisation
+COMP2041 Software Construction
+Waqas Napis is taking:
+COMP2041 Software Construction
+Benson D'Este is taking:
+COMP2021 Digital System Structures
+COMP2041 Software Construction
+COMP2711 Higher Data Organisation
+...
+</ssession>
+</slide>
+<slide>
+<heading>Course statistics
+Process enrollment data to print a summary of the other courses being taken by
+student enrolled in the specified courses
+<p>
+Note use of a dict of arrays to store the courses
+taken by each student.
+<p>
+Note use of grep to search array.
+<p>
+Note custom sorting.
+<p>
+<source examples/course_statistics.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% course_statistics.py enrollments COMP2041
+0.5% of COMP2041 students take COMP9315(Database Systems Implementat'n)
+0.5% of COMP2041 students take COMP9314(Next Generation Database Systs)
+1.0% of COMP2041 students take COMP3141(Software Sys Des&Implementat'n)
+...
+23.2% of COMP2041 students take COMP2011(Data Organisation)
+27.8% of COMP2041 students take COMP2021(Digital System Structures)
+100.0% of COMP2041 students take COMP2041(Software Construction)
+</ssession>
+</slide>
