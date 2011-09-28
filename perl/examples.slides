@@ -302,3 +302,167 @@ For example:
 100.0% of COMP2041 students take COMP2041(Software Construction)
 </ssession>
 </slide>
+<slide>
+<heading>Printing Odd Numbers in a list
+8 different ways to print the odd numbers in 
+a list - illustrating various aspects of Perl
+<p>
+<source examples/print_odd.pl>
+<p> 
+</slide>
+<slide>
+<heading>Sum list
+3 different ways to sum a list - illustrating
+various aspects of Perl
+<p>
+<source examples/sum_list.pl>
+<p> 
+</slide>
+<slide>
+<heading>Splitting & Joining lists
+Implementations of the builtin split & join
+<p>
+<source examples/split_join.pl>
+<p> 
+</slide>
+<slide>
+<heading>Splitting & Joining lists
+Implementations of the builtin split & join
+<p>
+<source examples/split_join.pl>
+<p> 
+</slide>
+<slide>
+<heading>Push
+Simple implementations of push builtin.
+<p>
+<source examples/push.pl>
+</slide>
+<slide>
+<heading>Sorting with a Comparison function - Sorting Dates
+Simple example of supplying a comparison function to sort
+<p>
+<source examples/sort_dates.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% sort_dates.pl
+random_dates=06/02/2013 20/07/2005 01/12/2001 13/08/2008 20/02/2000
+sorted dates=20/02/2000 01/12/2001 20/07/2005 13/08/2008 06/02/2013
+</ssession>
+</slide>
+<slide>
+<heading>Sorting on the basis of a hash value
+Sorting days of the weeks using a hash.
+<p>
+<source examples/sort_days0.pl>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/perl/examples
+% sort_dates.pl
+random_days=Thursday Monday Sunday Sunday Tuesday
+sorted days=Sunday Sunday Monday Tuesday Thursday
+</ssession>
+<p>
+And here is a more concise version.
+<p>
+Note use of a hash slice to create the same hash
+as the above example.
+<p>
+<source examples/sort_days1.pl>
+<p> 
+</slide>
+<slide>
+<heading>Implementing quicksort
+Two implementations of quicksort in Perl.
+The second version takes a reference to a comparison
+funcion as its first argument.
+<p>
+Note also the passing of array references to partition1.
+<p>
+<source examples/quicksort0.pl>
+<p>
+Here is same code with prototypes added.
+<p>
+This changes the calling syntax for the functions to be more convenient.
+<p>
+Note quicksort1 can be called with the same syntax as Perl's builtin sort 
+<p>
+<source examples/quicksort1.pl>
+<p> 
+</slide>
+<slide>
+<heading>Providing Optional Keyword arguments with a Hash
+Here is a small Perl function which has 6 arguments allow the user
+to mcustomize its operation and it could easily have 6 more arguments (e.g. font name, size, type, color)
+<p>
+<source examples/html_times_table0.pl>
+<p>
+This make calls clumsy and difficult to interpret.
+<p>
+E.g. what does the the 1 passed as the 6th argument here specify?
+<p>
+<ssession>
+print html_times_table(1, 12, 1, 12, "pink", 1);
+</ssession>
+<p>
+You can allow calling similar to keyword argument (e.g. Pythons)
+by having the values passed in a hash.
+<p>
+The arguments can be specified in any order and the code is more
+reable because the argument name is associated, e.g:
+<p>
+<source examples/html_times_table1.pl>
+<p>
+This is more useful if there are sensible defaults for most  parameters 
+and the user only needs specify a few.
+<p>
+Its common in some contexts to have tens of possible parameters to a fucntion
+but most calls to the function only need specify a couple. 
+<p>
+here is the above example with defaults for the parameters:
+<p>
+<source examples/html_times_table2.pl>
+<p>
+</slide>
+<slide>
+<heading>Rename files using eval
+Eval allows actions to be specified as fragments of Perl code.
+<p>
+This is very useful in appropriate contexts
+<p>
+This code renames the specified files using the specified Perl code.
+<p>
+For each file the Perl code  is executed with $_ set to the filename
+and the file is renamed to the value of $_ after the execution.
+<p>
+/usr/bin/rename is very similar.
+<p>
+<source examples/rename0.pl>
+<p>
+For example:
+<p>
+<ssession>
+% rename tr/A-Z/a-z/ *            # convert filenames to lower case
+% rename 's/\.txt$/.html/' *.txt  # change suffix from txt to HTML
+% rename 's/\W/_/g' *             # change non-word chars to udnerscore
+# rename 's/\d+/$&+1/' *          # increment number which is part of filename
+</ssession>
+</slide>
+<slide>
+<heading>Defining a Module
+<p>
+Here is a very simple module defining and exporting
+a few utility functions which operate on lists (see List::Util).
+<p> 
+<source examples/Example_Module.pm>
+<p>
+Using the module:
+<p>
+<source examples/module_example.pl>
+<p>
+</slide>

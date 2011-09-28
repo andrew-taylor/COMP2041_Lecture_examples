@@ -1,0 +1,29 @@
+<html>
+<head>
+<title>Command</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(
+    function() {
+        $("#match").click( 
+            function() {
+                $.get(
+                    "match.cgi",
+                    {string:$("#string").val(), regex:$("#regex").val()},
+                    function(data) {
+                        $("#show").html(data)
+                    }
+                )
+            }
+        )
+    }
+)
+</script>
+</head>
+<body>
+<button id="match">Match</button> regular expression <input type=text id=regex>
+<br>
+against string <input type=text id=string>
+<div id="show"></div>
+</body>
+</html>

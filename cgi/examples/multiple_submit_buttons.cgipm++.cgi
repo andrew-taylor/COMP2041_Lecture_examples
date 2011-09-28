@@ -21,11 +21,10 @@ if (defined param("x")) {
 	$hidden_variable = 0;
 }
 param('x', $hidden_variable);
-
-print h2($hidden_variable);
-print start_form;
-print hidden('x');
-print submit('increment');
-print submit('decrement');
-print end_form;
-print end_html;
+print h2($hidden_variable),
+      start_form,
+      hidden('x'),
+      submit('increment'),
+      submit('decrement'),
+      end_form,
+      end_html;

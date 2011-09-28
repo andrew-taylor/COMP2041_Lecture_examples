@@ -228,3 +228,57 @@ For example:
 100.0% of COMP2041 students take COMP2041(Software Construction)
 </ssession>
 </slide>
+<slide>
+<heading>Printing Odd Numbers in a list
+5 different ways to print the odd numbers in 
+a list - illustrating various aspects of Python
+<p>
+<source examples/print_odd.py>
+<p> 
+</slide>
+<slide>
+<heading>Splitting & Joining lists
+Implementations of the builtin split & join
+<p>
+<source examples/split_join.py>
+<p> 
+</slide>
+<slide>
+<heading>Sorting with a Comparison function - Sorting Dates
+Simple example of supplying a comparison function to sorted
+<p>
+<source examples/sort_dates.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% sort_dates.py
+random_dates= 26/03/2004,10/07/2012,08/12/2000,23/06/2006,27/06/2018
+sorted dates= 08/12/2000,26/03/2004,23/06/2006,10/07/2012,27/06/2018
+</ssession>
+</slide>
+<slide>
+<heading>Sorting on the basis of a dict value
+Sorting days of the weeks using a dict.
+<p>
+<source examples/sort_days0.py>
+<p> 
+For example:
+<p>
+<ssession>
+% cd /home/cs2041/public_html/lec/python/examples
+% sort_dates0.py
+random_days =  Friday,Thursday,Monday,Sunday,Sunday
+sorted_days =  Sunday,Sunday,Monday,Thursday,Friday
+</ssession>
+<p>
+And here is a more concise version.
+<p>
+Note use of split,zip and dict  to create the same dict as in the above example.
+<p>
+Also note use of lambda to get the sorting key.
+<p>
+<source examples/sort_days1.py>
+<p> 
+</slide>

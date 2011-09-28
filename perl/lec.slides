@@ -516,6 +516,7 @@ Other useful operations on arrays:
 </center>
 </slide>
 
+<comment>
 <slide>
 <heading>Exercise: reverse
 Assume that Perl doesn't have <@>reverse</@>.
@@ -524,6 +525,7 @@ Write code to reverse an array <@>@a</@>.
 <p>
 Store the result in an array <@>@b</@>
 </slide>
+</comment>
 
 <slide>
 <heading>Control Structures
@@ -543,6 +545,7 @@ You don't need a semicolon after a statement group in <@>{...}</@>.
 Statement blocks can also be used like anonymous functions.
 </slide>
 
+<comment>
 <slide>
 <heading>Exercise: sorting
 By default, <@>sort()</@> uses lexical (string) comparison.
@@ -554,12 +557,13 @@ Produce calls to <@>sort</@> that achieve
 <item> sorting in descending lexical order
 </itemize>
 </slide>
+</comment>
 
 <slide>
 <heading>Function Calls
 All Perl function calls ...
 <itemize>
-<item> are call by value <~> <small>(like C)</small>
+<item> are call by value <~> <small>(like C)</small> (except  scalars aliased to @_)
 <item> are expressions <~> <small>(although often ignore return value)</small>
 </itemize>
 <p>
@@ -765,12 +769,14 @@ the first call on the function.
 <red>Put prototypes at the top of the file</red>.
 </slide>
 
+<comment>
 <slide>
 <heading>Exercise: function definitions
 Consider the function definitions in the file <@>functions.pl</@>.
 <p>
 What does each one do? Describe how it works.
 </slide>
+</comment>
 
 <slide>
 <heading>Input/Output
@@ -854,6 +860,7 @@ perl -e 'print <<>>;' a b c
 Displays the contents of the files <@>a</@>, <@>b</@>, <@>c</@> on stdout.
 </slide>
 
+<comment>
 <slide>
 <heading>Exercise: uniq in Perl
 Implement a Perl version of Unix's <@>uniq</@>
@@ -898,6 +905,8 @@ Write a script to produce an index of words in text
 </itemize>
 Implement as a shell and Perl script.
 </slide>
+</comment>
+
 <slide>
 <heading>Perl and External Commands
 Perl is shell-like in the ease of invoking other commands/programs.
@@ -1000,15 +1009,15 @@ Careless use of <@>$_</@> can make programs cryptic.
 </row>
 <row>
    <col1><@>$!</@></col1>
-   <col2>last error from system call such as open
+   <col2>last error from system call such as open</col2>
 </row>
 <row>
    <col1><@>$.</@></col1>
-   <col2>line number for input file stream
+   <col2>line number for input file stream</col2>
 </row>
 <row>
    <col1><@>$/</@></col1>
-   <col2>line separator, none if undefined
+   <col2>line separator, none if undefined</col2>
 </row>
 <row>
    <col1><@>$$</@></col1>
@@ -1487,75 +1496,30 @@ sub f {
 
 <slide>
 <continued>
-Lists and arrays are concatentated with any scalar arguments
-to produce a single composite argument list.
+Lists (arrays and hashes) with any scalar arguments
+to produce a single  argument list.
 <p>
-There's a useful convention, <em>prototypes</em>,
-to indicate the expected parameter structure.
-Use one <@>$</@> for each scalar
-and @ for a list.
+This in effect means you can only pass a single array or hash to
+a Perl function and it must be the last argument.
 <p>
-The previous example is thus more clearly specified as
 <program>
-sub f($$$) {
-    my ($x, $y, $z) = @_;
-    ...
-    return $res;
-}
+sub good {
+    my ($x, $y, @list) = @_;
 </program>
 <p>
-
-Perl will check the prototype provided it occurs before
-the first call on the function.
+This will not work (x and y will be undefined):
 <p>
-<red>There should be a copy of all prototypes at the top of the file</red>
-so the perl interpreter can validate each call.
-</slide>
-
-<slide>
-<continued>
-Example: Perl factorial
 <program>
-sub fac($) {
-    my ($n) = @_;
-
-    return 1 if $n < 1;
-
-    return $n * fac($n-1);
-}
-</program>
-which behaves as
-<sprogram>
-print fac(3);   # displays 6
-print fac(4);   # displays 24
-print fac(10);  # displays 3628800
-print fac(20);  # displays 2.43290200817664e+18
-</sprogram>
-</slide>
-
-<slide>
-<heading>Parameter Passing
-All parameters in Perl are passed by value.
-<p>
-To pass complex structure intact, so that the original
-object (e.g. arrays, hashes),
-must pass a <em>reference</em> to the structure:
-<program>
-%h = (jas=>100,arun=>95,eric=>50);
-@x = (1..10)
-
-mySub(3, \%h, \@x);
-mysub(2, \%h, [1,2,3,4,5]);
-mysub(5, {a=>1,b=>2}, [1,2,3]);
+sub bad {
+    my (@list, $x, $y) = @_;
 </program>
 <p>
-Notation:
-<itemize>
-<item> <@>[1,2,3]</@> gives a reference to <@>(1,2,3)</@>
-<item> <@>{a=>1,b=>2}</@> gives a reference to <@>(a=>1,b=>2)</@>
-</itemize>
+And this will not work (list2 will be undefined):
+<program>
+sub bad {
+    my (@list1, @list2) = @_;
+</program>
 </slide>
-
 <slide>
 <heading>References
 References
@@ -1575,6 +1539,237 @@ print @$aref;    # displays whole array
 
 </slide>
 
+<slide>
+<heading>Parameter Passing
+Scalar variable are aliased to the corresponding element of @_.
+This means a function can changed them. E.g. this code sets x to 42.
+<program>
+sub assign {
+	$_[0] = $_[1];
+}
+assign($x, 42);
+</program>
+Arrays & hashes are passed by value.
+<p>
+If a function needs to change an
+array/hash pass a reference.
+<p>
+Also use references if you need to pass multiple hashes or arrays.
+<p>
+<program>
+%h = (jas=>100,arun=>95,eric=>50);
+@x = (1..10)
+
+mySub(3, \%h, \@x);
+mysub(2, \%h, [1,2,3,4,5]);
+mysub(5, {a=>1,b=>2}, [1,2,3]);
+</program>
+<p>
+Notation:
+<itemize>
+<item> <@>[1,2,3]</@> gives a reference to <@>(1,2,3)</@>
+<item> <@>{a=>1,b=>2}</@> gives a reference to <@>(a=>1,b=>2)</@>
+</itemize>
+</slide>
+<slide>
+<heading>Perl Prototypes
+Perl prototypes declare the expected parameter structure
+for a function.
+<p>
+Unlike other language (e.g. C) Perl prototype's main purpose
+is not type checking.
+<p>
+Perl prototypes' main purpose is to allow more convenient calling of  functions.
+<p>
+You also get some error checking - sometimes useful, sometimes less so.
+<p>
+Some programmers recommend against using prototypes.
+<p>
+Use in COMP2041/9041 optional.
+<p>
+You can use prototypes to define functions that can be called like builtins.
+<p>
+If Perl has seen a prototype, you can omit parenthesises from around the parameters.
+For example:
+<p>
+<program>
+sub my_function($$@);
+#...
+my_function $a,2,@list;
+</program>
+<p>
+Prototypes can also cause implicitly a reference to
+be passed when an array is specified as a parameter.
+<p>
+If we defined our implementraion of push like this:
+<p>
+<program>
+sub mypush {
+	my ($array_ref,@elements) = @_;
+	if (@elements) {
+		@$array_ref = (@$array_ref, @elements);
+	} else {
+		@$array_ref = (@$array_ref, $_);
+	}
+</program>
+<p>
+It has to be called like this:
+<p>
+<session>
+mypush(\@array, $x);
+</session>
+<p>
+But if we add this prototype:
+<p>
+<program>
+sub mypush2(\@@)
+</program>
+<p>
+It can be called just like the builtin push:
+<p>
+<session>
+mypush @array, $x;
+</session>
+<p>
+Google perlsub more more info.
+</slide>
+<slide>
+<heading>Recursive example
+<program>
+sub fac {
+    my ($n) = @_;
+
+    return 1 if $n < 1;
+
+    return $n * fac($n-1);
+}
+</program>
+which behaves as
+<sprogram>
+print fac(3);   # displays 6
+print fac(4);   # displays 24
+print fac(10);  # displays 3628800
+print fac(20);  # displays 2.43290200817664e+18
+</sprogram>
+</slide>
+
+
+<slide>
+<heading>Eval
+
+The Perl builtin function eval evaluates (executes) a supplied string 
+as Perl.
+<p>
+For example, this Perl  will print 43:
+<ssession>
+$perl = '$answer = 6 * 7;';
+eval $perl;
+print "$answer\n";
+</ssession>
+<p>
+and this Perl  will print 55:
+<ssession>
+@numbers = 1..10;
+$perl = join("+", @numbers);
+print eval $perl, "\n";
+</ssession>
+<p>
+and this Perl also prints 55:
+<ssession>
+$perl = '$sum=0; $i=1; while ($i <= 10) {$sum+=$i++}';
+eval $perl;
+print "$sum\n";
+</ssession>
+<p>
+and this Perl could do anything:
+<ssession>
+$input_line = <STDIN>;
+eval $input_line;
+</ssession>
+</slide>
+
+<slide>
+<heading>Pragmas and Modules
+
+Perl provides a way of controlling some aspects of the interpreter's behaviour
+(through <em>pragmas</em>) and is an extensible language through the
+use of compiled modules, of which there is a large number.
+Both are introduced by the <em>use</em> keyword.
+<p>
+<subhead>Pragmas
+<itemize>
+<item>
+<@>use English;</@> <dash> allow names for built-in vars, e.g.,
+<@>$NF</@> = <@>$.</@> and <@>$ARG</@> = <@>$_</@>.
+<item>
+<@>use integer;</@> <dash> truncate all arithmetic operations to integer,
+effective to the end of the enclosing block.
+<item>
+<@>use strict 'vars';</@> <dash> insist on all variables declared using <@@>my</@@>.
+</itemize>
+
+</slide>
+
+<slide>
+<continued>
+<subhead>Standard modules
+These are heaps of these, some grouped into packages.
+The package name is prefixed with <@@>::</@@>
+
+<p>
+Examples:
+<itemize>
+<item>
+<@>use DB_File;</@> <dash> functions for maintaining an external hash
+<item>
+<@>use Getopt::Std;</@> <dash> functions for processing command-line flags
+<item>
+<@>use File::Find;</@> <dash> find function like the shell's find
+<item>
+<@>use Math::BigInt;</@> <dash> unlimited-precision arithmetic
+<item>
+<@>use CGI;</@> <dash> see next week's lecture.
+</itemize>
+
+</slide>
+
+
+<slide>
+<heading>Summary
+
+<itemize>
+<item>
+Structure your scripts so they have documentation, constants,
+function prototypes, usage handling, main logic and function
+definitions, in that order.
+
+<item>
+Make sure you understand all the examples.
+
+<item>
+Consider that the built-in functions in the examples
+are the minimum that you need to know,
+and consult documentation for other string and scalar
+functions.
+
+<item>
+Perl is powered by regular expressions.
+Get used to using regexps and their operators. Quickly.
+
+<item>
+Initially you may want to stick to predictable ways of
+processing data, usually by splitting into field arrays
+and processing each element in turn.
+
+<item>
+With experience, try to exploit some of the more powerful
+attributes of the language, such as list assignment,
+slices, <@>map</@>, <@>grep</@>, etc.
+
+</itemize>
+
+</slide>
+<comment>
 <slide>
 <heading>Perl Programming Style
 
@@ -2020,90 +2215,5 @@ the final coding is straightforward.
 </itemize>
 
 </slide>
+</comment>
 
-<slide>
-<heading>Pragmas and Modules
-
-Perl provides a way of controlling some aspects of the interpreter's behaviour
-(through <em>pragmas</em>) and is an extensible language through the
-use of compiled modules, of which there is a large number.
-Both are introduced by the <em>use</em> keyword.
-<p>
-<subhead>Pragmas
-<itemize>
-<item>
-<@>use English;</@> <dash> allow names for built-in vars, e.g.,
-<@>$NF</@> = <@>$.</@> and <@>$ARG</@> = <@>$_</@>.
-<item>
-<@>use integer;</@> <dash> truncate all arithmetic operations to integer,
-effective to the end of the enclosing block.
-<item>
-<@>use strict 'vars';</@> <dash> insist on all variables declared using <@@>my</@@>.
-</itemize>
-
-</slide>
-
-<slide>
-<continued>
-<subhead>Standard modules
-These are heaps of these, some grouped into packages.
-The package name is prefixed with <@@>::</@@>
-
-<p>
-Examples:
-<itemize>
-<item>
-<@>use DB_File;</@> <dash> functions for maintaining an external hash
-<item>
-<@>use Getopt::Std;</@> <dash> functions for processing command-line flags
-<item>
-<@>use File::Find;</@> <dash> find function like the shell's find
-<item>
-<@>use Math::BigInt;</@> <dash> unlimited-precision arithmetic
-<item>
-<@>use CGI;</@> <dash> see next week's lecture.
-</itemize>
-
-</slide>
-
-
-<slide>
-<heading>Summary
-
-<itemize>
-<item>
-Structure your scripts so they have documentation, constants,
-function prototypes, usage handling, main logic and function
-definitions, in that order.
-
-<item>
-Make sure you understand all the examples.
-
-<item>
-Consider that the built-in functions in the examples
-are the minimum that you need to know,
-and consult documentation for other string and scalar
-functions.
-
-<item>
-Perl is powered by regular expressions.
-Get used to using regexps and their operators. Quickly.
-
-<item>
-Initially you may want to stick to predictable ways of
-processing data, usually by splitting into field arrays
-and processing each element in turn.
-
-<item>
-With experience, try to exploit some of the more powerful
-attributes of the language, such as list assignment,
-slices etc. 
-
-<item>
-If you really want to, experiment with <@>map</@>,
-although the resulting, powerful scripts are a challenge
-to understanding, and will require extensive documentation.
-
-</itemize>
-
-</slide>

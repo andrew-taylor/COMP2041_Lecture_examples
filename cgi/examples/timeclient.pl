@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 
 use IO::Socket;
-$c = IO::Socket::INET->new(PeerAddr => $ARGV[0] || 'localhost', PeerPort  => 4242) or die;
+$server_host =  $ARGV[0] || 'localhost';
+$server_port = 4242;
+$c = IO::Socket::INET->new(PeerAddr => $server_host, PeerPort  => $server_port) or die;
 print <$c>;
 close $c;

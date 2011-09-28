@@ -8,10 +8,11 @@ But helps understand how CGI works if we can use TCP/IP from Perl
 <p>
 Easy to establish a TCP/IP connection.
 <p>
-Server running on host <@>$host</@> does this:
+Server running on host williams.cse.unsw.edu.au does this:
 <p>
 <sprogram>
 use IO::Socket;
+$port = 1234;
 $server = IO::Socket::INET->new(LocalPort => $port, Listen => SOMAXCONN) or die;
 $c = $server->accept()
 </sprogram>
@@ -19,12 +20,15 @@ $c = $server->accept()
 Client running anywhere on internet does this:
 <p>
 <sprogram>
+$port 
 use IO::Socket;
+$host = "williams.cse.unsw.edu.au";
+$port = 1234;
 $c = IO::Socket::INET->new(PeerAddr => $host, PeerPort => $port) or die;
 </sprogram>
 <p>
-Then <@>$c</@> give you something  (see COMP[93]331)
-that can be used like a bidirectional file handle.
+Then <@>$c</@> is similar  (see COMP[93]331)
+to a bidirectional file handle.
 </slide>
 <slide>
 <heading>Time Server / Client
@@ -55,7 +59,7 @@ on the machine they are running. For example:
 <item> 443 HTTPS (Hypertext Transfer Protocol over SSL/TLS)
 </itemize>
 <p>
-So a web server normally listen to port 80 on the host is running.
+So a web server normally listens to port 80 on the host is running.
 <p>
 </slide>
 <slide>
@@ -77,7 +81,7 @@ http://www.google.com.au/search?q=COMP2041&hl=en&num=100
 Given a http URL a web browser extracts the hostname from the URL
 and connects to port 80 (unless another port is specified).
 <p>
-In then sends the remainder of the URL to the server.
+It then sends the remainder of the URL to the server.
 <p>
 The HTTP syntax of such a request is simple:
 <p>
@@ -97,36 +101,47 @@ provide a GUI or much at all.
 In action it looks like this:
 <p>
 <sprogram>
- % ./webget.pl http://www.cse.unsw.edu.au/~cs2041/index.html
- HTTP/1.1 200 OK
- Date: Tue, 08 Jun 2010 12:12:37 GMT
- Server: Apache/1.3.34 (Debian) PHP/4.4.4-8+etch6
- Last-Modified: Wed, 03 Feb 2010 23:58:31 GMT
- Connection: close
- Content-Type: text/html; charset=iso-8859-1
- 
- &lt;html>
- &lt;head>
- &lt;meta HTTP-EQUIV="Refresh"
- content="0; URL=
- http://www.cse.unsw.edu.au/~cs2041/11s1/index.html">
- &lt;/head>
- &lt;body>
- &lt;/body>
- &lt;/html>
+% cd /home/cs2041/public_html/11s2/lec/cgi/examples
+% ./webget.pl http://www.cse.unsw.edu.au/
+HTTP/1.1 200 OK
+Date: Wed, 14 Sep 2011 01:15:17 GMT
+Server: Apache/1.3.34 (Debian) PHP/4.4.4-8+etch6
+Last-Modified: Mon, 11 Jul 2011 05:06:56 GMT
+ETag: "1e9c037-8f-4e1a84f0"
+Accept-Ranges: bytes
+Content-Length: 143
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+
+&lt;html>
+&lt;head>
+&lt;meta HTTP-EQUIV="Refresh"
+content="0; URL=
+http://www.cse.unsw.edu.au/~cs2041/11s2/index.html">
+&lt;/head>
+&lt;body>
+&lt;/body>
+&lt;/html>
 </sprogram>
-</slide>
 <p>
 Notice the web server returns some header lines and then data.
 <p>
 Again easy to do in perl.
 <p>
 See HTTP::Request::Common for a more general solution
+</slide>
+<slide>
+<heading>Web server in Perl - getting started
+<p>
+This Perl programs acts like a web server but
+just prints details of incoming requests.
+<source examples/webserver-debug.pl>
+</slide>
 <slide>
 <heading>Web server in Perl - 404 every time
 <p>
-A very simple and very limited web server which just redeturn
-a header - the same header every time saying it can't find the URL.
+A silly example web server which just
+returns the same response every time saying it can't find the URL.
 <source examples/webserver-404.pl>
 </slide>
 <slide>
@@ -137,7 +152,6 @@ A simple web server in Perl.
 <p>
 Does the basic job of serving web pages from /home/cs2041/public_html but
 has a pile of bugs, insecurities and limitations.
-<source examples/webserver-too-simple.pl>
 </slide>
 <slide>
 <heading>Web server in Perl - simple 
@@ -301,6 +315,17 @@ Can also access data in form controls <small>(because they are also document ele
 </slide>
 
 <slide>
+<continued>
+For example, this web page has JavaScript embedded to sum two numbers from input fields and 
+store the result in a third  field.
+<p>
+The function is run whenever a character is entered in either input field.
+<p>
+<source examples/javascript_sum_two_numbers.html>
+<p>
+</slide>
+
+<slide>
 <heading>Ajax
 Ajax provides a variation on the above approach:
 <itemize>
@@ -322,6 +347,24 @@ Ajax-style browser/server interaction:
 </slide>
 
 <slide>
+<continued>
+For example, this web page uses the popular JQuery library which is one of the easiest ways to use AJAX.
+<p>
+It shows the result of matching a Perl regular expression against a string.
+<p>
+<source examples/match.html>
+<p>
+A new page is not loaded when the match button is pressed.
+<p>
+Jquery only updates a field on the page.
+<P>
+It fetches by http the results of the match from this CGI script:
+<p>
+<source examples/match.cgi.txt>
+<p>
+</slide>
+
+<slide>
 <heading>HTML Forms
 An HTML <em>form</em> combines the notions of
 	 <~> <em>user input</em> <~>&amp;<~> <em>function call</em> :
@@ -331,16 +374,16 @@ An HTML <em>form</em> combines the notions of
 </itemize>
 Syntax:
 <program>
-<<form method=<$>RequestMethod</$> action=<$>URL</$> ...>>
+&lt;form method=<$>RequestMethod</$> action=<$>URL</$> ...>
 <$>any HTML except another form</$>
    mixed with
 <$>data collection (form control) elements</$>
-<</form>>
+&lt;/form>
 </program>
-An HTML document may contain any number of <@><<form>></@>'s.
+An HTML document may contain any number of <@>&lt;form></@>'s.
 <p>
 Forms can be arbitrarily interleaved with HMTL layout elements
-	 <small>(e.g. <@><<table>></@>)</small>
+	 <small>(e.g. <@>&lt;table></@>)</small>
 </slide>
 
 <slide>
@@ -405,7 +448,7 @@ Data values are decoded before script uses them
 
 <slide>
 <heading><@>ACTION</@> Attribute
-<@><<form ... <brown><b>action</b></brown>='<i>URL</i>' ... >></@>
+<@>&lt;form ... <brown><b>action</b></brown>='<i>URL</i>' ... ></@>
 <itemize>
 <item> specifies script <@><i>URL</i></@> to process form data
 </itemize>
@@ -418,18 +461,18 @@ If no <@>action</@> attribute, re-invoke the current script.
 </slide>
 
 <slide>
-<heading>Other <@><<form>></@> Attributes
-<@><<form ... <brown><b>name</b></brown>='<i>FormName</i>' ... >></@>
+<heading>Other <@>&lt;form></@> Attributes
+<@>&lt;form ... <brown><b>name</b></brown>='<i>FormName</i>' ... ></@>
 <itemize>
 <item> associates the name <@><i>FormName</i></@> with the entire form
 <item> useful for referring to form in JavaScript
 </itemize>
-<@><<form ... <brown><b>target</b></brown>='<i>WindowName</i>' ... >></@>
+<@>&lt;form ... <brown><b>target</b></brown>='<i>WindowName</i>' ... ></@>
 <itemize>
 <item> causes output from executing script to be placed in specified window
 <item> useful when dealing with frames <~> <small>(see later)</small>
 </itemize>
-<@><<form ... <brown><b>onSubmit</b></brown>='<i>Script</i>' ... >></@>
+<@>&lt;form ... <brown><b>onSubmit</b></brown>='<i>Script</i>' ... ></@>
 <itemize>
 <item> specifies actions to be carried out just before sending data to script
 </itemize>
@@ -570,10 +613,10 @@ A dynamic Web page is produced by
 <heading>Example CGI.pm
 Consider a data collection form (<@>SayHello.html</@>):
 <program>
-<<form name="Hello" action="HelloScript.cgi">>
-Your name: <<input name="UserName" type="text">>
-<<input type=submit value="Say Hello">>
-<</form>>
+&lt;form name="Hello" action="HelloScript.cgi">
+Your name: &lt;input name="UserName" type="text">
+&lt;input type=submit value="Say Hello">
+&lt;/form>
 </program>
 And consider that we type <@>John</@> into the input box.
 </slide>
@@ -593,9 +636,9 @@ Output of script (sent to browser):
 <session>
 <red>Content-type: text/html</red>
 
-<green><<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">>
-<<HTML>><<HEAD>><<TITLE>>Untitled Document<</TITLE>>
-<</HEAD>><<BODY>></green><navy><<P>>Hello there, John<</P>></navy><brown><</BODY>><</HTML>></brown>
+<green>&lt;!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+&lt;HTML>&lt;HEAD>&lt;TITLE>Untitled Document&lt;/TITLE>
+&lt;/HEAD>&lt;BODY></green><navy>&lt;P>Hello there, John&lt;/P></navy><brown>&lt;/BODY>&lt;/HTML></brown>
 </session>
 </slide>
 
@@ -613,9 +656,9 @@ Output of script (sent to browser):
 <session>
 <red>Content-type: text/html</red>
 
-<green><<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">>
-<<HTML>><<HEAD>><<TITLE>>Untitled Document<</TITLE>>
-<</HEAD>><<BODY>></green><navy><<P>>Hello there, John<</P>></navy><brown><</BODY>><</HTML>></brown>
+<green>&lt;!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+&lt;HTML>&lt;HEAD>&lt;TITLE>Untitled Document&lt;/TITLE>
+&lt;/HEAD>&lt;BODY></green><navy>&lt;P>Hello there, John&lt;/P></navy><brown>&lt;/BODY>&lt;/HTML></brown>
 </session>
 </slide>
 
@@ -664,31 +707,31 @@ Examples of HTML shortcuts:
 <deftable>
 <row>
   <col1><@>h1()</@> <~> or <~> <@>h1</@></col1>
-  <col2><@><<H1>></@></col2>
+  <col2><@>&lt;H1></@></col2>
 </row>
 <row>
   <col1><@>h1('some','contents')</@></col1>
-  <col2><@><<H1>>some contents<</H1>></@></col2>
+  <col2><@>&lt;H1>some contents&lt;/H1></@></col2>
 </row>
 <row>
   <col1><@>h1({-align=>left})</@></col1>
-  <col2><@><<H1 ALIGN="left">></@></col2>
+  <col2><@>&lt;H1 ALIGN="left"></@></col2>
 </row>
 <row>
   <col1><@>h1({-align=>left},'Head')</@></col1>
-  <col2><@><<H1 ALIGN="left">><br>Head<</H1>></@></col2>
+  <col2><@>&lt;H1 ALIGN="left"><br>Head&lt;/H1></@></col2>
 </row>
 <row>
   <col1><@>p()</@> <~> or <~> <@>p</@></col1>
-  <col2><@><<P>></@></col2>
+  <col2><@>&lt;P></@></col2>
 </row>
 <row>
   <col1><@>p('how\'s',"this","now")</@></col1>
-  <col2><@><<P>>how's this now<</P>></@></col2>
+  <col2><@>&lt;P>how's this now&lt;/P></@></col2>
 </row>
 <row>
   <col1><@>p({-align=>center},'Now!')</@></col1>
-  <col2><@><<P ALIGN="center">><br>Now!<</P>></@></col2>
+  <col2><@>&lt;P ALIGN="center"><br>Now!&lt;/P></@></col2>
 </row>
 </deftable>
 </slide>
@@ -725,17 +768,17 @@ use CGI ':standard';
 
 @params = param();
 
-print header, "<<html>><<body>>";
+print header, "&lt;html>&lt;body>";
 
 foreach $p (@params) {
 	$v = param($p);
-	$rows .= "<<tr>><<td>>$p<</td>><<td>>$v<</td>><</tr>>";
+	$rows .= "&lt;tr>&lt;td>$p&lt;/td>&lt;td>$v&lt;/td>&lt;/tr>";
 }
-print "<<center>><<table border=1>>
-          <<tr>><<td>>Param<</td>><<td>>Value<</td>><</tr>>
+print "&lt;center>&lt;table border=1>
+          &lt;tr>&lt;td>Param&lt;/td>&lt;td>Value&lt;/td>&lt;/tr>
           $rows
-       <</table>><</center>>
-       <</body>><</html>>
+       &lt;/table>&lt;/center>
+       &lt;/body>&lt;/html>
       ";
 </program>
 </slide>
@@ -771,12 +814,12 @@ CGI.pm has methods to assist in generating forms dynamically:
 <deftable>
 <row>
   <col1><@>start_form</@></col1>
-  <col2>generates a <@><<form>></@> tag with <br>
+  <col2>generates a <@>&lt;form></@> tag with <br>
 	optional params for <@>action</@>,...</col2>
 </row>
 <row>
   <col1><@>end_form</@></col1>
-  <col2>generates a <@><</form>></@> tag</col2>
+  <col2>generates a <@>&lt;/form></@> tag</col2>
 </row>
 </deftable>
 Plus methods for each different kind of data collection element <br>

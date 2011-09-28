@@ -8,7 +8,7 @@
 # access by http://localhost:4280/
 
 # See http://search.cpan.org/dist/HTTP-Server-Simple/ for a much
-# more genral solution
+# more general solution
 
 use IO::Socket;
 $server = IO::Socket::INET->new(LocalPort => 4280, ReuseAddr => 1, Listen => SOMAXCONN) or die;
