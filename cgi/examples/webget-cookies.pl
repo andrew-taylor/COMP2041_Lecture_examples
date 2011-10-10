@@ -17,7 +17,7 @@ foreach (@ARGV) {
 	    	next if $path !~ /^$cookie_path/;
  		   	foreach $name (keys %{$cookies{$domain}{$path}}) {
 	  	  		print $c "Cookie: $name=$cookies{$domain}{$path}{$name}\n";
- 			   	print "Sent cookie $name=$cookies{$domain}{$path}{$name}\n";
+ 			   	print STDERR "Sent cookie $name=$cookies{$domain}{$path}{$name}\n";
 	  	  	}
     	}
     }
@@ -29,7 +29,7 @@ foreach (@ARGV) {
     	my $domain = $v{'domain'} || $host;
      	my $path = $v{'path'} || $path;
     	$cookies{$domain}{$path}{$name} = $value;
-    	print "Received cookie $domain $path $name=$value\n";
+    	print STDERR "Received cookie $domain $path $name=$value\n";
     }
     my @webpage = <$c>;
     print STDOUT @webpage;

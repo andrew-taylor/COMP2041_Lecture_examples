@@ -949,7 +949,7 @@ Set-cookie: session-id=191-0575084-2685655; path=/; domain=.amazon.com; expires=
 ....
 </sprogram>
 <p>
-A web client will sent the cookie strings back next time it access Amazon.
+Web clients will send the cookie strings back next time it fetches pages from Amazon.
 </slide>
 <slide>
 <heading>Storing a Hash

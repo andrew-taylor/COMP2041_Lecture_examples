@@ -165,11 +165,11 @@ sub parse_makefile($) {
 The <@>make</@> command behaves as:
 <program>
 make(target, sources, command):
-    <comment># Stage 1</comment>
+    # Stage 1
     FOR each S in sources DO
         rebuild S if it needs rebuilding
     END
-    <comment># Stage 2</comment>
+    # Stage 2
     IF (no sources OR
         any source is newer than target) THEN
        run command to rebuild target
@@ -202,31 +202,31 @@ sub build($) {
 <heading>More on <large><code>Makefiles</code></large>
 Some additional functionalities of <tt>Makefiles</tt>
 <program>
-<comment># string-valued variables/macros</comment>
+# string-valued variables/macros
 CC = gcc
 CFLAGS = -g
 LDFLAGS = -lm
 BINS = main.o graphics.o world.o
 
-<comment># implicit commands, determined by suffix</comment>
+# implicit commands, determined by suffix
 main.o     : main.c graphics.h world.h
 graphics.o : graphics.c world.h
 world.o    : world.c
 
-<comment># pseduo-targets</comment>
+# pseduo-targets
 clean :
         rm -f game main.o graphics.o world.o
-    <comment># or ... rm -f game $(BINS)</comment>
+    	# or ... rm -f game $(BINS)
 
-<comment># multiple targets with same sources</comment>
+# multiple targets with same sources
 stats1 stats2 : data1 data2 data3
         perl analyse1.pl data1 data2 data3 > stats1
         perl analyse2.pl data1 data2 data3 > stats2
 
-<comment># creating subsystems via make</comment>
+# creating subsystems via make
 parser:
     cd parser && $(MAKE)
-<comment># assumes parser directory has own Makefile</comment>
+	# assumes parser directory has own Makefile
 </program>
 
 Variables and comments easily handled parsed in Perl:
@@ -332,12 +332,12 @@ To simplify writing rules, <@>make</@> provides default abbreviations:
 Examples:
 <p>
 <program>
-<comment># one of above rules, re-written</comment>
+# one of above rules, re-written
 lex.o : lex.c mycc.h lex.h
         $(CC) $(CFLAGS) -c $*.c -o $@
-    <comment># or ... $(CC) $(CFLAGS) -c $<< -o $@</comment>
+    	# or ... $(CC) $(CFLAGS) -c $<< -o $@
 
-<comment># update a library archive</comment>
+# update a library archive
 lib.a: foo.o bar.o lose.o win.o
     ar r lib.a $?
 </program>
@@ -362,7 +362,7 @@ Can define generic rules based on suffixes:
     $(CC) $(CFLAGS) -c -o $@ $<<
 </program>
 <p>
-i.e. to make a <@>.o</@> file from a </@>.c</@> file, use the command ...
+i.e. to make a <@>.o</@> file from a <@>.c</@> file, use the command ...
 <p>
 Rules for several common languages are built in to <@>make</@>.
 <p>
